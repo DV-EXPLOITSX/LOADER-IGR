@@ -1,0 +1,1926 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local VirtualUser = game:GetService("VirtualUser")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+pcall(function()
+    for _, v in pairs(CoreGui:GetChildren()) do
+        if v.Name == "DVExploitsBrewokUI" or v.Name == "DVExploitsLight" or v.Name == "DVExploitsBank" or v.Name == "DVExploitsLoading" then v:Destroy() end
+    end
+    for _, v in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+        if v.Name == "DVExploitsBrewokUI" or v.Name == "DVExploitsLight" or v.Name == "DVExploitsBank" or v.Name == "DVExploitsLoading" then v:Destroy() end
+    end
+end)
+
+local LoadScreenGui = Instance.new("ScreenGui")
+LoadScreenGui.Name = "DVExploitsLoading"
+LoadScreenGui.ResetOnSpawn = false
+LoadScreenGui.DisplayOrder = 1000
+pcall(function() LoadScreenGui.Parent = CoreGui end)
+if not LoadScreenGui.Parent then LoadScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+local LoadFrame = Instance.new("Frame", LoadScreenGui)
+LoadFrame.Size = UDim2.new(0, 520, 0, 260)
+LoadFrame.Position = UDim2.new(0.5, -260, 0.5, -130)
+LoadFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+LoadFrame.BorderSizePixel = 0
+Instance.new("UICorner", LoadFrame).CornerRadius = UDim.new(0, 16)
+
+local loadBorder = Instance.new("Frame", LoadFrame)
+loadBorder.Name = "RGBBorder"
+loadBorder.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+loadBorder.BorderSizePixel = 0
+loadBorder.Size = UDim2.new(1, 8, 1, 8)
+loadBorder.Position = UDim2.new(0, -4, 0, -4)
+loadBorder.ZIndex = 0
+Instance.new("UICorner", loadBorder).CornerRadius = UDim.new(0, 18)
+
+task.spawn(function()
+    while LoadScreenGui.Parent do
+        local hue = (tick() * 6) % 1
+        loadBorder.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+local LoadInner = Instance.new("Frame", LoadFrame)
+LoadInner.Size = UDim2.new(1, -8, 1, -8)
+LoadInner.Position = UDim2.new(0, 4, 0, 4)
+LoadInner.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+LoadInner.BorderSizePixel = 0
+Instance.new("UICorner", LoadInner).CornerRadius = UDim.new(0, 14)
+
+local LoadTitle = Instance.new("TextLabel", LoadInner)
+LoadTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadTitle.Position = UDim2.new(0, 0, 0, 18)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Font = Enum.Font.GothamBold
+LoadTitle.Text = "DV EXPLOITS - LOADING"
+LoadTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+LoadTitle.TextSize = 20
+
+local AvatarImg = Instance.new("ImageLabel", LoadInner)
+AvatarImg.Size = UDim2.new(0, 64, 0, 64)
+AvatarImg.Position = UDim2.new(0, 25, 0, 72)
+AvatarImg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+AvatarImg.BorderSizePixel = 0
+AvatarImg.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
+
+local WelcomeText = Instance.new("TextLabel", LoadInner)
+WelcomeText.Size = UDim2.new(1, -105, 0, 20)
+WelcomeText.Position = UDim2.new(0, 100, 0, 72)
+WelcomeText.BackgroundTransparency = 1
+WelcomeText.Font = Enum.Font.GothamBold
+WelcomeText.Text = "Executing as:"
+WelcomeText.TextColor3 = Color3.fromRGB(180, 180, 180)
+WelcomeText.TextSize = 13
+WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
+
+local NameText = Instance.new("TextLabel", LoadInner)
+NameText.Size = UDim2.new(1, -105, 0, 25)
+NameText.Position = UDim2.new(0, 100, 0, 96)
+NameText.BackgroundTransparency = 1
+NameText.Font = Enum.Font.GothamBold
+NameText.Text = LocalPlayer.Name
+NameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+NameText.TextSize = 17
+NameText.TextXAlignment = Enum.TextXAlignment.Left
+
+local StatusLoadText = Instance.new("TextLabel", LoadInner)
+StatusLoadText.Size = UDim2.new(1, -50, 0, 20)
+StatusLoadText.Position = UDim2.new(0, 25, 0, 158)
+StatusLoadText.BackgroundTransparency = 1
+StatusLoadText.Font = Enum.Font.GothamBold
+StatusLoadText.Text = "Memuat Data... 0%"
+StatusLoadText.TextColor3 = Color3.fromRGB(255, 120, 120)
+StatusLoadText.TextSize = 14
+StatusLoadText.TextXAlignment = Enum.TextXAlignment.Left
+
+local TrackBar = Instance.new("Frame", LoadInner)
+TrackBar.Size = UDim2.new(1, -50, 0, 18)
+TrackBar.Position = UDim2.new(0, 25, 0, 190)
+TrackBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TrackBar.BorderSizePixel = 0
+Instance.new("UICorner", TrackBar).CornerRadius = UDim.new(0, 9)
+
+local FillBar = Instance.new("Frame", TrackBar)
+FillBar.Size = UDim2.new(0, 0, 1, 0)
+FillBar.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+FillBar.BorderSizePixel = 0
+Instance.new("UICorner", FillBar).CornerRadius = UDim.new(0, 9)
+
+local loadingFinished = false
+
+task.spawn(function()
+    local startTime = tick()
+    local duration = 7
+    while true do
+        local elapsed = tick() - startTime
+        local progress = math.clamp(elapsed / duration, 0, 1)
+        local percent = math.floor(progress * 100)
+        
+        FillBar.Size = UDim2.new(progress, 0, 1, 0)
+        StatusLoadText.Text = "Memuat Data... " .. percent .. "%"
+        
+        if progress >= 1 then
+            StatusLoadText.Text = "Setup UI Successfully!"
+            task.wait(0.5)
+            LoadScreenGui:Destroy()
+            loadingFinished = true
+            break
+        end
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+while not loadingFinished do
+    task.wait(0.1)
+end
+
+local _G_AutoFarmActive = false
+local _G_AutoFlyEnabled = false
+local _G_AutoFlyActive = false
+local _G_AntiAfkActive = true
+local _G_ActionDelay = 1.2
+local _G_BurstCount = 1
+local _G_BodyState = "Terlentang"
+local _G_CurrentStage = "Progress1"
+local _G_CurrentProgressCount = 0
+local _G_HandlerLastUpdate = 0
+local _G_HandlerReceivedComplete = false
+local _G_HandlerJobFailed = false
+local _H42_Active = false
+local _H42_Duration = 0.3
+local _H42_Delay = 1.5
+local _H42_Offset = 6
+local _H42_LoopCount = 5
+local _H42_EasingStyle = "Quad"
+local _H42_EasingDirection = "Out"
+local _H42_MoveSim = true
+local _H42_ForceMovement = true
+local _H42_AutoCancel = true
+local _H42_Fallback = true
+local _H42_FallbackTimeout = 3.0
+local _H42_CurrentTween = nil
+local _H42_UseHandler = true
+local _H42_HandlerTimeout = 10
+local _H42_VerifyTimeout = 3
+local _H42_MaxRetry = 3
+local _H42_RetryDelay = 0.5
+local _H42_EnableRetry = true
+local _H42_EnableVerify = true
+local _H42_MissCount = 0
+local _H42_MaxMiss = 5
+local _H42_SuccessCount = 0
+local _H42_RetryCount = 0
+local _H42_FailCount = 0
+local _H42_CompleteCount = 0
+local _H42_HideFailCount = 0
+local _H42_NextTarget = "—"
+local _H42_TouchMode = false
+local _H42_TouchCount = 0
+local _H42_NoclipMode = false
+
+local ProgressDisplay = nil
+local flyConnection = nil
+local bodyVelocity, bodyGyro = nil, nil
+local activeTabName = "Main"
+
+local function applyBodyState(rootPart, humanoid)
+    if not rootPart then return end
+    if _G_BodyState == "KepalaBawah" then
+        if humanoid then humanoid.PlatformStand = true end
+        rootPart.Anchored = false
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(180), 0, 0)
+    elseif _G_BodyState == "Terlentang" then
+        if humanoid then humanoid.PlatformStand = true end
+        rootPart.Anchored = false
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(90), 0, 0)
+    else
+        if humanoid and not _G_AutoFlyActive then humanoid.PlatformStand = false end
+        rootPart.Anchored = false
+    end
+end
+
+local function toggleFly(state)
+    if not _G_AutoFlyEnabled then
+        if flyConnection then flyConnection:Disconnect() end
+        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum and _G_BodyState == "Berdiri" then hum.PlatformStand = false end
+        return
+    end
+
+    _G_AutoFlyActive = state
+    local char = LocalPlayer.Character
+    if not char then return end
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    
+    if state then
+        if humanoid then humanoid.PlatformStand = true end
+        if not rootPart then return end
+        
+        if not bodyVelocity then
+            bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = rootPart
+        end
+        
+        if not bodyGyro then
+            bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bodyGyro.CFrame = rootPart.CFrame
+            bodyGyro.Parent = rootPart
+        end
+        
+        if flyConnection then flyConnection:Disconnect() end
+        flyConnection = RunService.RenderStepped:Connect(function()
+            if not _G_AutoFlyActive or not char or not rootPart then return end
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyGyro.CFrame = Workspace.CurrentCamera.CFrame
+        end)
+    else
+        if humanoid and _G_BodyState == "Berdiri" then humanoid.PlatformStand = false end
+        if flyConnection then flyConnection:Disconnect() end
+        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+    end
+end
+
+local function burstInstantTeleport(targetCFrame)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not rootPart then return end
+        
+        task.spawn(function()
+            for i = 1, _G_BurstCount do
+                if rootPart and _G_AutoFarmActive then
+                    rootPart.CFrame = targetCFrame
+                    applyBodyState(rootPart, humanoid)
+                    task.wait(0.01)
+                else
+                    break
+                end
+            end
+        end)
+    end)
+end
+
+local function manualTeleport(targetCFrame)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not rootPart then return end
+        if humanoid then humanoid.PlatformStand = false end
+        rootPart.Anchored = false
+        rootPart.CFrame = targetCFrame
+    end)
+end
+
+local remoteEventConnection = nil
+local function hookGameRemotes()
+    pcall(function()
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local jobRemotes = remotes and remotes:FindFirstChild("Job")
+        local brewogUIEvent = jobRemotes and jobRemotes:FindFirstChild("BrewogUI")
+        
+        if brewogUIEvent and brewogUIEvent:IsA("RemoteEvent") then
+            if remoteEventConnection then remoteEventConnection:Disconnect() end
+            remoteEventConnection = brewogUIEvent.OnClientEvent:Connect(function(actionType, value)
+                _G_HandlerLastUpdate = tick()
+                
+                if actionType == "Complete" then
+                    _G_HandlerReceivedComplete = true
+                    _G_CurrentStage = "Progress1"
+                    _G_CurrentProgressCount = 0
+                    _H42_CompleteCount = _H42_CompleteCount + 1
+                    if ProgressDisplay then 
+                        ProgressDisplay.Text = "✅ Complete! Ambil Job Baru"
+                        ProgressDisplay.TextColor3 = Color3.fromRGB(100, 255, 100)
+                    end
+                    
+                elseif actionType == "Hide" then
+                    if _G_HandlerReceivedComplete then
+                        _G_HandlerReceivedComplete = false
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "✅ Sukses - Job Baru"
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(100, 255, 100)
+                        end
+                    else
+                        _G_HandlerJobFailed = true
+                        _G_CurrentStage = "Progress1"
+                        _G_CurrentProgressCount = 0
+                        _H42_HideFailCount = _H42_HideFailCount + 1
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "❌ Gagal - Reset ke Ambil Job"
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 100, 100)
+                        end
+                    end
+                    
+                elseif actionType == "Stage2" or actionType == "Progress2" 
+                   or (actionType == "Progress" and value and type(value) == "number" and value >= 5) then
+                    _G_CurrentStage = "Stage2"
+                    _G_HandlerReceivedComplete = false
+                    if ProgressDisplay then 
+                        ProgressDisplay.Text = "Status: Tempat Taruh 2"
+                        ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120)
+                    end
+                    
+                elseif actionType == "Progress1" then
+                    _G_CurrentProgressCount = value or 0
+                    _G_HandlerReceivedComplete = false
+                    if _G_CurrentProgressCount >= 5 then
+                        _G_CurrentStage = "Stage2"
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "Progres 1 Selesai -> Taruh 2"
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120)
+                        end
+                    else
+                        _G_CurrentStage = "Progress1"
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "Progres 1: " .. _G_CurrentProgressCount .. " / 5"
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 160, 160)
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+end
+hookGameRemotes()
+
+local function getEasingStyle(name)
+    local map = {
+        Linear = Enum.EasingStyle.Linear,
+        Quad = Enum.EasingStyle.Quad,
+        Sine = Enum.EasingStyle.Sine,
+        Cubic = Enum.EasingStyle.Cubic,
+        Quart = Enum.EasingStyle.Quart,
+        Quint = Enum.EasingStyle.Quint,
+        Back = Enum.EasingStyle.Back,
+        Bounce = Enum.EasingStyle.Bounce,
+        Elastic = Enum.EasingStyle.Elastic,
+        Exponential = Enum.EasingStyle.Exponential,
+        Circular = Enum.EasingStyle.Circular,
+    }
+    return map[name] or Enum.EasingStyle.Quad
+end
+
+local function getEasingDirection(name)
+    local map = {
+        In = Enum.EasingDirection.In,
+        Out = Enum.EasingDirection.Out,
+        InOut = Enum.EasingDirection.InOut,
+    }
+    return map[name] or Enum.EasingDirection.Out
+end
+
+local function H42_TweenMove(targetCFrame, duration, cancelable)
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return false end
+    
+    duration = duration or _H42_Duration
+    local tweenInfo = TweenInfo.new(
+        duration,
+        getEasingStyle(_H42_EasingStyle),
+        getEasingDirection(_H42_EasingDirection)
+    )
+    
+    local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
+    _H42_CurrentTween = tween
+    tween:Play()
+    
+    local startTime = tick()
+    while tween.PlaybackState == Enum.PlaybackState.Playing do
+        if cancelable and not _H42_Active then
+            tween:Cancel()
+            _H42_CurrentTween = nil
+            return false
+        end
+        if (tick() - startTime) > (duration + _H42_FallbackTimeout) then
+            tween:Cancel()
+            _H42_CurrentTween = nil
+            if _H42_Fallback then
+                rootPart.CFrame = targetCFrame
+            end
+            return false
+        end
+        task.wait(0.03)
+    end
+    
+    _H42_CurrentTween = nil
+    return true
+end
+
+local H42_WAYPOINTS = {
+    AmbilJob  = Vector3.new(4026.41, 23.33, -415.59),
+    AmbilTool = Vector3.new(4005.23, 23.31, -364.45),
+    Taruh1    = Vector3.new(4028.46, 23.31, -368.54),
+    Taruh2    = Vector3.new(4020.16, 35.94, -365.68),
+}
+
+local function getMyJob()
+    local jobs = Workspace:FindFirstChild("Ekonomi") and Workspace.Ekonomi:FindFirstChild("ActiveJobs")
+    return jobs and jobs:FindFirstChild("Brewog_" .. tostring(LocalPlayer.UserId))
+end
+
+local function hasTool()
+    local char = LocalPlayer.Character
+    return char and char:FindFirstChildOfClass("Tool") ~= nil
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        
+        if _H42_TouchMode then
+            local myJob = getMyJob()
+            if myJob then
+                pcall(function()
+                    local char = LocalPlayer.Character
+                    if not char then return end
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then return end
+                    
+                    for _, part in pairs(myJob:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            local hasTouch = false
+                            for _, child in pairs(part:GetChildren()) do
+                                if child.Name == "TouchInterest" then
+                                    hasTouch = true
+                                    break
+                                end
+                            end
+                            
+                            if hasTouch then
+                                pcall(function()
+                                    firetouchinterest(hrp, part, 0)
+                                    task.wait(0.02)
+                                    firetouchinterest(hrp, part, 1)
+                                    _H42_TouchCount = _H42_TouchCount + 1
+                                end)
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if _H42_NoclipMode and LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+local function H42_Teleport(targetPos, withMovement)
+    if not _H42_Active then return false end
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not rootPart then return false end
+    
+    if _H42_ForceMovement then
+        withMovement = true
+    end
+    
+    if humanoid then
+        humanoid.PlatformStand = false
+        humanoid.Sit = false
+    end
+    
+    local targetCFrame = CFrame.new(targetPos)
+    
+    if not H42_TweenMove(targetCFrame, _H42_Duration, true) then
+        return false
+    end
+    
+    task.wait(0.1)
+    
+    if withMovement and _H42_MoveSim and _H42_Active then
+        local baseCF = rootPart.CFrame
+        
+        local fwd = baseCF * CFrame.new(0, 0, -_H42_Offset)
+        if not H42_TweenMove(fwd, _H42_Duration * 0.6, true) then return false end
+        if not _H42_Active then return false end
+        
+        local bwd = baseCF * CFrame.new(3, 0, _H42_Offset)
+        if not H42_TweenMove(bwd, _H42_Duration * 0.6, true) then return false end
+        if not _H42_Active then return false end
+        
+        if not H42_TweenMove(targetCFrame, _H42_Duration * 0.8, true) then return false end
+    end
+    
+    task.wait(_H42_Delay)
+    return true
+end
+
+local function getEffectiveVerifyTimeout()
+    if _H42_ForceMovement and _H42_MoveSim then
+        return _H42_VerifyTimeout + 1
+    end
+    return _H42_VerifyTimeout
+end
+
+local function H42_TeleportVerify(targetPos, withMovement)
+    local timeBefore = _G_HandlerLastUpdate
+    
+    H42_Teleport(targetPos, withMovement)
+    
+    if not _H42_EnableVerify then return true end
+    
+    local startWait = tick()
+    local effectiveTimeout = getEffectiveVerifyTimeout()
+    while (tick() - startWait) < effectiveTimeout do
+        if not _H42_Active then return false end
+        if _G_HandlerLastUpdate > timeBefore then
+            return true
+        end
+        task.wait(0.1)
+    end
+    
+    return false
+end
+
+local function H42_TeleportRetry(targetPos, withMovement)
+    if not _H42_EnableRetry then
+        return H42_TeleportVerify(targetPos, withMovement)
+    end
+    
+    for attempt = 1, _H42_MaxRetry do
+        if not _H42_Active then return false end
+        
+        local ok = H42_TeleportVerify(targetPos, withMovement)
+        
+        if ok then
+            if attempt > 1 then
+                _H42_RetryCount = _H42_RetryCount + 1
+            end
+            _H42_SuccessCount = _H42_SuccessCount + 1
+            _H42_MissCount = 0
+            return true
+        end
+        
+        _H42_MissCount = _H42_MissCount + 1
+        
+        if attempt < _H42_MaxRetry then
+            task.wait(_H42_RetryDelay)
+        end
+    end
+    
+    _H42_FailCount = _H42_FailCount + 1
+    return false
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        if _H42_Active then
+            pcall(function()
+                if not _H42_Active then return end
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                
+                local myJob = getMyJob()
+                local holdingTool = hasTool()
+                local handlerAlive = (tick() - _G_HandlerLastUpdate) < _H42_HandlerTimeout
+                
+                if _H42_UseHandler and handlerAlive then
+                    if _G_HandlerReceivedComplete then
+                        _G_HandlerReceivedComplete = false
+                        _H42_NextTarget = "AmbilJob (Complete)"
+                        H42_TeleportRetry(H42_WAYPOINTS.AmbilJob, true)
+                        return
+                    end
+                    
+                    if _G_HandlerJobFailed then
+                        _G_HandlerJobFailed = false
+                        _H42_NextTarget = "AmbilJob (Failed)"
+                        H42_TeleportRetry(H42_WAYPOINTS.AmbilJob, true)
+                        return
+                    end
+                    
+                    if not myJob then
+                        _H42_NextTarget = "AmbilJob"
+                        if not H42_TeleportRetry(H42_WAYPOINTS.AmbilJob, true) then
+                            if _H42_MissCount >= _H42_MaxMiss then
+                                _H42_UseHandler = false
+                                _H42_MissCount = 0
+                            end
+                        end
+                    elseif not holdingTool then
+                        _H42_NextTarget = "AmbilTool"
+                        if not H42_TeleportRetry(H42_WAYPOINTS.AmbilTool, true) then
+                            if _H42_MissCount >= _H42_MaxMiss then
+                                _H42_UseHandler = false
+                                _H42_MissCount = 0
+                            end
+                        end
+                    elseif _G_CurrentStage == "Stage2" then
+                        _H42_NextTarget = "Taruh2"
+                        if not H42_TeleportRetry(H42_WAYPOINTS.Taruh2, true) then
+                            if _H42_MissCount >= _H42_MaxMiss then
+                                _H42_UseHandler = false
+                                _H42_MissCount = 0
+                            end
+                        end
+                    else
+                        _H42_NextTarget = "Taruh1"
+                        if not H42_TeleportRetry(H42_WAYPOINTS.Taruh1, true) then
+                            if _H42_MissCount >= _H42_MaxMiss then
+                                _H42_UseHandler = false
+                                _H42_MissCount = 0
+                            end
+                        end
+                    end
+                else
+                    _H42_NextTarget = "Blind Loop"
+                    if not H42_Teleport(H42_WAYPOINTS.AmbilJob, true) then return end
+                    
+                    for i = 1, _H42_LoopCount do
+                        if not _H42_Active then break end
+                        H42_Teleport(H42_WAYPOINTS.AmbilTool, true)
+                        H42_Teleport(H42_WAYPOINTS.Taruh1, true)
+                    end
+                    
+                    for i = 1, _H42_LoopCount do
+                        if not _H42_Active then break end
+                        H42_Teleport(H42_WAYPOINTS.AmbilTool, true)
+                        H42_Teleport(H42_WAYPOINTS.Taruh2, true)
+                    end
+                    
+                    H42_Teleport(H42_WAYPOINTS.AmbilJob, true)
+                end
+            end)
+        end
+    end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DVExploitsBrewokUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999
+pcall(function() ScreenGui.Parent = CoreGui end)
+if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 440, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(16, 12, 12)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local mainCorner = Instance.new("UICorner", MainFrame)
+mainCorner.CornerRadius = UDim.new(0, 10)
+
+local border = Instance.new("Frame", MainFrame)
+border.Name = "Border"
+border.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+border.BorderSizePixel = 0
+border.Size = UDim2.new(1, 2, 1, 2)
+border.Position = UDim2.new(0, -1, 0, -1)
+border.ZIndex = 0
+local borderCorner = Instance.new("UICorner", border)
+borderCorner.CornerRadius = UDim.new(0, 11)
+
+local Header = Instance.new("Frame", MainFrame)
+Header.Name = "Header"
+Header.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+Header.BorderSizePixel = 0
+Header.Size = UDim2.new(1, 0, 0, 38)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
+
+local iconFrame = Instance.new("Frame", Header)
+iconFrame.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+iconFrame.BorderSizePixel = 0
+iconFrame.Position = UDim2.new(0, 10, 0.5, -9)
+iconFrame.Size = UDim2.new(0, 18, 0, 18)
+Instance.new("UICorner", iconFrame).CornerRadius = UDim.new(1, 0)
+
+local iconText = Instance.new("TextLabel", iconFrame)
+iconText.BackgroundTransparency = 1
+iconText.Size = UDim2.new(1, 0, 1, 0)
+iconText.Font = Enum.Font.GothamBold
+iconText.Text = "DV"
+iconText.TextColor3 = Color3.fromRGB(255, 255, 255)
+iconText.TextSize = 9
+iconText.TextScaled = true
+
+local Title = Instance.new("TextLabel", Header)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 35, 0, 0)
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "DV EXPLOITS - BREWOK"
+Title.TextColor3 = Color3.fromRGB(255, 70, 70)
+Title.TextSize = 11
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
+CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 11
+CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+
+local MinBtn = Instance.new("TextButton", Header)
+MinBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20)
+MinBtn.Position = UDim2.new(1, -58, 0.5, -11)
+MinBtn.Size = UDim2.new(0, 22, 0, 22)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.Text = "−"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.TextSize = 13
+MinBtn.BorderSizePixel = 0
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 5)
+
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(0, 110, 1, -48)
+TabBar.Position = UDim2.new(0, 8, 0, 42)
+TabBar.BackgroundColor3 = Color3.fromRGB(22, 16, 16)
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
+
+local TabMainBtn = Instance.new("TextButton", TabBar)
+TabMainBtn.Size = UDim2.new(1, -12, 0, 30)
+TabMainBtn.Position = UDim2.new(0, 6, 0, 6)
+TabMainBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+TabMainBtn.Text = "⚙️ Main Farm"
+TabMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabMainBtn.Font = Enum.Font.GothamBold
+TabMainBtn.TextSize = 10
+TabMainBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabMainBtn).CornerRadius = UDim.new(0, 6)
+
+local TabH42Btn = Instance.new("TextButton", TabBar)
+TabH42Btn.Size = UDim2.new(1, -12, 0, 30)
+TabH42Btn.Position = UDim2.new(0, 6, 0, 42)
+TabH42Btn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+TabH42Btn.Text = "🍺 Brewok H42"
+TabH42Btn.TextColor3 = Color3.fromRGB(220, 180, 180)
+TabH42Btn.Font = Enum.Font.GothamBold
+TabH42Btn.TextSize = 10
+TabH42Btn.BorderSizePixel = 0
+Instance.new("UICorner", TabH42Btn).CornerRadius = UDim.new(0, 6)
+
+local TabLightBtn = Instance.new("TextButton", TabBar)
+TabLightBtn.Size = UDim2.new(1, -12, 0, 30)
+TabLightBtn.Position = UDim2.new(0, 6, 0, 78)
+TabLightBtn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+TabLightBtn.Text = "💡 Lighting"
+TabLightBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+TabLightBtn.Font = Enum.Font.GothamBold
+TabLightBtn.TextSize = 10
+TabLightBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabLightBtn).CornerRadius = UDim.new(0, 6)
+
+local TabBankBtn = Instance.new("TextButton", TabBar)
+TabBankBtn.Size = UDim2.new(1, -12, 0, 30)
+TabBankBtn.Position = UDim2.new(0, 6, 0, 114)
+TabBankBtn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+TabBankBtn.Text = "🏦 Bank"
+TabBankBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+TabBankBtn.Font = Enum.Font.GothamBold
+TabBankBtn.TextSize = 10
+TabBankBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabBankBtn).CornerRadius = UDim.new(0, 6)
+
+local ContainerMain = Instance.new("Frame", MainFrame)
+ContainerMain.Size = UDim2.new(1, -132, 1, -48)
+ContainerMain.Position = UDim2.new(0, 124, 0, 42)
+ContainerMain.BackgroundTransparency = 1
+ContainerMain.Visible = true
+
+local ContainerH42 = Instance.new("Frame", MainFrame)
+ContainerH42.Size = UDim2.new(1, -132, 1, -48)
+ContainerH42.Position = UDim2.new(0, 124, 0, 42)
+ContainerH42.BackgroundTransparency = 1
+ContainerH42.Visible = false
+
+local ContainerH42Scroll = Instance.new("ScrollingFrame", ContainerH42)
+ContainerH42Scroll.Size = UDim2.new(1, 0, 1, 0)
+ContainerH42Scroll.Position = UDim2.new(0, 0, 0, 0)
+ContainerH42Scroll.BackgroundTransparency = 1
+ContainerH42Scroll.BorderSizePixel = 0
+ContainerH42Scroll.ScrollBarThickness = 3
+ContainerH42Scroll.ScrollBarImageColor3 = Color3.fromRGB(180, 30, 30)
+ContainerH42Scroll.CanvasSize = UDim2.new(0, 0, 0, 650)
+
+local ContainerLight = Instance.new("Frame", MainFrame)
+ContainerLight.Size = UDim2.new(1, -132, 1, -48)
+ContainerLight.Position = UDim2.new(0, 124, 0, 42)
+ContainerLight.BackgroundTransparency = 1
+ContainerLight.Visible = false
+
+local ContainerBank = Instance.new("Frame", MainFrame)
+ContainerBank.Size = UDim2.new(1, -132, 1, -48)
+ContainerBank.Position = UDim2.new(0, 124, 0, 42)
+ContainerBank.BackgroundTransparency = 1
+ContainerBank.Visible = false
+
+local function switchTab(tabName)
+    activeTabName = tabName
+    ContainerMain.Visible = (tabName == "Main")
+    ContainerH42.Visible = (tabName == "H42")
+    ContainerLight.Visible = (tabName == "Light")
+    ContainerBank.Visible = (tabName == "Bank")
+    
+    local tabs = {
+        Main = TabMainBtn,
+        H42 = TabH42Btn,
+        Light = TabLightBtn,
+        Bank = TabBankBtn,
+    }
+    
+    for name, btn in pairs(tabs) do
+        if name == tabName then
+            btn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+            btn.TextColor3 = Color3.fromRGB(220, 180, 180)
+        end
+    end
+end
+
+TabMainBtn.MouseButton1Click:Connect(function() switchTab("Main") end)
+TabH42Btn.MouseButton1Click:Connect(function() switchTab("H42") end)
+TabLightBtn.MouseButton1Click:Connect(function() switchTab("Light") end)
+TabBankBtn.MouseButton1Click:Connect(function() switchTab("Bank") end)
+
+task.spawn(function()
+    while ScreenGui.Parent do
+        local hue = (tick() * 2) % 1
+        border.BackgroundColor3 = Color3.fromHSV(0, 0.8 + math.sin(tick() * 3) * 0.2, 0.9)
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+MinBtn.MouseButton1Click:Connect(function()
+    local isVis = TabBar.Visible
+    TabBar.Visible = not isVis
+    
+    if isVis then
+        ContainerMain.Visible = false
+        ContainerH42.Visible = false
+        ContainerLight.Visible = false
+        ContainerBank.Visible = false
+        MainFrame.Size = UDim2.new(0, 440, 0, 38)
+        MinBtn.Text = "⊕"
+    else
+        MainFrame.Size = UDim2.new(0, 440, 0, 420)
+        MinBtn.Text = "−"
+        if activeTabName == "Main" then
+            ContainerMain.Visible = true
+        elseif activeTabName == "H42" then
+            ContainerH42.Visible = true
+        elseif activeTabName == "Light" then
+            ContainerLight.Visible = true
+        elseif activeTabName == "Bank" then
+            ContainerBank.Visible = true
+        end
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() 
+    toggleFly(false)
+    _H42_Active = false
+    _H42_NoclipMode = false
+    if _H42_CurrentTween then _H42_CurrentTween:Cancel() end
+    if remoteEventConnection then remoteEventConnection:Disconnect() end
+    ScreenGui:Destroy() 
+end)
+
+local ToggleBtn = Instance.new("TextButton", ContainerMain)
+ToggleBtn.Size = UDim2.new(1, -12, 0, 32)
+ToggleBtn.Position = UDim2.new(0, 0, 0, 8)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+ToggleBtn.Text = "🍺 AUTO FARM: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 11
+ToggleBtn.BorderSizePixel = 0
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    _G_AutoFarmActive = not _G_AutoFarmActive
+    if _G_AutoFarmActive then
+        if _H42_Active then
+            _H42_Active = false
+            if _H42_CurrentTween then _H42_CurrentTween:Cancel() end
+            if H42_ToggleBtn then
+                H42_ToggleBtn.Text = "🍺 H42 HYBRID FARM: OFF"
+                H42_ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+            end
+        end
+        ToggleBtn.Text = "🍺 AUTO FARM: ON"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+        if _G_AutoFlyEnabled then toggleFly(true) end
+    else
+        ToggleBtn.Text = "🍺 AUTO FARM: OFF"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+        toggleFly(false)
+    end
+end)
+
+local FlyModeBtn = Instance.new("TextButton", ContainerMain)
+FlyModeBtn.Size = UDim2.new(1, -12, 0, 28)
+FlyModeBtn.Position = UDim2.new(0, 0, 0, 46)
+FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+FlyModeBtn.Text = "Mode: FLY (Mati)"
+FlyModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyModeBtn.Font = Enum.Font.GothamBold
+FlyModeBtn.TextSize = 10
+FlyModeBtn.BorderSizePixel = 0
+Instance.new("UICorner", FlyModeBtn).CornerRadius = UDim.new(0, 6)
+
+FlyModeBtn.MouseButton1Click:Connect(function()
+    _G_AutoFlyEnabled = not _G_AutoFlyEnabled
+    if _G_AutoFlyEnabled then
+        FlyModeBtn.Text = "Mode: FLY (Aktif)"
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        if _G_AutoFarmActive then toggleFly(true) end
+    else
+        FlyModeBtn.Text = "Mode: FLY (Mati)"
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+        toggleFly(false)
+    end
+end)
+
+local BodyStateBtn = Instance.new("TextButton", ContainerMain)
+BodyStateBtn.Size = UDim2.new(1, -12, 0, 28)
+BodyStateBtn.Position = UDim2.new(0, 0, 0, 80)
+BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
+BodyStateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BodyStateBtn.Font = Enum.Font.GothamBold
+BodyStateBtn.TextSize = 10
+BodyStateBtn.BorderSizePixel = 0
+Instance.new("UICorner", BodyStateBtn).CornerRadius = UDim.new(0, 6)
+
+BodyStateBtn.MouseButton1Click:Connect(function()
+    if _G_BodyState == "Terlentang" then
+        _G_BodyState = "Berdiri"
+        BodyStateBtn.Text = "Posisi: Berdiri (Normal)"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+    elseif _G_BodyState == "Berdiri" then
+        _G_BodyState = "KepalaBawah"
+        BodyStateBtn.Text = "Posisi: Kepala di Bawah"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
+    else
+        _G_BodyState = "Terlentang"
+        BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+    end
+end)
+
+local DelayBox = Instance.new("TextBox", ContainerMain)
+DelayBox.Size = UDim2.new(0.48, -4, 0, 28)
+DelayBox.Position = UDim2.new(0, 0, 0, 114)
+DelayBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+DelayBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+DelayBox.PlaceholderText = "Delay TP"
+DelayBox.Text = tostring(_G_ActionDelay)
+DelayBox.Font = Enum.Font.GothamBold
+DelayBox.TextSize = 10
+DelayBox.BorderSizePixel = 0
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+
+DelayBox.FocusLost:Connect(function()
+    local val = tonumber(DelayBox.Text)
+    if val and val > 0 then _G_ActionDelay = val end
+end)
+
+local BurstBox = Instance.new("TextBox", ContainerMain)
+BurstBox.Size = UDim2.new(0.48, -4, 0, 28)
+BurstBox.Position = UDim2.new(0.52, 0, 0, 114)
+BurstBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+BurstBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+BurstBox.PlaceholderText = "Burst Count"
+BurstBox.Text = tostring(_G_BurstCount)
+BurstBox.Font = Enum.Font.GothamBold
+BurstBox.TextSize = 10
+BurstBox.BorderSizePixel = 0
+Instance.new("UICorner", BurstBox).CornerRadius = UDim.new(0, 6)
+
+BurstBox.FocusLost:Connect(function()
+    local val = tonumber(BurstBox.Text)
+    if val and val > 0 then _G_BurstCount = math.floor(val) end
+end)
+
+ProgressDisplay = Instance.new("TextLabel", ContainerMain)
+ProgressDisplay.Size = UDim2.new(1, -12, 0, 26)
+ProgressDisplay.Position = UDim2.new(0, 0, 0, 148)
+ProgressDisplay.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+ProgressDisplay.BorderSizePixel = 0
+ProgressDisplay.Text = "Progres: Menunggu Sinyal..."
+ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120)
+ProgressDisplay.Font = Enum.Font.GothamBold
+ProgressDisplay.TextSize = 10
+Instance.new("UICorner", ProgressDisplay).CornerRadius = UDim.new(0, 6)
+
+local ManualTpBtn = Instance.new("TextButton", ContainerMain)
+ManualTpBtn.Size = UDim2.new(1, -12, 0, 30)
+ManualTpBtn.Position = UDim2.new(0, 0, 0, 180)
+ManualTpBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+ManualTpBtn.Text = "📍 TP Manual ke Brewog"
+ManualTpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ManualTpBtn.Font = Enum.Font.GothamBold
+ManualTpBtn.TextSize = 11
+ManualTpBtn.BorderSizePixel = 0
+Instance.new("UICorner", ManualTpBtn).CornerRadius = UDim.new(0, 6)
+
+ManualTpBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local jobPart = ReplicatedStorage.LOKASI["\240\159\146\188 BREWOG"]
+        if jobPart then
+            local targetCFrame = jobPart:IsA("BasePart") and jobPart.CFrame or jobPart:GetPivot()
+            manualTeleport(targetCFrame)
+        end
+    end)
+end)
+
+local H42_ToggleBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_ToggleBtn.Size = UDim2.new(1, -12, 0, 32)
+H42_ToggleBtn.Position = UDim2.new(0, 0, 0, 4)
+H42_ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+H42_ToggleBtn.Text = "🍺 H42 HYBRID FARM: OFF"
+H42_ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_ToggleBtn.Font = Enum.Font.GothamBold
+H42_ToggleBtn.TextSize = 11
+H42_ToggleBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+H42_ToggleBtn.MouseButton1Click:Connect(function()
+    _H42_Active = not _H42_Active
+    if _H42_Active then
+        if _G_AutoFarmActive then
+            _G_AutoFarmActive = false
+            ToggleBtn.Text = "🍺 AUTO FARM: OFF"
+            ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+        end
+        
+        _G_BodyState = "Berdiri"
+        BodyStateBtn.Text = "Posisi: Berdiri (Normal)"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+        
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.PlatformStand = false
+            hum.Sit = false
+        end
+        
+        _H42_MissCount = 0
+        _H42_SuccessCount = 0
+        _H42_RetryCount = 0
+        _H42_FailCount = 0
+        _H42_CompleteCount = 0
+        _H42_HideFailCount = 0
+        _H42_TouchCount = 0
+        
+        H42_ToggleBtn.Text = "🍺 H42 HYBRID FARM: ON"
+        H42_ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+    else
+        if _H42_CurrentTween then _H42_CurrentTween:Cancel() end
+        H42_ToggleBtn.Text = "🍺 H42 HYBRID FARM: OFF"
+        H42_ToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+    end
+end)
+
+local H42_TPBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_TPBtn.Size = UDim2.new(1, -12, 0, 26)
+H42_TPBtn.Position = UDim2.new(0, 0, 0, 42)
+H42_TPBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+H42_TPBtn.Text = "📍 TP ke AmbilJob (v1)"
+H42_TPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_TPBtn.Font = Enum.Font.GothamBold
+H42_TPBtn.TextSize = 10
+H42_TPBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_TPBtn).CornerRadius = UDim.new(0, 6)
+
+H42_TPBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not rootPart then return end
+        if humanoid then
+            humanoid.PlatformStand = false
+            humanoid.Sit = false
+        end
+        rootPart.CFrame = CFrame.new(H42_WAYPOINTS.AmbilJob)
+    end)
+end)
+
+local touchLabel = Instance.new("TextLabel", ContainerH42Scroll)
+touchLabel.Size = UDim2.new(1, -12, 0, 14)
+touchLabel.Position = UDim2.new(0, 0, 0, 74)
+touchLabel.BackgroundTransparency = 1
+touchLabel.Text = "🖐️ AUTO TOUCH + NOCLIP"
+touchLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+touchLabel.Font = Enum.Font.GothamBold
+touchLabel.TextSize = 8
+touchLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_TouchBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_TouchBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_TouchBtn.Position = UDim2.new(0, 0, 0, 90)
+H42_TouchBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+H42_TouchBtn.Text = "Touch Mode: OFF"
+H42_TouchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_TouchBtn.Font = Enum.Font.GothamBold
+H42_TouchBtn.TextSize = 9
+H42_TouchBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_TouchBtn).CornerRadius = UDim.new(0, 5)
+
+H42_TouchBtn.MouseButton1Click:Connect(function()
+    _H42_TouchMode = not _H42_TouchMode
+    if _H42_TouchMode then
+        H42_TouchBtn.Text = "Touch Mode: ON"
+        H42_TouchBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_TouchBtn.Text = "Touch Mode: OFF"
+        H42_TouchBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_NoclipBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_NoclipBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_NoclipBtn.Position = UDim2.new(0.52, 0, 0, 90)
+H42_NoclipBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+H42_NoclipBtn.Text = "Noclip: OFF"
+H42_NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_NoclipBtn.Font = Enum.Font.GothamBold
+H42_NoclipBtn.TextSize = 9
+H42_NoclipBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_NoclipBtn).CornerRadius = UDim.new(0, 5)
+
+H42_NoclipBtn.MouseButton1Click:Connect(function()
+    _H42_NoclipMode = not _H42_NoclipMode
+    if _H42_NoclipMode then
+        H42_NoclipBtn.Text = "Noclip: ON"
+        H42_NoclipBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_NoclipBtn.Text = "Noclip: OFF"
+        H42_NoclipBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+        local char = LocalPlayer.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = (v.Name ~= "HumanoidRootPart")
+                end
+            end
+        end
+    end
+end)
+
+local statusLabel = Instance.new("TextLabel", ContainerH42Scroll)
+statusLabel.Size = UDim2.new(1, -12, 0, 14)
+statusLabel.Position = UDim2.new(0, 0, 0, 120)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "📍 STATUS HANDLER"
+statusLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 8
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_StatusBox = Instance.new("TextLabel", ContainerH42Scroll)
+H42_StatusBox.Size = UDim2.new(1, -12, 0, 76)
+H42_StatusBox.Position = UDim2.new(0, 0, 0, 136)
+H42_StatusBox.BackgroundColor3 = Color3.fromRGB(20, 12, 12)
+H42_StatusBox.BorderSizePixel = 0
+H42_StatusBox.Text = "Mode: Hybrid\nStage: —\nNext: —"
+H42_StatusBox.TextColor3 = Color3.fromRGB(255, 200, 200)
+H42_StatusBox.Font = Enum.Font.GothamBold
+H42_StatusBox.TextSize = 8
+H42_StatusBox.TextXAlignment = Enum.TextXAlignment.Left
+Instance.new("UICorner", H42_StatusBox).CornerRadius = UDim.new(0, 5)
+
+task.spawn(function()
+    while ScreenGui.Parent do
+        task.wait(0.3)
+        if H42_StatusBox then
+            local mode = _H42_UseHandler and "Hybrid" or "Blind"
+            local stage = _G_CurrentStage
+            local nextT = _H42_NextTarget
+            local stats = "✓" .. _H42_SuccessCount .. " ↻" .. _H42_RetryCount .. " ✗" .. _H42_FailCount
+            local completeInfo = "Complete: " .. _H42_CompleteCount .. " | Gagal: " .. _H42_HideFailCount
+            local touchInfo = "Touch: " .. _H42_TouchCount .. "x | Noclip: " .. (_H42_NoclipMode and "ON" or "OFF")
+            H42_StatusBox.Text = "Mode: " .. mode .. "\nStage: " .. stage .. "\nNext: " .. nextT .. "\nStats: " .. stats .. "\n" .. completeInfo .. "\n" .. touchInfo
+        end
+    end
+end)
+
+local durationLabel = Instance.new("TextLabel", ContainerH42Scroll)
+durationLabel.Size = UDim2.new(0.31, -3, 0, 14)
+durationLabel.Position = UDim2.new(0, 0, 0, 218)
+durationLabel.BackgroundTransparency = 1
+durationLabel.Text = "Durasi"
+durationLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+durationLabel.Font = Enum.Font.GothamBold
+durationLabel.TextSize = 8
+durationLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local delayLabel = Instance.new("TextLabel", ContainerH42Scroll)
+delayLabel.Size = UDim2.new(0.31, -3, 0, 14)
+delayLabel.Position = UDim2.new(0.345, 0, 0, 218)
+delayLabel.BackgroundTransparency = 1
+delayLabel.Text = "Delay"
+delayLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+delayLabel.Font = Enum.Font.GothamBold
+delayLabel.TextSize = 8
+delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local offsetLabel = Instance.new("TextLabel", ContainerH42Scroll)
+offsetLabel.Size = UDim2.new(0.31, -3, 0, 14)
+offsetLabel.Position = UDim2.new(0.69, 0, 0, 218)
+offsetLabel.BackgroundTransparency = 1
+offsetLabel.Text = "Offset"
+offsetLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+offsetLabel.Font = Enum.Font.GothamBold
+offsetLabel.TextSize = 8
+offsetLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_DurationBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_DurationBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_DurationBox.Position = UDim2.new(0, 0, 0, 234)
+H42_DurationBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_DurationBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_DurationBox.Text = tostring(_H42_Duration)
+H42_DurationBox.Font = Enum.Font.GothamBold
+H42_DurationBox.TextSize = 9
+H42_DurationBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_DurationBox).CornerRadius = UDim.new(0, 5)
+
+H42_DurationBox.FocusLost:Connect(function()
+    local val = tonumber(H42_DurationBox.Text)
+    if val and val > 0 then _H42_Duration = val end
+end)
+
+local H42_DelayBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_DelayBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_DelayBox.Position = UDim2.new(0.345, 0, 0, 234)
+H42_DelayBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_DelayBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_DelayBox.Text = tostring(_H42_Delay)
+H42_DelayBox.Font = Enum.Font.GothamBold
+H42_DelayBox.TextSize = 9
+H42_DelayBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_DelayBox).CornerRadius = UDim.new(0, 5)
+
+H42_DelayBox.FocusLost:Connect(function()
+    local val = tonumber(H42_DelayBox.Text)
+    if val and val > 0 then _H42_Delay = val end
+end)
+
+local H42_OffsetBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_OffsetBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_OffsetBox.Position = UDim2.new(0.69, 0, 0, 234)
+H42_OffsetBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_OffsetBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_OffsetBox.Text = tostring(_H42_Offset)
+H42_OffsetBox.Font = Enum.Font.GothamBold
+H42_OffsetBox.TextSize = 9
+H42_OffsetBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_OffsetBox).CornerRadius = UDim.new(0, 5)
+
+H42_OffsetBox.FocusLost:Connect(function()
+    local val = tonumber(H42_OffsetBox.Text)
+    if val and val > 0 then _H42_Offset = val end
+end)
+
+local loopLabel = Instance.new("TextLabel", ContainerH42Scroll)
+loopLabel.Size = UDim2.new(0.48, -3, 0, 14)
+loopLabel.Position = UDim2.new(0, 0, 0, 264)
+loopLabel.BackgroundTransparency = 1
+loopLabel.Text = "Loop Count (Blind)"
+loopLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+loopLabel.Font = Enum.Font.GothamBold
+loopLabel.TextSize = 8
+loopLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local fbLabel = Instance.new("TextLabel", ContainerH42Scroll)
+fbLabel.Size = UDim2.new(0.48, -3, 0, 14)
+fbLabel.Position = UDim2.new(0.52, 0, 0, 264)
+fbLabel.BackgroundTransparency = 1
+fbLabel.Text = "Fallback Timeout"
+fbLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+fbLabel.Font = Enum.Font.GothamBold
+fbLabel.TextSize = 8
+fbLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_LoopBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_LoopBox.Size = UDim2.new(0.48, -3, 0, 24)
+H42_LoopBox.Position = UDim2.new(0, 0, 0, 280)
+H42_LoopBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_LoopBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_LoopBox.Text = tostring(_H42_LoopCount)
+H42_LoopBox.Font = Enum.Font.GothamBold
+H42_LoopBox.TextSize = 9
+H42_LoopBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_LoopBox).CornerRadius = UDim.new(0, 5)
+
+H42_LoopBox.FocusLost:Connect(function()
+    local val = tonumber(H42_LoopBox.Text)
+    if val and val > 0 then _H42_LoopCount = math.floor(val) end
+end)
+
+local H42_FallbackBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_FallbackBox.Size = UDim2.new(0.48, -3, 0, 24)
+H42_FallbackBox.Position = UDim2.new(0.52, 0, 0, 280)
+H42_FallbackBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_FallbackBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_FallbackBox.Text = tostring(_H42_FallbackTimeout)
+H42_FallbackBox.Font = Enum.Font.GothamBold
+H42_FallbackBox.TextSize = 9
+H42_FallbackBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_FallbackBox).CornerRadius = UDim.new(0, 5)
+
+H42_FallbackBox.FocusLost:Connect(function()
+    local val = tonumber(H42_FallbackBox.Text)
+    if val and val > 0 then _H42_FallbackTimeout = val end
+end)
+
+local retryLabel = Instance.new("TextLabel", ContainerH42Scroll)
+retryLabel.Size = UDim2.new(0.31, -3, 0, 14)
+retryLabel.Position = UDim2.new(0, 0, 0, 310)
+retryLabel.BackgroundTransparency = 1
+retryLabel.Text = "Max Retry"
+retryLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+retryLabel.Font = Enum.Font.GothamBold
+retryLabel.TextSize = 8
+retryLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local verifyLabel = Instance.new("TextLabel", ContainerH42Scroll)
+verifyLabel.Size = UDim2.new(0.31, -3, 0, 14)
+verifyLabel.Position = UDim2.new(0.345, 0, 0, 310)
+verifyLabel.BackgroundTransparency = 1
+verifyLabel.Text = "Verify Timeout"
+verifyLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+verifyLabel.Font = Enum.Font.GothamBold
+verifyLabel.TextSize = 8
+verifyLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local retryDelayLabel = Instance.new("TextLabel", ContainerH42Scroll)
+retryDelayLabel.Size = UDim2.new(0.31, -3, 0, 14)
+retryDelayLabel.Position = UDim2.new(0.69, 0, 0, 310)
+retryDelayLabel.BackgroundTransparency = 1
+retryDelayLabel.Text = "Retry Delay"
+retryDelayLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+retryDelayLabel.Font = Enum.Font.GothamBold
+retryDelayLabel.TextSize = 8
+retryDelayLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_MaxRetryBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_MaxRetryBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_MaxRetryBox.Position = UDim2.new(0, 0, 0, 326)
+H42_MaxRetryBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_MaxRetryBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_MaxRetryBox.Text = tostring(_H42_MaxRetry)
+H42_MaxRetryBox.Font = Enum.Font.GothamBold
+H42_MaxRetryBox.TextSize = 9
+H42_MaxRetryBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_MaxRetryBox).CornerRadius = UDim.new(0, 5)
+
+H42_MaxRetryBox.FocusLost:Connect(function()
+    local val = tonumber(H42_MaxRetryBox.Text)
+    if val and val > 0 then _H42_MaxRetry = math.floor(val) end
+end)
+
+local H42_VerifyBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_VerifyBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_VerifyBox.Position = UDim2.new(0.345, 0, 0, 326)
+H42_VerifyBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_VerifyBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_VerifyBox.Text = tostring(_H42_VerifyTimeout)
+H42_VerifyBox.Font = Enum.Font.GothamBold
+H42_VerifyBox.TextSize = 9
+H42_VerifyBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_VerifyBox).CornerRadius = UDim.new(0, 5)
+
+H42_VerifyBox.FocusLost:Connect(function()
+    local val = tonumber(H42_VerifyBox.Text)
+    if val and val > 0 then _H42_VerifyTimeout = val end
+end)
+
+local H42_RetryDelayBox = Instance.new("TextBox", ContainerH42Scroll)
+H42_RetryDelayBox.Size = UDim2.new(0.31, -3, 0, 24)
+H42_RetryDelayBox.Position = UDim2.new(0.69, 0, 0, 326)
+H42_RetryDelayBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+H42_RetryDelayBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+H42_RetryDelayBox.Text = tostring(_H42_RetryDelay)
+H42_RetryDelayBox.Font = Enum.Font.GothamBold
+H42_RetryDelayBox.TextSize = 9
+H42_RetryDelayBox.BorderSizePixel = 0
+Instance.new("UICorner", H42_RetryDelayBox).CornerRadius = UDim.new(0, 5)
+
+H42_RetryDelayBox.FocusLost:Connect(function()
+    local val = tonumber(H42_RetryDelayBox.Text)
+    if val and val > 0 then _H42_RetryDelay = val end
+end)
+
+local easeLabel = Instance.new("TextLabel", ContainerH42Scroll)
+easeLabel.Size = UDim2.new(0.48, -3, 0, 14)
+easeLabel.Position = UDim2.new(0, 0, 0, 356)
+easeLabel.BackgroundTransparency = 1
+easeLabel.Text = "Easing Style"
+easeLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+easeLabel.Font = Enum.Font.GothamBold
+easeLabel.TextSize = 8
+easeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local dirLabel = Instance.new("TextLabel", ContainerH42Scroll)
+dirLabel.Size = UDim2.new(0.48, -3, 0, 14)
+dirLabel.Position = UDim2.new(0.52, 0, 0, 356)
+dirLabel.BackgroundTransparency = 1
+dirLabel.Text = "Easing Direction"
+dirLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+dirLabel.Font = Enum.Font.GothamBold
+dirLabel.TextSize = 8
+dirLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_EaseBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_EaseBtn.Size = UDim2.new(0.48, -3, 0, 24)
+H42_EaseBtn.Position = UDim2.new(0, 0, 0, 372)
+H42_EaseBtn.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+H42_EaseBtn.Text = _H42_EasingStyle
+H42_EaseBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+H42_EaseBtn.Font = Enum.Font.GothamBold
+H42_EaseBtn.TextSize = 9
+H42_EaseBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_EaseBtn).CornerRadius = UDim.new(0, 5)
+
+local easeList = {"Quad", "Sine", "Cubic", "Quart", "Quint", "Linear", "Exponential"}
+local easeIdx = 1
+H42_EaseBtn.MouseButton1Click:Connect(function()
+    easeIdx = easeIdx + 1
+    if easeIdx > #easeList then easeIdx = 1 end
+    _H42_EasingStyle = easeList[easeIdx]
+    H42_EaseBtn.Text = _H42_EasingStyle
+end)
+
+local H42_DirBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_DirBtn.Size = UDim2.new(0.48, -3, 0, 24)
+H42_DirBtn.Position = UDim2.new(0.52, 0, 0, 372)
+H42_DirBtn.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+H42_DirBtn.Text = _H42_EasingDirection
+H42_DirBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+H42_DirBtn.Font = Enum.Font.GothamBold
+H42_DirBtn.TextSize = 9
+H42_DirBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_DirBtn).CornerRadius = UDim.new(0, 5)
+
+local dirList = {"Out", "In", "InOut"}
+local dirIdx = 1
+H42_DirBtn.MouseButton1Click:Connect(function()
+    dirIdx = dirIdx + 1
+    if dirIdx > #dirList then dirIdx = 1 end
+    _H42_EasingDirection = dirList[dirIdx]
+    H42_DirBtn.Text = _H42_EasingDirection
+end)
+
+local H42_MoveSimBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_MoveSimBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_MoveSimBtn.Position = UDim2.new(0, 0, 0, 402)
+H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_MoveSimBtn.Text = "MoveSim: ON"
+H42_MoveSimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_MoveSimBtn.Font = Enum.Font.GothamBold
+H42_MoveSimBtn.TextSize = 9
+H42_MoveSimBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_MoveSimBtn).CornerRadius = UDim.new(0, 5)
+
+H42_MoveSimBtn.MouseButton1Click:Connect(function()
+    _H42_MoveSim = not _H42_MoveSim
+    if _H42_MoveSim then
+        H42_MoveSimBtn.Text = "MoveSim: ON"
+        H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_MoveSimBtn.Text = "MoveSim: OFF"
+        H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_ForceMoveBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_ForceMoveBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_ForceMoveBtn.Position = UDim2.new(0.52, 0, 0, 402)
+H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_ForceMoveBtn.Text = "ForceMove: ON"
+H42_ForceMoveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_ForceMoveBtn.Font = Enum.Font.GothamBold
+H42_ForceMoveBtn.TextSize = 9
+H42_ForceMoveBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_ForceMoveBtn).CornerRadius = UDim.new(0, 5)
+
+H42_ForceMoveBtn.MouseButton1Click:Connect(function()
+    _H42_ForceMovement = not _H42_ForceMovement
+    if _H42_ForceMovement then
+        H42_ForceMoveBtn.Text = "ForceMove: ON"
+        H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_ForceMoveBtn.Text = "ForceMove: OFF"
+        H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_HandlerBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_HandlerBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_HandlerBtn.Position = UDim2.new(0, 0, 0, 428)
+H42_HandlerBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_HandlerBtn.Text = "Handler: ON"
+H42_HandlerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_HandlerBtn.Font = Enum.Font.GothamBold
+H42_HandlerBtn.TextSize = 9
+H42_HandlerBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_HandlerBtn).CornerRadius = UDim.new(0, 5)
+
+H42_HandlerBtn.MouseButton1Click:Connect(function()
+    _H42_UseHandler = not _H42_UseHandler
+    if _H42_UseHandler then
+        H42_HandlerBtn.Text = "Handler: ON"
+        H42_HandlerBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_HandlerBtn.Text = "Handler: OFF"
+        H42_HandlerBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_RetryBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_RetryBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_RetryBtn.Position = UDim2.new(0.52, 0, 0, 428)
+H42_RetryBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_RetryBtn.Text = "Retry: ON"
+H42_RetryBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_RetryBtn.Font = Enum.Font.GothamBold
+H42_RetryBtn.TextSize = 9
+H42_RetryBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_RetryBtn).CornerRadius = UDim.new(0, 5)
+
+H42_RetryBtn.MouseButton1Click:Connect(function()
+    _H42_EnableRetry = not _H42_EnableRetry
+    if _H42_EnableRetry then
+        H42_RetryBtn.Text = "Retry: ON"
+        H42_RetryBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_RetryBtn.Text = "Retry: OFF"
+        H42_RetryBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_VerifyBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_VerifyBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_VerifyBtn.Position = UDim2.new(0, 0, 0, 454)
+H42_VerifyBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_VerifyBtn.Text = "Verify: ON"
+H42_VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_VerifyBtn.Font = Enum.Font.GothamBold
+H42_VerifyBtn.TextSize = 9
+H42_VerifyBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_VerifyBtn).CornerRadius = UDim.new(0, 5)
+
+H42_VerifyBtn.MouseButton1Click:Connect(function()
+    _H42_EnableVerify = not _H42_EnableVerify
+    if _H42_EnableVerify then
+        H42_VerifyBtn.Text = "Verify: ON"
+        H42_VerifyBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_VerifyBtn.Text = "Verify: OFF"
+        H42_VerifyBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_AutoCancelBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_AutoCancelBtn.Size = UDim2.new(0.48, -3, 0, 22)
+H42_AutoCancelBtn.Position = UDim2.new(0.52, 0, 0, 454)
+H42_AutoCancelBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+H42_AutoCancelBtn.Text = "AutoCancel: ON"
+H42_AutoCancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_AutoCancelBtn.Font = Enum.Font.GothamBold
+H42_AutoCancelBtn.TextSize = 9
+H42_AutoCancelBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_AutoCancelBtn).CornerRadius = UDim.new(0, 5)
+
+H42_AutoCancelBtn.MouseButton1Click:Connect(function()
+    _H42_AutoCancel = not _H42_AutoCancel
+    if _H42_AutoCancel then
+        H42_AutoCancelBtn.Text = "AutoCancel: ON"
+        H42_AutoCancelBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    else
+        H42_AutoCancelBtn.Text = "AutoCancel: OFF"
+        H42_AutoCancelBtn.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+    end
+end)
+
+local H42_ResetStatsBtn = Instance.new("TextButton", ContainerH42Scroll)
+H42_ResetStatsBtn.Size = UDim2.new(1, -12, 0, 22)
+H42_ResetStatsBtn.Position = UDim2.new(0, 0, 0, 480)
+H42_ResetStatsBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 60)
+H42_ResetStatsBtn.Text = "Reset Stats"
+H42_ResetStatsBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+H42_ResetStatsBtn.Font = Enum.Font.GothamBold
+H42_ResetStatsBtn.TextSize = 9
+H42_ResetStatsBtn.BorderSizePixel = 0
+Instance.new("UICorner", H42_ResetStatsBtn).CornerRadius = UDim.new(0, 5)
+
+H42_ResetStatsBtn.MouseButton1Click:Connect(function()
+    _H42_SuccessCount = 0
+    _H42_RetryCount = 0
+    _H42_FailCount = 0
+    _H42_MissCount = 0
+    _H42_CompleteCount = 0
+    _H42_HideFailCount = 0
+    _H42_TouchCount = 0
+end)
+
+local presetLabel = Instance.new("TextLabel", ContainerH42Scroll)
+presetLabel.Size = UDim2.new(1, -12, 0, 14)
+presetLabel.Position = UDim2.new(0, 0, 0, 510)
+presetLabel.BackgroundTransparency = 1
+presetLabel.Text = "Preset Cepat"
+presetLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+presetLabel.Font = Enum.Font.GothamBold
+presetLabel.TextSize = 8
+presetLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local H42_PresetStealth = Instance.new("TextButton", ContainerH42Scroll)
+H42_PresetStealth.Size = UDim2.new(0.31, -3, 0, 24)
+H42_PresetStealth.Position = UDim2.new(0, 0, 0, 526)
+H42_PresetStealth.BackgroundColor3 = Color3.fromRGB(60, 60, 100)
+H42_PresetStealth.Text = "🥷 Stealth"
+H42_PresetStealth.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_PresetStealth.Font = Enum.Font.GothamBold
+H42_PresetStealth.TextSize = 9
+H42_PresetStealth.BorderSizePixel = 0
+Instance.new("UICorner", H42_PresetStealth).CornerRadius = UDim.new(0, 5)
+
+H42_PresetStealth.MouseButton1Click:Connect(function()
+    _H42_Duration = 0.5
+    _H42_Delay = 2.0
+    _H42_Offset = 10
+    _H42_EasingStyle = "Sine"
+    _H42_EasingDirection = "InOut"
+    _H42_MoveSim = true
+    _H42_ForceMovement = true
+    H42_DurationBox.Text = "0.5"
+    H42_DelayBox.Text = "2"
+    H42_OffsetBox.Text = "10"
+    H42_EaseBtn.Text = "Sine"
+    H42_DirBtn.Text = "InOut"
+    H42_MoveSimBtn.Text = "MoveSim: ON"
+    H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    H42_ForceMoveBtn.Text = "ForceMove: ON"
+    H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    easeIdx = 2
+    dirIdx = 3
+end)
+
+local H42_PresetBalance = Instance.new("TextButton", ContainerH42Scroll)
+H42_PresetBalance.Size = UDim2.new(0.31, -3, 0, 24)
+H42_PresetBalance.Position = UDim2.new(0.345, 0, 0, 526)
+H42_PresetBalance.BackgroundColor3 = Color3.fromRGB(60, 100, 60)
+H42_PresetBalance.Text = "⚖️ Balance"
+H42_PresetBalance.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_PresetBalance.Font = Enum.Font.GothamBold
+H42_PresetBalance.TextSize = 9
+H42_PresetBalance.BorderSizePixel = 0
+Instance.new("UICorner", H42_PresetBalance).CornerRadius = UDim.new(0, 5)
+
+H42_PresetBalance.MouseButton1Click:Connect(function()
+    _H42_Duration = 0.3
+    _H42_Delay = 1.5
+    _H42_Offset = 6
+    _H42_EasingStyle = "Quad"
+    _H42_EasingDirection = "Out"
+    _H42_MoveSim = true
+    _H42_ForceMovement = true
+    H42_DurationBox.Text = "0.3"
+    H42_DelayBox.Text = "1.5"
+    H42_OffsetBox.Text = "6"
+    H42_EaseBtn.Text = "Quad"
+    H42_DirBtn.Text = "Out"
+    H42_MoveSimBtn.Text = "MoveSim: ON"
+    H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    H42_ForceMoveBtn.Text = "ForceMove: ON"
+    H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    easeIdx = 1
+    dirIdx = 1
+end)
+
+local H42_PresetTurbo = Instance.new("TextButton", ContainerH42Scroll)
+H42_PresetTurbo.Size = UDim2.new(0.31, -3, 0, 24)
+H42_PresetTurbo.Position = UDim2.new(0.69, 0, 0, 526)
+H42_PresetTurbo.BackgroundColor3 = Color3.fromRGB(130, 60, 60)
+H42_PresetTurbo.Text = "⚡ Turbo"
+H42_PresetTurbo.TextColor3 = Color3.fromRGB(255, 255, 255)
+H42_PresetTurbo.Font = Enum.Font.GothamBold
+H42_PresetTurbo.TextSize = 9
+H42_PresetTurbo.BorderSizePixel = 0
+Instance.new("UICorner", H42_PresetTurbo).CornerRadius = UDim.new(0, 5)
+
+H42_PresetTurbo.MouseButton1Click:Connect(function()
+    _H42_Duration = 0.15
+    _H42_Delay = 0.8
+    _H42_Offset = 3
+    _H42_EasingStyle = "Quint"
+    _H42_EasingDirection = "In"
+    _H42_MoveSim = true
+    _H42_ForceMovement = true
+    H42_DurationBox.Text = "0.15"
+    H42_DelayBox.Text = "0.8"
+    H42_OffsetBox.Text = "3"
+    H42_EaseBtn.Text = "Quint"
+    H42_DirBtn.Text = "In"
+    H42_MoveSimBtn.Text = "MoveSim: ON"
+    H42_MoveSimBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    H42_ForceMoveBtn.Text = "ForceMove: ON"
+    H42_ForceMoveBtn.BackgroundColor3 = Color3.fromRGB(40, 130, 40)
+    easeIdx = 5
+    dirIdx = 2
+end)
+
+local LToggle = Instance.new("TextButton", ContainerLight)
+LToggle.Size = UDim2.new(1, -12, 0, 34)
+LToggle.Position = UDim2.new(0, 0, 0, 8)
+LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+LToggle.Text = "⚡ Status Lighting: OFF"
+LToggle.TextColor3 = Color3.new(1,1,1)
+LToggle.Font = Enum.Font.GothamBold
+LToggle.TextSize = 11
+Instance.new("UICorner", LToggle).CornerRadius = UDim.new(0, 6)
+
+local ClockBox = Instance.new("TextBox", ContainerLight)
+ClockBox.Size = UDim2.new(1, -12, 0, 30)
+ClockBox.Position = UDim2.new(0, 0, 0, 48)
+ClockBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+ClockBox.PlaceholderText = "ClockTime (Cth: 14)"
+ClockBox.Text = "14"
+ClockBox.TextColor3 = Color3.new(1,1,1)
+ClockBox.Font = Enum.Font.GothamBold
+ClockBox.TextSize = 11
+Instance.new("UICorner", ClockBox).CornerRadius = UDim.new(0, 6)
+
+local BrightBox = Instance.new("TextBox", ContainerLight)
+BrightBox.Size = UDim2.new(1, -12, 0, 30)
+BrightBox.Position = UDim2.new(0, 0, 0, 84)
+BrightBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+BrightBox.PlaceholderText = "Brightness (Cth: 3)"
+BrightBox.Text = "3"
+BrightBox.TextColor3 = Color3.new(1,1,1)
+BrightBox.Font = Enum.Font.GothamBold
+BrightBox.TextSize = 11
+Instance.new("UICorner", BrightBox).CornerRadius = UDim.new(0, 6)
+
+local SBtn = Instance.new("TextButton", ContainerLight)
+SBtn.Size = UDim2.new(1, -12, 0, 32)
+SBtn.Position = UDim2.new(0, 0, 0, 120)
+SBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 20)
+SBtn.Text = "🌑 Global Shadows: OFF"
+SBtn.TextColor3 = Color3.fromRGB(220, 150, 150)
+SBtn.Font = Enum.Font.GothamBold
+SBtn.TextSize = 11
+Instance.new("UICorner", SBtn).CornerRadius = UDim.new(0, 6)
+
+local lightOn = false
+local shadowOff = true
+
+local function updateLight()
+    if not lightOn then return end
+    Lighting.ClockTime = tonumber(ClockBox.Text) or 14
+    Lighting.Brightness = tonumber(BrightBox.Text) or 3
+    Lighting.GlobalShadows = not shadowOff
+    Lighting.OutdoorAmbient = Color3.fromRGB(220, 220, 220)
+end
+
+LToggle.MouseButton1Click:Connect(function()
+    lightOn = not lightOn
+    if lightOn then
+        LToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 60)
+        LToggle.Text = "⚡ Status Lighting: ON"
+        updateLight()
+    else
+        LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+        LToggle.Text = "⚡ Status Lighting: OFF"
+        Lighting.GlobalShadows = true
+        Lighting.Brightness = 1
+        Lighting.ClockTime = 14
+    end
+end)
+
+SBtn.MouseButton1Click:Connect(function()
+    shadowOff = not shadowOff
+    SBtn.Text = shadowOff and "🌑 Global Shadows: OFF" or "🌑 Global Shadows: ON"
+    if lightOn then updateLight() end
+end)
+
+ClockBox:GetPropertyChangedSignal("Text"):Connect(updateLight)
+BrightBox:GetPropertyChangedSignal("Text"):Connect(updateLight)
+
+local LoadBankBtn = Instance.new("TextButton", ContainerBank)
+LoadBankBtn.Size = UDim2.new(1, -12, 0, 38)
+LoadBankBtn.Position = UDim2.new(0, 0, 0, 8)
+LoadBankBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadBankBtn.Text = "🏦 LOAD BANK SCRIPT"
+LoadBankBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBankBtn.Font = Enum.Font.GothamBold
+LoadBankBtn.TextSize = 12
+LoadBankBtn.BorderSizePixel = 0
+Instance.new("UICorner", LoadBankBtn).CornerRadius = UDim.new(0, 6)
+
+LoadBankBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nY9yeiyH"))()
+    end)
+end)
+
+task.spawn(function()
+    local oldIdled
+    oldIdled = LocalPlayer.Idled:Connect(function()
+        if _G_AntiAfkActive then
+            VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+        end
+    end)
+    
+    while true do
+        task.wait(_G_ActionDelay)
+        
+        if not remoteEventConnection then
+            hookGameRemotes()
+        end
+        
+        if _G_AutoFarmActive then
+            pcall(function()
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                
+                local userId = LocalPlayer.UserId
+                local activeJobs = Workspace:FindFirstChild("Ekonomi") and Workspace.Ekonomi:FindFirstChild("ActiveJobs")
+                local myJob = activeJobs and activeJobs:FindFirstChild("Brewog_" .. tostring(userId))
+                
+                local targetCFrame = nil
+                
+                if not myJob then
+                    _G_CurrentStage = "Progress1"
+                    local jobTrigger = Workspace.Ekonomi.Job:FindFirstChild("Brewog")
+                    if jobTrigger then
+                        targetCFrame = jobTrigger:IsA("BasePart") and jobTrigger.CFrame or jobTrigger:GetPivot()
+                    end
+                else
+                    local tempatAmbil = myJob:FindFirstChild("TempatAmbil")
+                    local tempatTaruh1 = myJob:FindFirstChild("Taruh1")
+                    local tempatTaruh2 = myJob:FindFirstChild("Taruh2")
+                    local holdingTool = char:FindFirstChildOfClass("Tool")
+                    
+                    local targetPart = nil
+                    
+                    if not holdingTool and tempatAmbil then
+                        targetPart = tempatAmbil
+                    else
+                        if _G_CurrentStage == "Stage2" and tempatTaruh2 then
+                            targetPart = tempatTaruh2
+                        else
+                            targetPart = tempatTaruh1 or tempatTaruh2
+                        end
+                    end
+                    
+                    if targetPart then
+                        targetCFrame = targetPart.CFrame
+                    end
+                end
+                
+                if targetCFrame then
+                    burstInstantTeleport(targetCFrame)
+                end
+            end)
+        end
+    end
+end)
