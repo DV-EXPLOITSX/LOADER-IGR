@@ -27,6 +27,7 @@ local CLR = {
     GREEN = Color3.fromRGB(50, 170, 90),
     RED = Color3.fromRGB(210, 60, 70),
     YELLOW = Color3.fromRGB(255, 200, 80),
+    ORANGE = Color3.fromRGB(230, 140, 40),
     TEXT = Color3.fromRGB(220, 230, 255),
     TEXT_DIM = Color3.fromRGB(130, 150, 180),
 }
@@ -85,7 +86,7 @@ if not parented or not ScreenGui.Parent then
 end
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 320, 0, 340)
+Main.Size = UDim2.new(0, 320, 0, 386)
 Main.Position = UDim2.new(0, 100, 0, 100)
 Main.BackgroundColor3 = CLR.BG
 Main.BorderSizePixel = 0
@@ -94,7 +95,6 @@ Main.Draggable = true
 Main.Parent = ScreenGui
 makeCorner(Main, 12)
 makeStroke(Main, CLR.BLUE, 1.5)
-
 makeGradient(Main, CLR.BG, CLR.BG_LIGHT, 135)
 
 local Header = Instance.new("Frame")
@@ -135,7 +135,7 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0, 40, 0, 0)
 Title.Size = UDim2.new(1, -120, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "MAP BYPASS"
+Title.Text = "BYPASS UTILITY"
 Title.TextColor3 = CLR.TEXT
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -170,7 +170,7 @@ local ShowBtn = Instance.new("TextButton")
 ShowBtn.Size = UDim2.new(0, 44, 0, 44)
 ShowBtn.Position = UDim2.new(0, 20, 0, 100)
 ShowBtn.BackgroundColor3 = CLR.BG
-ShowBtn.Text = "🗑️"
+ShowBtn.Text = "⚙️"
 ShowBtn.TextColor3 = CLR.BLUE_LIGHT
 ShowBtn.Font = Enum.Font.GothamBold
 ShowBtn.TextSize = 20
@@ -183,10 +183,21 @@ makeCorner(ShowBtn, 22)
 makeStroke(ShowBtn, CLR.BLUE, 2)
 makeGradient(ShowBtn, CLR.BLUE_DARK, CLR.BG, 135)
 
+local MapSection = Instance.new("TextLabel")
+MapSection.BackgroundTransparency = 1
+MapSection.Size = UDim2.new(1, -20, 0, 14)
+MapSection.Position = UDim2.new(0, 10, 0, 46)
+MapSection.Font = Enum.Font.GothamBold
+MapSection.Text = "🗑️  MAP BYPASS"
+MapSection.TextColor3 = CLR.BLUE_LIGHT
+MapSection.TextSize = 9
+MapSection.TextXAlignment = Enum.TextXAlignment.Left
+MapSection.Parent = Main
+
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.BackgroundColor3 = CLR.BG_LIGHT
-StatusLabel.Size = UDim2.new(1, -20, 0, 36)
-StatusLabel.Position = UDim2.new(0, 10, 0, 48)
+StatusLabel.Size = UDim2.new(1, -20, 0, 32)
+StatusLabel.Position = UDim2.new(0, 10, 0, 62)
 StatusLabel.Font = Enum.Font.GothamBold
 StatusLabel.Text = "⚪ MAP NORMAL"
 StatusLabel.TextColor3 = CLR.TEXT_DIM
@@ -197,8 +208,8 @@ makeCorner(StatusLabel, 8)
 makeStroke(StatusLabel, CLR.BLUE_DARK, 1)
 
 local DeleteBtn = Instance.new("TextButton")
-DeleteBtn.Size = UDim2.new(1, -20, 0, 38)
-DeleteBtn.Position = UDim2.new(0, 10, 0, 92)
+DeleteBtn.Size = UDim2.new(1, -20, 0, 36)
+DeleteBtn.Position = UDim2.new(0, 10, 0, 100)
 DeleteBtn.BackgroundColor3 = CLR.GREEN
 DeleteBtn.Text = "🟢 BYPASS MAP: OFF"
 DeleteBtn.TextColor3 = CLR.TEXT
@@ -213,8 +224,8 @@ makeStroke(DeleteBtn, CLR.BLUE_LIGHT, 1)
 local DeleteGradient = makeGradient(DeleteBtn, CLR.GREEN, Color3.fromRGB(35, 140, 70), 0)
 
 local RestoreBtn = Instance.new("TextButton")
-RestoreBtn.Size = UDim2.new(1, -20, 0, 34)
-RestoreBtn.Position = UDim2.new(0, 10, 0, 136)
+RestoreBtn.Size = UDim2.new(1, -20, 0, 32)
+RestoreBtn.Position = UDim2.new(0, 10, 0, 142)
 RestoreBtn.BackgroundColor3 = CLR.YELLOW
 RestoreBtn.Text = "♻️ RESTORE MAP"
 RestoreBtn.TextColor3 = CLR.BG
@@ -225,13 +236,49 @@ RestoreBtn.AutoButtonColor = false
 RestoreBtn.Parent = Main
 makeCorner(RestoreBtn, 8)
 makeStroke(RestoreBtn, CLR.BLUE_LIGHT, 1)
-
 makeGradient(RestoreBtn, CLR.YELLOW, Color3.fromRGB(200, 140, 40), 0)
+
+local WheelsSection = Instance.new("TextLabel")
+WheelsSection.BackgroundTransparency = 1
+WheelsSection.Size = UDim2.new(1, -20, 0, 14)
+WheelsSection.Position = UDim2.new(0, 10, 0, 182)
+WheelsSection.Font = Enum.Font.GothamBold
+WheelsSection.Text = "🛞  WHEELS BYPASS"
+WheelsSection.TextColor3 = CLR.BLUE_LIGHT
+WheelsSection.TextSize = 9
+WheelsSection.TextXAlignment = Enum.TextXAlignment.Left
+WheelsSection.Parent = Main
+
+local WheelsBtn = Instance.new("TextButton")
+WheelsBtn.Size = UDim2.new(1, -20, 0, 36)
+WheelsBtn.Position = UDim2.new(0, 10, 0, 198)
+WheelsBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 30)
+WheelsBtn.Text = "🛞 BYPASS WHEELS: OFF"
+WheelsBtn.TextColor3 = Color3.fromRGB(255, 220, 150)
+WheelsBtn.Font = Enum.Font.GothamBold
+WheelsBtn.TextSize = 12
+WheelsBtn.BorderSizePixel = 0
+WheelsBtn.AutoButtonColor = false
+WheelsBtn.Parent = Main
+makeCorner(WheelsBtn, 8)
+makeStroke(WheelsBtn, CLR.ORANGE, 1)
+
+local WheelsGradient = makeGradient(WheelsBtn, Color3.fromRGB(100, 70, 40), Color3.fromRGB(60, 40, 20), 0)
+
+local WheelsCountLabel = Instance.new("TextLabel")
+WheelsCountLabel.BackgroundTransparency = 1
+WheelsCountLabel.Size = UDim2.new(1, -20, 0, 14)
+WheelsCountLabel.Position = UDim2.new(0, 10, 0, 238)
+WheelsCountLabel.Font = Enum.Font.Gotham
+WheelsCountLabel.Text = "Wheels removed: 0"
+WheelsCountLabel.TextColor3 = CLR.BLUE_LIGHT
+WheelsCountLabel.TextSize = 9
+WheelsCountLabel.Parent = Main
 
 local ProgressLabel = Instance.new("TextLabel")
 ProgressLabel.BackgroundTransparency = 1
 ProgressLabel.Size = UDim2.new(1, -20, 0, 14)
-ProgressLabel.Position = UDim2.new(0, 10, 0, 180)
+ProgressLabel.Position = UDim2.new(0, 10, 0, 258)
 ProgressLabel.Font = Enum.Font.GothamBold
 ProgressLabel.Text = "🚀 PROGRESS"
 ProgressLabel.TextColor3 = CLR.BLUE_LIGHT
@@ -241,7 +288,7 @@ ProgressLabel.Parent = Main
 
 local ProgressBG = Instance.new("Frame")
 ProgressBG.BackgroundColor3 = CLR.BG_LIGHT
-ProgressBG.Position = UDim2.new(0, 10, 0, 198)
+ProgressBG.Position = UDim2.new(0, 10, 0, 276)
 ProgressBG.Size = UDim2.new(1, -20, 0, 22)
 ProgressBG.BorderSizePixel = 0
 ProgressBG.Parent = Main
@@ -269,7 +316,7 @@ ProgressText.Parent = ProgressBG
 local CountLabel = Instance.new("TextLabel")
 CountLabel.BackgroundTransparency = 1
 CountLabel.Size = UDim2.new(1, -20, 0, 16)
-CountLabel.Position = UDim2.new(0, 10, 0, 226)
+CountLabel.Position = UDim2.new(0, 10, 0, 304)
 CountLabel.Font = Enum.Font.Gotham
 CountLabel.Text = "Deleted: 0  |  Restored: 0"
 CountLabel.TextColor3 = CLR.BLUE_LIGHT
@@ -279,9 +326,9 @@ CountLabel.Parent = Main
 local InfoLabel = Instance.new("TextLabel")
 InfoLabel.BackgroundColor3 = CLR.BG_LIGHT
 InfoLabel.Size = UDim2.new(1, -20, 0, 52)
-InfoLabel.Position = UDim2.new(0, 10, 0, 250)
+InfoLabel.Position = UDim2.new(0, 10, 0, 326)
 InfoLabel.Font = Enum.Font.Gotham
-InfoLabel.Text = "Bypass obstacle untuk kelancaran\naktivitas auto delivery."
+InfoLabel.Text = "Bypass obstacle & wheels untuk\nkelancaran aktivitas auto delivery."
 InfoLabel.TextColor3 = CLR.TEXT_DIM
 InfoLabel.TextSize = 9
 InfoLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -308,6 +355,12 @@ local hidden = false
 local savedObjects = {}
 local deletedCount = 0
 local totalTarget = 0
+
+local wheelsBypassActive = false
+local _removedWheels = {}
+local _lastBpRef = nil
+local _wheelsRemovedCount = 0
+local _wheelsInterval = nil
 
 local function isWhitelisted(name)
     local lower = name:lower()
@@ -372,6 +425,110 @@ local function isSafeToDelete(obj)
     end
 
     return true
+end
+
+local function isMyBp(bp)
+    if not bp or not bp.Parent then return false end
+    if not bp.PrimaryPart then return false end
+
+    local ownerId = bp:GetAttribute("OwnerUserId")
+    if ownerId ~= nil then
+        return ownerId == LocalPlayer.UserId
+    end
+
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    local dist = (bp.PrimaryPart.Position - hrp.Position).Magnitude
+    return dist <= 50
+end
+
+local function removeWheelsFromBp(bp)
+    if not bp or not bp.Parent then return 0 end
+    if not isMyBp(bp) then return 0 end
+
+    local count = 0
+
+    for _, obj in ipairs(bp:GetChildren()) do
+        if obj:IsA("Model") or obj:IsA("Folder") then
+            local n = obj.Name:lower()
+            if n == "wheels" or n:find("wheel") then
+                _removedWheels[obj] = bp
+                obj.Parent = nil
+                count = count + 1
+            end
+        elseif obj:IsA("BasePart") then
+            local n = obj.Name:lower()
+            if n:find("wheel") then
+                _removedWheels[obj] = bp
+                obj.Parent = nil
+                count = count + 1
+            end
+        end
+    end
+
+    for _, child in ipairs(bp:GetDescendants()) do
+        if child and child.Parent then
+            if child:IsA("Model") or child:IsA("Folder") then
+                local n = child.Name:lower()
+                if n == "wheels" or n:find("wheel") then
+                    _removedWheels[child] = child.Parent
+                    child.Parent = nil
+                    count = count + 1
+                end
+            elseif child:IsA("BasePart") then
+                local n = child.Name:lower()
+                if n:find("wheel") then
+                    _removedWheels[child] = child.Parent
+                    child.Parent = nil
+                    count = count + 1
+                end
+            end
+        end
+    end
+
+    return count
+end
+
+local function applyWheelsBypass()
+    if not wheelsBypassActive then return end
+
+    local bp = workspace:FindFirstChild("BP")
+    if not bp then
+        _lastBpRef = nil
+        return
+    end
+
+    if bp ~= _lastBpRef then
+        _lastBpRef = bp
+        _removedWheels = {}
+        _wheelsRemovedCount = 0
+    end
+
+    if isMyBp(bp) then
+        local removed = removeWheelsFromBp(bp)
+        if removed > 0 then
+            _wheelsRemovedCount = _wheelsRemovedCount + removed
+            WheelsCountLabel.Text = "Wheels removed: " .. _wheelsRemovedCount
+        end
+    end
+end
+
+local function restoreWheels()
+    local restored = 0
+    for obj, parent in pairs(_removedWheels) do
+        pcall(function()
+            if obj and obj.Parent == nil and parent then
+                obj.Parent = parent
+                restored = restored + 1
+            end
+        end)
+    end
+    _removedWheels = {}
+    _wheelsRemovedCount = 0
+    WheelsCountLabel.Text = "Wheels removed: 0"
+    return restored
 end
 
 local function updateProgress(current, total)
@@ -517,6 +674,58 @@ RestoreBtn.MouseButton1Click:Connect(function()
     StatusLabel.TextColor3 = CLR.TEXT_DIM
 end)
 
+WheelsBtn.MouseButton1Click:Connect(function()
+    animateButton(WheelsBtn)
+    if not wheelsBypassActive then
+        wheelsBypassActive = true
+        playSound("rbxassetid://232127604", 0.8)
+        WheelsBtn.Text = "🔴 BYPASS WHEELS: ON"
+        WheelsBtn.BackgroundColor3 = CLR.ORANGE
+        WheelsGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, CLR.ORANGE),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 80, 20)),
+        })
+
+        if not _wheelsInterval then
+            _wheelsInterval = task.spawn(function()
+                while wheelsBypassActive do
+                    task.wait(0.3)
+                    pcall(applyWheelsBypass)
+                end
+            end)
+        end
+
+        pcall(applyWheelsBypass)
+
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Bypass Wheels",
+                Text = "🛞 Wheels dihapus dari BP",
+                Duration = 2
+            })
+        end)
+    else
+        wheelsBypassActive = false
+        playSound("rbxassetid://232127604", 0.5)
+        WheelsBtn.Text = "🛞 BYPASS WHEELS: OFF"
+        WheelsBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 30)
+        WheelsGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 70, 40)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 40, 20)),
+        })
+
+        local restored = restoreWheels()
+
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Bypass Wheels",
+                Text = "🛞 Wheels direstore: " .. restored,
+                Duration = 2
+            })
+        end)
+    end
+end)
+
 HideBtn.MouseButton1Click:Connect(function()
     hidden = true
     Main.Visible = false
@@ -532,6 +741,10 @@ end)
 CloseBtn.MouseButton1Click:Connect(function()
     if bypassActive then
         restoreMap()
+    end
+    if wheelsBypassActive then
+        wheelsBypassActive = false
+        restoreWheels()
     end
     ScreenGui:Destroy()
 end)
@@ -561,4 +774,13 @@ task.spawn(function()
             end
         end
     end
+end)
+
+task.spawn(function()
+    Workspace.ChildAdded:Connect(function(child)
+        if child.Name == "BP" and wheelsBypassActive then
+            task.wait(1)
+            pcall(applyWheelsBypass)
+        end
+    end)
 end)
