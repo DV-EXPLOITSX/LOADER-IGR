@@ -270,7 +270,7 @@ WheelsCountLabel.BackgroundTransparency = 1
 WheelsCountLabel.Size = UDim2.new(1, -20, 0, 14)
 WheelsCountLabel.Position = UDim2.new(0, 10, 0, 238)
 WheelsCountLabel.Font = Enum.Font.Gotham
-WheelsCountLabel.Text = "Wheels removed: 0"
+WheelsCountLabel.Text = "⏳ Nunggu BP..."
 WheelsCountLabel.TextColor3 = CLR.BLUE_LIGHT
 WheelsCountLabel.TextSize = 9
 WheelsCountLabel.Parent = Main
@@ -343,11 +343,13 @@ local WHITELIST_NAME = {
     "ekonomi", "bedilpusat", "activejobs", "brewog", "job",
     "npc", "speakerfolder", "indikator", "trigger", "zone",
     "bp", "deliveryvehicle", "driveseat",
+    "sungai", "selokan",
 }
 
 local WHITELIST_PATH = {
     "Map.Tanah",
-    "Map.Behavior",
+    "Map.Behavior.SUngai",
+    "Map.Behavior.Selokan",
 }
 
 local bypassActive = false
@@ -495,8 +497,16 @@ local function applyWheelsBypass()
     if not wheelsBypassActive then return end
 
     local bp = workspace:FindFirstChild("BP")
+
     if not bp then
         _lastBpRef = nil
+        _wheelsRemovedCount = 0
+        WheelsCountLabel.Text = "⏳ Nunggu BP spawn..."
+        return
+    end
+
+    if not isMyBp(bp) then
+        WheelsCountLabel.Text = "⏳ BP bukan punya lu"
         return
     end
 
@@ -506,12 +516,12 @@ local function applyWheelsBypass()
         _wheelsRemovedCount = 0
     end
 
-    if isMyBp(bp) then
-        local removed = removeWheelsFromBp(bp)
-        if removed > 0 then
-            _wheelsRemovedCount = _wheelsRemovedCount + removed
-            WheelsCountLabel.Text = "Wheels removed: " .. _wheelsRemovedCount
-        end
+    local removed = removeWheelsFromBp(bp)
+    if removed > 0 then
+        _wheelsRemovedCount = _wheelsRemovedCount + removed
+        WheelsCountLabel.Text = "✅ Wheels removed: " .. _wheelsRemovedCount
+    else
+        WheelsCountLabel.Text = "✅ Monitoring BP (" .. _wheelsRemovedCount .. " removed)"
     end
 end
 
@@ -527,7 +537,7 @@ local function restoreWheels()
     end
     _removedWheels = {}
     _wheelsRemovedCount = 0
-    WheelsCountLabel.Text = "Wheels removed: 0"
+    WheelsCountLabel.Text = "⏳ Nunggu BP..."
     return restored
 end
 
@@ -686,6 +696,13 @@ WheelsBtn.MouseButton1Click:Connect(function()
             ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 80, 20)),
         })
 
+        local bp = workspace:FindFirstChild("BP")
+        if bp and isMyBp(bp) then
+            WheelsCountLabel.Text = "✅ BP ketemu, hapus wheels..."
+        else
+            WheelsCountLabel.Text = "⏳ Nunggu BP spawn..."
+        end
+
         if not _wheelsInterval then
             _wheelsInterval = task.spawn(function()
                 while wheelsBypassActive do
@@ -700,7 +717,7 @@ WheelsBtn.MouseButton1Click:Connect(function()
         pcall(function()
             StarterGui:SetCore("SendNotification", {
                 Title = "Bypass Wheels",
-                Text = "🛞 Wheels dihapus dari BP",
+                Text = "🛞 Handler aktif, nunggu BP...",
                 Duration = 2
             })
         end)
@@ -776,11 +793,18 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    Workspace.ChildAdded:Connect(function(child)
-        if child.Name == "BP" and wheelsBypassActive then
-            task.wait(1)
+Workspace.ChildAdded:Connect(function(child)
+    if child.Name == "BP" and wheelsBypassActive then
+        task.wait(0.5)
+        if isMyBp(child) then
             pcall(applyWheelsBypass)
+            pcall(function()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Bypass Wheels",
+                    Text = "🛞 BP muncul! Wheels dihapus",
+                    Duration = 2
+                })
+            end)
         end
-    end)
+    end
 end)
