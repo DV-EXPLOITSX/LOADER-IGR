@@ -1,0 +1,564 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
+local CollectionService = game:GetService("CollectionService")
+local LocalPlayer = Players.LocalPlayer
+
+pcall(function()
+    local old = CoreGui:FindFirstChild("MapBypassUI")
+    if old then old:Destroy() end
+    local pg = LocalPlayer:FindFirstChild("PlayerGui")
+    if pg then
+        local old2 = pg:FindFirstChild("MapBypassUI")
+        if old2 then old2:Destroy() end
+    end
+end)
+
+local CLR = {
+    BG = Color3.fromRGB(8, 12, 20),
+    BG_LIGHT = Color3.fromRGB(16, 22, 34),
+    BLUE = Color3.fromRGB(50, 130, 255),
+    BLUE_DARK = Color3.fromRGB(30, 80, 180),
+    BLUE_LIGHT = Color3.fromRGB(120, 180, 255),
+    BLUE_GLOW = Color3.fromRGB(80, 160, 255),
+    GREEN = Color3.fromRGB(50, 170, 90),
+    RED = Color3.fromRGB(210, 60, 70),
+    YELLOW = Color3.fromRGB(255, 200, 80),
+    TEXT = Color3.fromRGB(220, 230, 255),
+    TEXT_DIM = Color3.fromRGB(130, 150, 180),
+}
+
+local function playSound(soundId, volume)
+    pcall(function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = soundId or "rbxassetid://232127604"
+        sound.Volume = volume or 1
+        sound.Parent = SoundService
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 3)
+    end)
+end
+
+local function makeCorner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius or 8)
+    c.Parent = parent
+    return c
+end
+
+local function makeStroke(parent, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or CLR.BLUE
+    s.Thickness = thickness or 1.5
+    s.Transparency = 0.2
+    s.Parent = parent
+    return s
+end
+
+local function makeGradient(parent, colorA, colorB, rotation)
+    local g = Instance.new("UIGradient")
+    g.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, colorA),
+        ColorSequenceKeypoint.new(1, colorB),
+    })
+    g.Rotation = rotation or 90
+    g.Parent = parent
+    return g
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MapBypassUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 9999
+ScreenGui.IgnoreGuiInset = true
+
+local parented = false
+pcall(function()
+    ScreenGui.Parent = CoreGui
+    parented = true
+end)
+if not parented or not ScreenGui.Parent then
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 320, 0, 340)
+Main.Position = UDim2.new(0, 100, 0, 100)
+Main.BackgroundColor3 = CLR.BG
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Parent = ScreenGui
+makeCorner(Main, 12)
+makeStroke(Main, CLR.BLUE, 1.5)
+
+makeGradient(Main, CLR.BG, CLR.BG_LIGHT, 135)
+
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.BackgroundColor3 = CLR.BLUE_DARK
+Header.BorderSizePixel = 0
+Header.Parent = Main
+makeCorner(Header, 12)
+makeGradient(Header, CLR.BLUE, CLR.BLUE_DARK, 0)
+
+local HeaderFix = Instance.new("Frame")
+HeaderFix.Size = UDim2.new(1, 0, 0, 12)
+HeaderFix.Position = UDim2.new(0, 0, 1, -12)
+HeaderFix.BackgroundColor3 = CLR.BLUE_DARK
+HeaderFix.BorderSizePixel = 0
+HeaderFix.Parent = Header
+
+local IconBox = Instance.new("Frame")
+IconBox.Size = UDim2.new(0, 22, 0, 22)
+IconBox.Position = UDim2.new(0, 10, 0.5, -11)
+IconBox.BackgroundColor3 = CLR.BG
+IconBox.BorderSizePixel = 0
+IconBox.Parent = Header
+makeCorner(IconBox, 6)
+makeStroke(IconBox, CLR.BLUE_LIGHT, 1)
+
+local IconTxt = Instance.new("TextLabel")
+IconTxt.BackgroundTransparency = 1
+IconTxt.Size = UDim2.new(1, 0, 1, 0)
+IconTxt.Font = Enum.Font.GothamBold
+IconTxt.Text = "🗑️"
+IconTxt.TextColor3 = CLR.BLUE_LIGHT
+IconTxt.TextSize = 12
+IconTxt.Parent = IconBox
+
+local Title = Instance.new("TextLabel")
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 40, 0, 0)
+Title.Size = UDim2.new(1, -120, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "MAP BYPASS"
+Title.TextColor3 = CLR.TEXT
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
+
+local HideBtn = Instance.new("TextButton")
+HideBtn.Size = UDim2.new(0, 24, 0, 24)
+HideBtn.Position = UDim2.new(1, -58, 0.5, -12)
+HideBtn.BackgroundColor3 = CLR.BG_LIGHT
+HideBtn.Text = "━"
+HideBtn.TextColor3 = CLR.BLUE_LIGHT
+HideBtn.Font = Enum.Font.GothamBold
+HideBtn.TextSize = 11
+HideBtn.BorderSizePixel = 0
+HideBtn.Parent = Header
+makeCorner(HideBtn, 6)
+makeStroke(HideBtn, CLR.BLUE, 1)
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -12)
+CloseBtn.BackgroundColor3 = CLR.RED
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = CLR.TEXT
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 11
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = Header
+makeCorner(CloseBtn, 6)
+
+local ShowBtn = Instance.new("TextButton")
+ShowBtn.Size = UDim2.new(0, 44, 0, 44)
+ShowBtn.Position = UDim2.new(0, 20, 0, 100)
+ShowBtn.BackgroundColor3 = CLR.BG
+ShowBtn.Text = "🗑️"
+ShowBtn.TextColor3 = CLR.BLUE_LIGHT
+ShowBtn.Font = Enum.Font.GothamBold
+ShowBtn.TextSize = 20
+ShowBtn.BorderSizePixel = 0
+ShowBtn.Visible = false
+ShowBtn.Active = true
+ShowBtn.Draggable = true
+ShowBtn.Parent = ScreenGui
+makeCorner(ShowBtn, 22)
+makeStroke(ShowBtn, CLR.BLUE, 2)
+makeGradient(ShowBtn, CLR.BLUE_DARK, CLR.BG, 135)
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.BackgroundColor3 = CLR.BG_LIGHT
+StatusLabel.Size = UDim2.new(1, -20, 0, 36)
+StatusLabel.Position = UDim2.new(0, 10, 0, 48)
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.Text = "⚪ MAP NORMAL"
+StatusLabel.TextColor3 = CLR.TEXT_DIM
+StatusLabel.TextSize = 11
+StatusLabel.BorderSizePixel = 0
+StatusLabel.Parent = Main
+makeCorner(StatusLabel, 8)
+makeStroke(StatusLabel, CLR.BLUE_DARK, 1)
+
+local DeleteBtn = Instance.new("TextButton")
+DeleteBtn.Size = UDim2.new(1, -20, 0, 38)
+DeleteBtn.Position = UDim2.new(0, 10, 0, 92)
+DeleteBtn.BackgroundColor3 = CLR.GREEN
+DeleteBtn.Text = "🟢 BYPASS MAP: OFF"
+DeleteBtn.TextColor3 = CLR.TEXT
+DeleteBtn.Font = Enum.Font.GothamBold
+DeleteBtn.TextSize = 12
+DeleteBtn.BorderSizePixel = 0
+DeleteBtn.AutoButtonColor = false
+DeleteBtn.Parent = Main
+makeCorner(DeleteBtn, 8)
+makeStroke(DeleteBtn, CLR.BLUE_LIGHT, 1)
+
+local DeleteGradient = makeGradient(DeleteBtn, CLR.GREEN, Color3.fromRGB(35, 140, 70), 0)
+
+local RestoreBtn = Instance.new("TextButton")
+RestoreBtn.Size = UDim2.new(1, -20, 0, 34)
+RestoreBtn.Position = UDim2.new(0, 10, 0, 136)
+RestoreBtn.BackgroundColor3 = CLR.YELLOW
+RestoreBtn.Text = "♻️ RESTORE MAP"
+RestoreBtn.TextColor3 = CLR.BG
+RestoreBtn.Font = Enum.Font.GothamBold
+RestoreBtn.TextSize = 11
+RestoreBtn.BorderSizePixel = 0
+RestoreBtn.AutoButtonColor = false
+RestoreBtn.Parent = Main
+makeCorner(RestoreBtn, 8)
+makeStroke(RestoreBtn, CLR.BLUE_LIGHT, 1)
+
+makeGradient(RestoreBtn, CLR.YELLOW, Color3.fromRGB(200, 140, 40), 0)
+
+local ProgressLabel = Instance.new("TextLabel")
+ProgressLabel.BackgroundTransparency = 1
+ProgressLabel.Size = UDim2.new(1, -20, 0, 14)
+ProgressLabel.Position = UDim2.new(0, 10, 0, 180)
+ProgressLabel.Font = Enum.Font.GothamBold
+ProgressLabel.Text = "🚀 PROGRESS"
+ProgressLabel.TextColor3 = CLR.BLUE_LIGHT
+ProgressLabel.TextSize = 9
+ProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
+ProgressLabel.Parent = Main
+
+local ProgressBG = Instance.new("Frame")
+ProgressBG.BackgroundColor3 = CLR.BG_LIGHT
+ProgressBG.Position = UDim2.new(0, 10, 0, 198)
+ProgressBG.Size = UDim2.new(1, -20, 0, 22)
+ProgressBG.BorderSizePixel = 0
+ProgressBG.Parent = Main
+makeCorner(ProgressBG, 11)
+makeStroke(ProgressBG, CLR.BLUE_DARK, 1)
+
+local ProgressFill = Instance.new("Frame")
+ProgressFill.Size = UDim2.new(0, 0, 1, 0)
+ProgressFill.BackgroundColor3 = CLR.BLUE
+ProgressFill.BorderSizePixel = 0
+ProgressFill.Parent = ProgressBG
+makeCorner(ProgressFill, 11)
+makeGradient(ProgressFill, CLR.BLUE_LIGHT, CLR.BLUE, 0)
+
+local ProgressText = Instance.new("TextLabel")
+ProgressText.Size = UDim2.new(1, 0, 1, 0)
+ProgressText.BackgroundTransparency = 1
+ProgressText.Font = Enum.Font.GothamBold
+ProgressText.Text = "0%"
+ProgressText.TextColor3 = CLR.TEXT
+ProgressText.TextSize = 10
+ProgressText.ZIndex = 2
+ProgressText.Parent = ProgressBG
+
+local CountLabel = Instance.new("TextLabel")
+CountLabel.BackgroundTransparency = 1
+CountLabel.Size = UDim2.new(1, -20, 0, 16)
+CountLabel.Position = UDim2.new(0, 10, 0, 226)
+CountLabel.Font = Enum.Font.Gotham
+CountLabel.Text = "Deleted: 0  |  Restored: 0"
+CountLabel.TextColor3 = CLR.BLUE_LIGHT
+CountLabel.TextSize = 9
+CountLabel.Parent = Main
+
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.BackgroundColor3 = CLR.BG_LIGHT
+InfoLabel.Size = UDim2.new(1, -20, 0, 52)
+InfoLabel.Position = UDim2.new(0, 10, 0, 250)
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.Text = "Bypass obstacle untuk kelancaran\naktivitas auto delivery."
+InfoLabel.TextColor3 = CLR.TEXT_DIM
+InfoLabel.TextSize = 9
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Center
+InfoLabel.TextYAlignment = Enum.TextYAlignment.Center
+InfoLabel.BorderSizePixel = 0
+InfoLabel.Parent = Main
+makeCorner(InfoLabel, 8)
+makeStroke(InfoLabel, CLR.BLUE_DARK, 1)
+
+local WHITELIST_NAME = {
+    "baseplate", "ground", "floor", "road", "terrain", "spawnlocation", "tanah",
+    "ekonomi", "bedilpusat", "activejobs", "brewog", "job",
+    "npc", "speakerfolder", "indikator", "trigger", "zone",
+    "bp", "deliveryvehicle", "driveseat",
+}
+
+local WHITELIST_PATH = {
+    "Map.Tanah",
+    "Map.Behavior",
+}
+
+local bypassActive = false
+local hidden = false
+local savedObjects = {}
+local deletedCount = 0
+local totalTarget = 0
+
+local function isWhitelisted(name)
+    local lower = name:lower()
+    for _, wl in pairs(WHITELIST_NAME) do
+        if lower:find(wl) then return true end
+    end
+    return false
+end
+
+local function isWhitelistedPath(obj)
+    for _, path in pairs(WHITELIST_PATH) do
+        local parts = {}
+        for segment in path:gmatch("[^%.]+") do
+            table.insert(parts, segment)
+        end
+        local current = workspace
+        local valid = true
+        for _, segment in ipairs(parts) do
+            if current then
+                current = current:FindFirstChild(segment)
+            else
+                valid = false
+                break
+            end
+        end
+        if valid and current and (obj == current or obj:IsDescendantOf(current)) then
+            return true
+        end
+    end
+    return false
+end
+
+local function isCharacterOrPlayer(obj)
+    if LocalPlayer.Character and obj:IsDescendantOf(LocalPlayer.Character) then return true end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and obj:IsDescendantOf(player.Character) then return true end
+    end
+    return false
+end
+
+local function isSafeToDelete(obj)
+    if obj:IsA("Terrain") then return false end
+    if isWhitelisted(obj.Name) then return false end
+    if isWhitelistedPath(obj) then return false end
+    if isCharacterOrPlayer(obj) then return false end
+
+    local ekonomi = workspace:FindFirstChild("Ekonomi")
+    if ekonomi and obj:IsDescendantOf(ekonomi) then return false end
+
+    local speaker = workspace:FindFirstChild("SpeakerFolder")
+    if speaker and obj:IsDescendantOf(speaker) then return false end
+
+    local vehicle = workspace:FindFirstChild("BP")
+    if vehicle and obj:IsDescendantOf(vehicle) then return false end
+
+    for _, tagged in pairs(CollectionService:GetTagged("DeliveryVehicle")) do
+        if tagged and obj:IsDescendantOf(tagged) then return false end
+    end
+
+    if not (obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("Folder") or obj:IsA("UnionOperation") or obj:IsA("MeshPart")) then
+        return false
+    end
+
+    return true
+end
+
+local function updateProgress(current, total)
+    total = total or totalTarget
+    local percent = total > 0 and math.clamp(current / total, 0, 1) or 0
+    ProgressFill.Size = UDim2.new(percent, 0, 1, 0)
+    ProgressText.Text = math.floor(percent * 100) .. "%  (" .. current .. "/" .. total .. ")"
+end
+
+local function bypassMap()
+    deletedCount = 0
+    savedObjects = {}
+    totalTarget = 0
+
+    local mapFolder = workspace:FindFirstChild("Map")
+    if not mapFolder then
+        StatusLabel.Text = "⚠️ MAP TIDAK DITEMUKAN"
+        StatusLabel.TextColor3 = CLR.RED
+        return
+    end
+
+    local targets = {}
+    for _, obj in pairs(mapFolder:GetDescendants()) do
+        if isSafeToDelete(obj) then
+            table.insert(targets, obj)
+        end
+    end
+    totalTarget = #targets
+
+    for i, obj in ipairs(targets) do
+        pcall(function()
+            savedObjects[obj] = obj.Parent
+            obj.Parent = nil
+            deletedCount = deletedCount + 1
+        end)
+
+        if i % 50 == 0 or i == totalTarget then
+            updateProgress(i, totalTarget)
+            task.wait()
+        end
+    end
+
+    updateProgress(deletedCount, totalTarget)
+    StatusLabel.Text = "✅ MAP DIBERSIHKAN"
+    StatusLabel.TextColor3 = CLR.BLUE_LIGHT
+    CountLabel.Text = "Deleted: " .. deletedCount .. "  |  Restored: 0"
+
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "Map Bypass",
+            Text = "🗑️ Berhasil! Deleted: " .. deletedCount,
+            Duration = 3
+        })
+    end)
+end
+
+local function restoreMap()
+    local restored = 0
+    for obj, parent in pairs(savedObjects) do
+        if obj and parent then
+            pcall(function()
+                obj.Parent = parent
+                restored = restored + 1
+            end)
+        end
+    end
+    savedObjects = {}
+    deletedCount = 0
+    totalTarget = 0
+
+    updateProgress(0, 1)
+    StatusLabel.Text = "♻️ MAP RESTORED"
+    StatusLabel.TextColor3 = CLR.YELLOW
+    CountLabel.Text = "Deleted: 0  |  Restored: " .. restored
+
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "Map Restore",
+            Text = "♻️ Direstore: " .. restored,
+            Duration = 3
+        })
+    end)
+end
+
+local function animateButton(btn)
+    local pulse = Instance.new("Frame")
+    pulse.Size = UDim2.new(1, 0, 1, 0)
+    pulse.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    pulse.BackgroundTransparency = 0.7
+    pulse.BorderSizePixel = 0
+    pulse.ZIndex = 1
+    pulse.Parent = btn
+    makeCorner(pulse, 8)
+    local tween = TweenService:Create(pulse, TweenInfo.new(0.3), {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 10, 1, 10),
+        Position = UDim2.new(0, -5, 0, -5),
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        pulse:Destroy()
+    end)
+end
+
+DeleteBtn.MouseButton1Click:Connect(function()
+    animateButton(DeleteBtn)
+    if not bypassActive then
+        bypassActive = true
+        playSound("rbxassetid://232127604", 0.8)
+        DeleteBtn.Text = "🔴 BYPASS MAP: ON"
+        DeleteBtn.BackgroundColor3 = CLR.RED
+        DeleteGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, CLR.RED),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 30, 40)),
+        })
+        bypassMap()
+    else
+        bypassActive = false
+        playSound("rbxassetid://232127604", 0.5)
+        DeleteBtn.Text = "🟢 BYPASS MAP: OFF"
+        DeleteBtn.BackgroundColor3 = CLR.GREEN
+        DeleteGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, CLR.GREEN),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 140, 70)),
+        })
+        restoreMap()
+        StatusLabel.Text = "⚪ MAP NORMAL"
+        StatusLabel.TextColor3 = CLR.TEXT_DIM
+    end
+end)
+
+RestoreBtn.MouseButton1Click:Connect(function()
+    animateButton(RestoreBtn)
+    restoreMap()
+    bypassActive = false
+    DeleteBtn.Text = "🟢 BYPASS MAP: OFF"
+    DeleteBtn.BackgroundColor3 = CLR.GREEN
+    DeleteGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, CLR.GREEN),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 140, 70)),
+    })
+    StatusLabel.Text = "⚪ MAP NORMAL"
+    StatusLabel.TextColor3 = CLR.TEXT_DIM
+end)
+
+HideBtn.MouseButton1Click:Connect(function()
+    hidden = true
+    Main.Visible = false
+    ShowBtn.Visible = true
+end)
+
+ShowBtn.MouseButton1Click:Connect(function()
+    hidden = false
+    Main.Visible = true
+    ShowBtn.Visible = false
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    if bypassActive then
+        restoreMap()
+    end
+    ScreenGui:Destroy()
+end)
+
+task.spawn(function()
+    while ScreenGui.Parent do
+        task.wait(5)
+        if bypassActive then
+            local mapFolder = workspace:FindFirstChild("Map")
+            if mapFolder then
+                local newCount = 0
+                for _, obj in pairs(mapFolder:GetDescendants()) do
+                    if obj.Parent and isSafeToDelete(obj) then
+                        pcall(function()
+                            savedObjects[obj] = obj.Parent
+                            obj.Parent = nil
+                            deletedCount = deletedCount + 1
+                            newCount = newCount + 1
+                        end)
+                    end
+                end
+                if newCount > 0 then
+                    totalTarget = totalTarget + newCount
+                    updateProgress(deletedCount, totalTarget)
+                    CountLabel.Text = "Deleted: " .. deletedCount .. "  |  Auto-clean +" .. newCount
+                end
+            end
+        end
+    end
+end)
