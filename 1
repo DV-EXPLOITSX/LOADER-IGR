@@ -1,0 +1,3168 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local VirtualUser = game:GetService("VirtualUser")
+local CollectionService = game:GetService("CollectionService")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
+
+pcall(function()
+    for _, v in pairs(CoreGui:GetChildren()) do
+        if v.Name == "DVExploitsBrewokUI" or v.Name == "DVExploitsDelivery" or v.Name == "DVExploitsLoading" then v:Destroy() end
+    end
+    for _, v in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+        if v.Name == "DVExploitsBrewokUI" or v.Name == "DVExploitsDelivery" or v.Name == "DVExploitsLoading" then v:Destroy() end
+    end
+end)
+
+local function safeParent(gui)
+    local success = pcall(function() gui.Parent = CoreGui end)
+    if not success or not gui.Parent then
+        pcall(function() gui.Parent = LocalPlayer:WaitForChild("PlayerGui") end)
+    end
+end
+
+local LoadScreenGui = Instance.new("ScreenGui")
+LoadScreenGui.Name = "DVExploitsLoading"
+LoadScreenGui.ResetOnSpawn = false
+LoadScreenGui.DisplayOrder = 1000
+LoadScreenGui.IgnoreGuiInset = true
+safeParent(LoadScreenGui)
+
+local LoadFrame = Instance.new("Frame", LoadScreenGui)
+LoadFrame.Size = UDim2.new(0, 520, 0, 260)
+LoadFrame.Position = UDim2.new(0.5, -260, 0.5, -130)
+LoadFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+LoadFrame.BorderSizePixel = 0
+Instance.new("UICorner", LoadFrame).CornerRadius = UDim.new(0, 16)
+
+local loadBorder = Instance.new("Frame", LoadFrame)
+loadBorder.Name = "RGBBorder"
+loadBorder.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+loadBorder.BorderSizePixel = 0
+loadBorder.Size = UDim2.new(1, 8, 1, 8)
+loadBorder.Position = UDim2.new(0, -4, 0, -4)
+loadBorder.ZIndex = 0
+Instance.new("UICorner", loadBorder).CornerRadius = UDim.new(0, 18)
+
+task.spawn(function()
+    while LoadScreenGui.Parent do
+        local hue = (tick() * 6) % 1
+        loadBorder.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+local LoadInner = Instance.new("Frame", LoadFrame)
+LoadInner.Size = UDim2.new(1, -8, 1, -8)
+LoadInner.Position = UDim2.new(0, 4, 0, 4)
+LoadInner.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+LoadInner.BorderSizePixel = 0
+Instance.new("UICorner", LoadInner).CornerRadius = UDim.new(0, 14)
+
+local LoadTitle = Instance.new("TextLabel", LoadInner)
+LoadTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadTitle.Position = UDim2.new(0, 0, 0, 18)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Font = Enum.Font.GothamBold
+LoadTitle.Text = "DV EXPLOITS - HUB LOADING"
+LoadTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+LoadTitle.TextSize = 18
+
+local AvatarImg = Instance.new("ImageLabel", LoadInner)
+AvatarImg.Size = UDim2.new(0, 64, 0, 64)
+AvatarImg.Position = UDim2.new(0, 25, 0, 72)
+AvatarImg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+AvatarImg.BorderSizePixel = 0
+pcall(function()
+    AvatarImg.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+end)
+Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
+
+local WelcomeText = Instance.new("TextLabel", LoadInner)
+WelcomeText.Size = UDim2.new(1, -105, 0, 20)
+WelcomeText.Position = UDim2.new(0, 100, 0, 72)
+WelcomeText.BackgroundTransparency = 1
+WelcomeText.Font = Enum.Font.GothamBold
+WelcomeText.Text = "Executing as:"
+WelcomeText.TextColor3 = Color3.fromRGB(180, 180, 180)
+WelcomeText.TextSize = 13
+WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
+
+local NameText = Instance.new("TextLabel", LoadInner)
+NameText.Size = UDim2.new(1, -105, 0, 25)
+NameText.Position = UDim2.new(0, 100, 0, 96)
+NameText.BackgroundTransparency = 1
+NameText.Font = Enum.Font.GothamBold
+NameText.Text = LocalPlayer.Name
+NameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+NameText.TextSize = 17
+NameText.TextXAlignment = Enum.TextXAlignment.Left
+
+local StatusLoadText = Instance.new("TextLabel", LoadInner)
+StatusLoadText.Size = UDim2.new(1, -50, 0, 20)
+StatusLoadText.Position = UDim2.new(0, 25, 0, 158)
+StatusLoadText.BackgroundTransparency = 1
+StatusLoadText.Font = Enum.Font.GothamBold
+StatusLoadText.Text = "Memuat Hub Data... 0%"
+StatusLoadText.TextColor3 = Color3.fromRGB(255, 120, 120)
+StatusLoadText.TextSize = 14
+StatusLoadText.TextXAlignment = Enum.TextXAlignment.Left
+
+local TrackBar = Instance.new("Frame", LoadInner)
+TrackBar.Size = UDim2.new(1, -50, 0, 18)
+TrackBar.Position = UDim2.new(0, 25, 0, 190)
+TrackBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TrackBar.BorderSizePixel = 0
+Instance.new("UICorner", TrackBar).CornerRadius = UDim.new(0, 9)
+
+local FillBar = Instance.new("Frame", TrackBar)
+FillBar.Size = UDim2.new(0, 0, 1, 0)
+FillBar.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+FillBar.BorderSizePixel = 0
+Instance.new("UICorner", FillBar).CornerRadius = UDim.new(0, 9)
+
+local loadingFinished = false
+task.spawn(function()
+    local startTime = tick()
+    local duration = 3
+    while LoadScreenGui.Parent do
+        local elapsed = tick() - startTime
+        local progress = math.clamp(elapsed / duration, 0, 1)
+        local percent = math.floor(progress * 100)
+        pcall(function()
+            FillBar.Size = UDim2.new(progress, 0, 1, 0)
+            StatusLoadText.Text = "Memuat Hub Data... " .. percent .. "%"
+        end)
+        if progress >= 1 then
+            pcall(function() StatusLoadText.Text = "Setup UI Successfully!" end)
+            task.wait(0.3)
+            pcall(function() LoadScreenGui:Destroy() end)
+            loadingFinished = true
+            break
+        end
+        task.wait()
+    end
+    loadingFinished = true
+end)
+
+local waitStart = tick()
+while not loadingFinished and (tick() - waitStart) < 10 do
+    task.wait(0.1)
+end
+pcall(function() 
+    if LoadScreenGui and LoadScreenGui.Parent then LoadScreenGui:Destroy() end 
+end)
+
+local deliveryRemote = nil
+pcall(function()
+    deliveryRemote = ReplicatedStorage:WaitForChild("Remotes", 5):WaitForChild("Job", 5):WaitForChild("DeliveryRemote", 5)
+end)
+
+local deliverySettings = {
+    DelayCharTP = 7,
+    DelayCarTP = 3,
+    DelayFinishTP = 7,
+    HumanizedMin = 0.05,
+    HumanizedMax = 0.3,
+    AntiAFK = true,
+}
+
+local autoDeliveryActive = false
+local currentTargetPosition = nil
+local jobState = "NONE"
+local currentJobId = nil
+
+local autoDriveActive = false
+local adTargetPos = nil
+local adFinishPos = nil
+local noClipEnabled = true
+local flyHeight = 30
+local flySpeed = 90
+local dynamicSpeed = true
+local noFlyMode = true
+local groundHeight = 3
+local jobCounter = 0
+local sessionStartTime = tick()
+local _lastProgressTick = tick()
+local _loopGeneration = 0
+local _restarting = false
+local _jobStartTime = 0
+local _pauseTime = 0
+
+local _G_AutoFarmBrewok = false
+local _G_AutoFlyEnabled = false
+local _G_AutoFlyActive = false
+local _G_ActionDelay = 1.2
+local _G_BurstCount = 1
+local _G_BodyState = "Terlentang"
+local _G_CurrentStage = "Progress1"
+local _G_CurrentProgressCount = 0
+
+local ProgressDisplay = nil
+local flyConnection = nil
+local bodyVelocity, bodyGyro = nil, nil
+local activeTabName = "Maxgen"
+local lightOn = false
+
+task.spawn(function()
+    pcall(function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("ModuleScript") and obj.Name == "Config" then
+                local success, cfg = pcall(require, obj)
+                if success and type(cfg) == "table" and cfg.Weight then
+                    cfg.Weight = 9000
+                    cfg.CGHeight = 0.1
+                    cfg.GravComp = 100
+                    cfg.FSusStiffness = 30.0
+                    cfg.FSusDamping = 20.0
+                    cfg.RSusStiffness = 30.0
+                    cfg.RSusDamping = 20.0
+                    cfg.IdleDamping = 9999
+                    cfg.SteerSmoothing = 10
+                    cfg.AutoFlip = true
+                end
+            end
+        end
+    end)
+end)
+
+local function getMyVehicle()
+    for _, vehicle in ipairs(CollectionService:GetTagged("DeliveryVehicle")) do
+        if vehicle.Parent and vehicle:GetAttribute("OwnerUserId") == LocalPlayer.UserId then
+            if vehicle.PrimaryPart and vehicle.PrimaryPart.Parent then
+                return vehicle
+            end
+        end
+    end
+    local bp = Workspace:FindFirstChild("BP")
+    if bp and bp.PrimaryPart and bp.PrimaryPart.Parent then
+        local ownerId = bp:GetAttribute("OwnerUserId")
+        if ownerId ~= nil and ownerId ~= LocalPlayer.UserId then return nil end
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local dist = (bp.PrimaryPart.Position - hrp.Position).Magnitude
+            if dist > 50 then return nil end
+        end
+        return bp
+    end
+    return nil
+end
+
+local function getDriveSeat()
+    local vehicle = getMyVehicle()
+    if not vehicle then return nil end
+    local ds = vehicle:FindFirstChild("DriveSeat")
+    if ds and ds:IsA("VehicleSeat") then return ds end
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("VehicleSeat") then return part end
+    end
+    return nil
+end
+
+local function sitInVehicle()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not humanoid then return false end
+    local vehicle = getMyVehicle()
+    if not vehicle then return false end
+    local ds = getDriveSeat()
+    if not ds then return false end
+    if ds.Occupant and ds.Occupant ~= humanoid then return false end
+    
+    hrp.CFrame = ds.CFrame + Vector3.new(0, 2.5, 0)
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    task.wait(0.15)
+    
+    for i = 1, 3 do
+        pcall(function() ds:Sit(humanoid) end)
+        task.wait(0.15)
+        if ds.Occupant == humanoid then return true end
+    end
+    return false
+end
+
+local function touchStartJob()
+    pcall(function()
+        local jobPart = Workspace:FindFirstChild("Ekonomi")
+            and Workspace.Ekonomi:FindFirstChild("BedilPusat")
+            and Workspace.Ekonomi.BedilPusat:FindFirstChild("Job")
+        if jobPart then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                hrp.CFrame = jobPart.CFrame + Vector3.new(0, 3, 0)
+                task.wait(0.3)
+                for i = 1, 3 do
+                    if firetouchinterest then
+                        firetouchinterest(hrp, jobPart, 0)
+                        task.wait(0.2)
+                        firetouchinterest(hrp, jobPart, 1)
+                        task.wait(0.2)
+                    end
+                    if adTargetPos or currentTargetPosition then break end
+                end
+            end
+        end
+    end)
+end
+
+local function triggerCarSpawn()
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+        local hrp = char.HumanoidRootPart
+        local vehicle = getMyVehicle()
+        if vehicle and vehicle.PrimaryPart then
+            vehicle:SetPrimaryPartCFrame(hrp.CFrame + Vector3.new(0, 3, 3))
+            for _, part in ipairs(vehicle:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        else
+            touchStartJob()
+        end
+    end)
+end
+
+local function breakableWait(seconds)
+    if seconds <= 0 then return true end
+    local iterations = math.floor(seconds * 20)
+    for _ = 1, iterations do
+        if not autoDeliveryActive and not autoDriveActive then return false end
+        task.wait(0.05)
+    end
+    return autoDeliveryActive or autoDriveActive
+end
+
+local function sitToSeat(humanoid, vehicle)
+    pcall(function()
+        local driveSeat = getDriveSeat()
+        if driveSeat and not driveSeat.Occupant then
+            driveSeat:Sit(humanoid)
+            return
+        end
+        for _, obj in ipairs(vehicle:GetDescendants()) do
+            if obj:IsA("Seat") or obj:IsA("VehicleSeat") then
+                if not obj.Occupant then
+                    obj:Sit(humanoid)
+                    break
+                end
+            end
+        end
+    end)
+end
+
+local function getHumanizedDelay()
+    return math.random(deliverySettings.HumanizedMin * 100, deliverySettings.HumanizedMax * 100) / 100
+end
+
+local _vehicleAnchored = false
+local _anchoredVehicle = nil
+
+local function lockVehicle(vehicle)
+    if not vehicle or _vehicleAnchored then return false end
+    _vehicleAnchored = true
+    _anchoredVehicle = vehicle
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("BasePart") then part.Anchored = true end
+    end
+    return true
+end
+
+local function unlockVehicle(vehicle)
+    if not vehicle then return false end
+    _vehicleAnchored = false
+    _anchoredVehicle = nil
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("BasePart") then part.Anchored = false end
+    end
+    return true
+end
+
+task.spawn(function()
+    while true do
+        task.wait(5)
+        if not autoDeliveryActive and not autoDriveActive and _vehicleAnchored and _anchoredVehicle then
+            pcall(function() unlockVehicle(_anchoredVehicle) end)
+        end
+    end
+end)
+
+local function waitForJobState(targetState, timeout)
+    timeout = timeout or 15
+    local start = tick()
+    while (tick() - start) < timeout do
+        if jobState == targetState then return true end
+        if targetState == "WAITING" and (jobState == "RETURNING" or jobState == "NONE") then return true end
+        if targetState == "RETURNING" and jobState == "NONE" then return true end
+        if not autoDeliveryActive and not autoDriveActive then return false end
+        task.wait(0.1)
+    end
+    if targetState == "WAITING" or targetState == "RETURNING" then
+        jobState = "NONE"
+        currentTargetPosition = nil
+    end
+    return false
+end
+
+local function waitForJobComplete(timeout)
+    timeout = timeout or 30
+    local start = tick()
+    while (tick() - start) < timeout do
+        if jobState == "RETURNING" or jobState == "NONE" then return true end
+        if not autoDeliveryActive and not autoDriveActive then return false end
+        task.wait(0.2)
+    end
+    return false
+end
+
+local LockSeatEnabled = false
+local _lockSeatWatchdogActive = false
+local _lockSeatCurrentSeat = nil
+local _lockSeatPropertyConnection = nil
+
+local function lockSeat_forceSit(humanoid, vehicle)
+    if not humanoid or not vehicle or not humanoid.Parent then return false end
+    local function trySeat(seat)
+        if not seat then return false end
+        if not (seat:IsA("VehicleSeat") or seat:IsA("Seat")) then return false end
+        if seat.Occupant == humanoid then return true end
+        pcall(function() seat:Sit(humanoid) end)
+        task.wait(0.05)
+        return seat.Occupant == humanoid
+    end
+    local bp = Workspace:FindFirstChild("BP")
+    local driveSeat = bp and bp:FindFirstChild("DriveSeat")
+    if trySeat(driveSeat) then
+        _lockSeatCurrentSeat = driveSeat
+        return true
+    end
+    for _, obj in ipairs(vehicle:GetDescendants()) do
+        if obj:IsA("Seat") or obj:IsA("VehicleSeat") then
+            if trySeat(obj) then
+                _lockSeatCurrentSeat = obj
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function lockSeat_startWatchdog()
+    if _lockSeatWatchdogActive then return end
+    _lockSeatWatchdogActive = true
+    task.spawn(function()
+        while _lockSeatWatchdogActive do
+            task.wait(0.3)
+            if not LockSeatEnabled then task.wait(0.5) continue end
+            pcall(function()
+                local char = LocalPlayer.Character
+                if not char then return end
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if not humanoid then return end
+                local vehicle = getMyVehicle()
+                if not vehicle then return end
+                local isSeated = humanoid.SeatPart and humanoid.SeatPart.Parent
+                if not isSeated then lockSeat_forceSit(humanoid, vehicle) end
+            end)
+        end
+    end)
+end
+
+local function lockSeat_stopWatchdog()
+    _lockSeatWatchdogActive = false
+    _lockSeatCurrentSeat = nil
+    if _lockSeatPropertyConnection then
+        _lockSeatPropertyConnection:Disconnect()
+        _lockSeatPropertyConnection = nil
+    end
+end
+
+local function lockSeat_bindListener()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    if _lockSeatPropertyConnection then _lockSeatPropertyConnection:Disconnect() end
+    _lockSeatPropertyConnection = humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+        if not LockSeatEnabled then return end
+        if not humanoid.SeatPart then
+            task.spawn(function()
+                task.wait(0.1)
+                if not LockSeatEnabled then return end
+                local c = LocalPlayer.Character
+                if not c then return end
+                local h = c:FindFirstChildOfClass("Humanoid")
+                if not h then return end
+                if h.SeatPart then return end
+                local v = getMyVehicle()
+                if v then lockSeat_forceSit(h, v) end
+            end)
+        end
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    jobState = "NONE"
+    currentTargetPosition = nil
+    adTargetPos = nil
+    adFinishPos = nil
+    _lastProgressTick = tick()
+    
+    if LockSeatEnabled then lockSeat_bindListener() end
+    
+    if autoDriveActive then
+        task.wait(1)
+        pcall(function() sitInVehicle() end)
+    end
+end)
+
+local function getGroundY(x, z, y, vehicle)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    local rayOrigin = Vector3.new(x, y + 500, z)
+    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -1000, 0), rayParams)
+    if result then
+        return result.Position.Y + groundHeight
+    end
+    return y + groundHeight
+end
+
+local function flyToPosition(vehicle, targetPos, label)
+    if not vehicle or not vehicle.PrimaryPart then return false end
+    local ownerId = vehicle:GetAttribute("OwnerUserId")
+    if ownerId ~= nil and ownerId ~= LocalPlayer.UserId then return false end
+    
+    for _, part in ipairs(vehicle:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Anchored = false
+            part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            pcall(function() part:SetNetworkOwner(LocalPlayer) end)
+        end
+    end
+    task.wait(0.15)
+    
+    local primaryPart = vehicle.PrimaryPart
+    local driveSeat = getDriveSeat()
+    
+    local flyTargetY
+    if noFlyMode then
+        flyTargetY = getGroundY(targetPos.X, targetPos.Z, targetPos.Y, vehicle)
+    else
+        flyTargetY = targetPos.Y + flyHeight
+    end
+    
+    local char = LocalPlayer.Character
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    if not humanoid or not humanoid.SeatPart then
+        sitInVehicle()
+        task.wait(0.3)
+        char = LocalPlayer.Character
+        humanoid = char and char:FindFirstChildOfClass("Humanoid")
+        if not humanoid or not humanoid.SeatPart then return false end
+    end
+    
+    pcall(function()
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then part:SetNetworkOwner(LocalPlayer) end
+        end
+    end)
+    
+    local savedState = {}
+    pcall(function()
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then
+                if part == driveSeat then
+                    savedState[part] = "SKIP"
+                else
+                    savedState[part] = {
+                        CanCollide = part.CanCollide,
+                        CanQuery = part.CanQuery,
+                        CanTouch = part.CanTouch
+                    }
+                end
+            end
+        end
+    end)
+    
+    if noClipEnabled then
+        pcall(function()
+            for _, part in ipairs(vehicle:GetDescendants()) do
+                if part:IsA("BasePart") and part ~= driveSeat then
+                    part.CanCollide = false
+                    part.CanQuery = false
+                    part.CanTouch = false
+                end
+            end
+        end)
+    end
+    
+    if noFlyMode then
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+        end
+        pcall(function()
+            primaryPart.CFrame = CFrame.new(primaryPart.Position.X, flyTargetY, primaryPart.Position.Z)
+            primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        end)
+        task.wait(0.1)
+    else
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "🎯 Phase: ASCEND"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+        end
+        local ascendTimeout = tick() + 5
+        while autoDriveActive and (tick() < ascendTimeout) do
+            local currentY = primaryPart.Position.Y
+            local altDiff = flyTargetY - currentY
+            if altDiff <= 1 then break end
+            pcall(function()
+                local newY = math.min(currentY + 15, flyTargetY)
+                primaryPart.CFrame = CFrame.new(primaryPart.Position.X, newY, primaryPart.Position.Z)
+                primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end)
+            task.wait(0.05)
+        end
+    end
+    
+    if not autoDriveActive then
+        if noClipEnabled then
+            pcall(function()
+                for part, state in pairs(savedState) do
+                    if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                        part.CanCollide = state.CanCollide
+                        part.CanQuery = state.CanQuery
+                        part.CanTouch = state.CanTouch
+                    end
+                end
+            end)
+        end
+        return false
+    end
+    
+    if AD_PhaseLabel then
+        if noFlyMode then
+            AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 255, 150)
+        else
+            AD_PhaseLabel.Text = "🎯 Phase: FLY"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        end
+    end
+    
+    local flyCFrame = CFrame.new(targetPos.X, flyTargetY, targetPos.Z)
+    local flyTimeout = tick() + 30
+    local runConnection
+    local flyDone = false
+    
+    runConnection = RunService.Heartbeat:Connect(function()
+        if flyDone or not autoDriveActive then
+            if runConnection then runConnection:Disconnect() end
+            return
+        end
+        if tick() > flyTimeout then
+            if runConnection then runConnection:Disconnect() end
+            return
+        end
+        
+        if noClipEnabled then
+            pcall(function()
+                for _, part in ipairs(vehicle:GetDescendants()) do
+                    if part:IsA("BasePart") and part ~= driveSeat then
+                        part.CanCollide = false
+                        part.CanQuery = false
+                        part.CanTouch = false
+                    end
+                end
+            end)
+        end
+        
+        local currentPos = primaryPart.Position
+        
+        if noFlyMode then
+            flyCFrame = CFrame.new(targetPos.X, flyTargetY, targetPos.Z)
+        end
+        
+        local dist = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
+        
+        if AD_DistanceLabel then
+            AD_DistanceLabel.Text = "📏 Jarak: " .. math.floor(dist) .. " studs"
+        end
+        if AD_ProgressFill then
+            local prog = math.clamp(1 - (dist / 500), 0, 1)
+            AD_ProgressFill.Size = UDim2.new(prog, 0, 1, 0)
+            AD_ProgressText.Text = math.floor(prog * 100) .. "%"
+        end
+        
+        if dist < 5 then
+            pcall(function()
+                primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end)
+            if runConnection then runConnection:Disconnect() end
+            flyDone = true
+            return
+        end
+        
+        local dir = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Unit
+        local speed
+        if dynamicSpeed then
+            if dist > 150 then speed = flySpeed
+            elseif dist > 50 then speed = flySpeed * (0.5 + 0.5 * (dist / 150))
+            else speed = flySpeed * 0.4 end
+        else
+            speed = flySpeed
+        end
+        speed = math.max(speed, 30)
+        
+        if noFlyMode then
+            speed = speed * 0.7
+        end
+        
+        pcall(function()
+            local stepSize = math.max(speed * 0.05, 1)
+            local newPos = Vector3.new(
+                currentPos.X + dir.X * stepSize,
+                flyTargetY,
+                currentPos.Z + dir.Z * stepSize
+            )
+            primaryPart.CFrame = CFrame.new(newPos, Vector3.new(flyCFrame.X, flyTargetY, flyCFrame.Z))
+            primaryPart.AssemblyLinearVelocity = Vector3.new(dir.X * speed, 0, dir.Z * speed)
+            primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
+        end)
+    end)
+    
+    while not flyDone and autoDriveActive and (tick() < flyTimeout) do
+        task.wait(0.1)
+    end
+    if runConnection then runConnection:Disconnect() end
+    
+    if not autoDriveActive then
+        if noClipEnabled then
+            pcall(function()
+                for part, state in pairs(savedState) do
+                    if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                        part.CanCollide = state.CanCollide
+                        part.CanQuery = state.CanQuery
+                        part.CanTouch = state.CanTouch
+                    end
+                end
+            end)
+        end
+        return false
+    end
+    
+    if not noFlyMode then
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "🎯 Phase: DESCEND"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 100, 255)
+        end
+        
+        local descendTimeout = tick() + 10
+        while autoDriveActive and (tick() < descendTimeout) do
+            local currentPos = primaryPart.Position
+            local targetY = targetPos.Y + 3
+            local altDiff = currentPos.Y - targetY
+            local horizDist = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
+            if AD_DistanceLabel then
+                AD_DistanceLabel.Text = "📏 Jarak: " .. math.floor(horizDist) .. " studs"
+            end
+            if altDiff <= 1 and horizDist < 6 then break end
+            pcall(function()
+                local newY = math.max(currentPos.Y - 8, targetY)
+                local newPos = Vector3.new(currentPos.X, newY, currentPos.Z)
+                primaryPart.CFrame = CFrame.new(newPos, Vector3.new(targetPos.X, newY, targetPos.Z))
+                primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end)
+            task.wait(0.05)
+        end
+    end
+    
+    if AD_PhaseLabel then
+        AD_PhaseLabel.Text = "🎯 Phase: LAND"
+        AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    end
+    
+pcall(function()
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    
+    local rayOrigin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
+    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -1000, 0), rayParams)
+    
+    local landY
+    if result then
+        landY = result.Position.Y + groundHeight
+    else
+        landY = targetPos.Y + groundHeight
+    end
+    
+    primaryPart.CFrame = CFrame.new(targetPos.X, landY, targetPos.Z)
+    primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+end)
+task.wait(0.3)
+
+pcall(function()
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    
+    local rayOrigin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
+    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -1000, 0), rayParams)
+    
+    if result then
+        local finalY = result.Position.Y + groundHeight
+        primaryPart.CFrame = CFrame.new(targetPos.X, finalY, targetPos.Z)
+        primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    end
+end)
+task.wait(0.1)
+    
+    if noClipEnabled then
+        pcall(function()
+            for part, state in pairs(savedState) do
+                if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                    part.CanCollide = state.CanCollide
+                    part.CanQuery = state.CanQuery
+                    part.CanTouch = state.CanTouch
+                end
+            end
+        end)
+    end
+    
+    local freezeStart = tick()
+local freezeMaxTime = 20
+local freezeTargetPos = Vector3.new(targetPos.X, primaryPart.Position.Y, targetPos.Z)
+    local TOLERANCE = 0.5
+    
+    local freezeGyro = Instance.new("BodyGyro")
+    freezeGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    freezeGyro.P = 100000
+    freezeGyro.D = 500
+    freezeGyro.CFrame = primaryPart.CFrame
+    freezeGyro.Parent = primaryPart
+    
+    while autoDriveActive and (tick() - freezeStart) < freezeMaxTime do
+        if jobState == "WAITING" or jobState == "RETURNING" or jobState == "NONE" then
+            break
+        end
+        
+        pcall(function()
+            local currentPos = primaryPart.Position
+            local dist = (currentPos - freezeTargetPos).Magnitude
+            
+            if dist > TOLERANCE then
+                primaryPart.CFrame = CFrame.new(freezeTargetPos) * (primaryPart.CFrame - primaryPart.CFrame.Position)
+            end
+            
+            primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            
+            freezeGyro.CFrame = CFrame.new(primaryPart.Position, primaryPart.Position + primaryPart.CFrame.LookVector)
+            
+            pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
+        end)
+        
+        local chk = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if chk and not chk.SeatPart then
+            sitInVehicle()
+        end
+        
+        task.wait(0.03)
+    end
+    
+    if freezeGyro then freezeGyro:Destroy() end
+    
+    if AD_PhaseLabel then
+        if jobState == "WAITING" or jobState == "RETURNING" then
+            AD_PhaseLabel.Text = "🎯 Phase: DONE (confirmed)"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            AD_PhaseLabel.Text = "🎯 Phase: DONE (timeout)"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        end
+    end
+    return true
+end
+
+local function autoRunJob()
+    _loopGeneration = _loopGeneration + 1
+    local myGen = _loopGeneration
+    
+    local char = LocalPlayer.Character
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    if not humanoid or not humanoid.SeatPart then
+        sitInVehicle()
+        task.wait(0.3)
+    end
+    
+    while autoDriveActive and myGen == _loopGeneration do
+    _lastProgressTick = tick()
+    _jobStartTime = tick()
+    
+    if adTargetPos and (jobState == "WAITING" or jobState == "RETURNING") then
+        adTargetPos = nil
+    end
+    
+    if adFinishPos and jobState == "NONE" then
+        adFinishPos = nil
+    end
+    
+    local hasActiveJob = (adTargetPos ~= nil) or (adFinishPos ~= nil) 
+        or (currentTargetPosition ~= nil)
+    
+    if (not adTargetPos) and (not hasActiveJob) then
+            if AD_StatusLabel then
+                AD_StatusLabel.Text = "🔄 Trigger job..."
+                AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+                AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+            end
+            
+            local waitClean = tick()
+            while jobState ~= "NONE" and (tick() - waitClean) < 5 do
+                if not autoDriveActive then break end
+                task.wait(0.2)
+            end
+            
+            local humCheck = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if not humCheck or not humCheck.SeatPart then
+                sitInVehicle()
+                task.wait(0.3)
+            end
+            
+            local jobPart = Workspace:FindFirstChild("Ekonomi")
+                and Workspace.Ekonomi:FindFirstChild("BedilPusat")
+                and Workspace.Ekonomi.BedilPusat:FindFirstChild("Job")
+            
+            if jobPart then
+                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = jobPart.CFrame + Vector3.new(0, 3, 0)
+                    task.wait(0.5)
+                    for i = 1, 3 do
+                        if firetouchinterest then
+                            firetouchinterest(hrp, jobPart, 0)
+                            task.wait(0.3)
+                            firetouchinterest(hrp, jobPart, 1)
+                            task.wait(0.3)
+                        end
+                        if adTargetPos then break end
+                    end
+                    
+                    if not adTargetPos then
+                        local vehicle = getMyVehicle()
+                        if vehicle and vehicle.PrimaryPart then
+                            vehicle:SetPrimaryPartCFrame(jobPart.CFrame + Vector3.new(0, 3, 0))
+                            task.wait(0.5)
+                            if firetouchinterest then
+                                firetouchinterest(hrp, jobPart, 0)
+                                task.wait(0.3)
+                                firetouchinterest(hrp, jobPart, 1)
+                            end
+                        end
+                    end
+                end
+            end
+            
+            local triggerWait = tick()
+            while not adTargetPos and (tick() - triggerWait) < 15 do
+                if not autoDriveActive then break end
+                task.wait(0.2)
+            end
+            
+            if not adTargetPos then
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "⚠️ Target ga dateng, retry..."
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                    AD_LED.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+                end
+                sitInVehicle()
+                task.wait(3)
+                continue
+            end
+        end
+        
+        if not autoDriveActive then break end
+_lastProgressTick = tick()
+
+local humCheck2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+if not humCheck2 or not humCheck2.SeatPart then
+    sitInVehicle()
+    task.wait(0.3)
+end
+
+if not adTargetPos then
+    if AD_StatusLabel then
+        AD_StatusLabel.Text = "♻️ Resume — skip target, langsung finish"
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+    end
+    if jobState == "RETURNING" and not adFinishPos then
+        if AD_StatusLabel then
+            AD_StatusLabel.Text = "♻️ Resume RETURNING tanpa finish pos — tunggu 15s"
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        end
+        local _waitF = tick()
+        while autoDriveActive and not adFinishPos and (tick() - _waitF) < 15 do
+            task.wait(0.2)
+        end
+        if not adFinishPos then
+            if AD_StatusLabel then
+                AD_StatusLabel.Text = "⚠️ Ga dapet finish pos — reset job baru"
+                AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            end
+            jobState = "NONE"
+            currentTargetPosition = nil
+            adTargetPos = nil
+            adFinishPos = nil
+            currentJobId = nil
+            task.wait(1)
+            continue
+        end
+    end
+else
+    if AD_StatusLabel then
+        AD_StatusLabel.Text = "🎯 Ke TARGET..."
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+    end
+    
+    local vehicle = getMyVehicle()
+    if not vehicle then
+        if AD_StatusLabel then
+            AD_StatusLabel.Text = "❌ Mobil ilang, retry..."
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+        end
+        adTargetPos = nil
+        adFinishPos = nil
+        task.wait(2)
+        continue
+    end
+    
+    local ok = flyToPosition(vehicle, adTargetPos, "TARGET")
+    if not autoDriveActive then break end
+    _lastProgressTick = tick()
+    
+    if ok then
+        if AD_StatusLabel then
+            AD_StatusLabel.Text = "⏳ Nunggu konfirm target..."
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        end
+        waitForJobState("WAITING", 15)
+    end
+    
+    if not autoDriveActive then break end
+    _lastProgressTick = tick()
+end
+
+if not autoDriveActive then break end
+_lastProgressTick = tick()
+
+if AD_StatusLabel then
+    AD_StatusLabel.Text = "⏳ Nunggu finish pos..."
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
+        end
+        
+        local waitFinish = tick()
+        local finishGot = false
+        while (tick() - waitFinish) < 20 do
+            if not autoDriveActive then break end
+            if adFinishPos then
+                finishGot = true
+                break
+            end
+            if jobState == "NONE" then
+                task.wait(2)
+                adTargetPos = nil
+                adFinishPos = nil
+                currentTargetPosition = nil
+                break
+            end
+            task.wait(0.2)
+        end
+        
+        if not autoDriveActive then break end
+        _lastProgressTick = tick()
+        
+        if not finishGot or not adFinishPos then
+            adTargetPos = nil
+            adFinishPos = nil
+            currentTargetPosition = nil
+            jobState = "NONE"
+            task.wait(1)
+            continue
+        end
+        
+        if AD_StatusLabel then
+            AD_StatusLabel.Text = "🏁 Ke FINISH..."
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 200)
+        end
+        
+        vehicle = getMyVehicle()
+        if not vehicle then
+            adTargetPos = nil
+            adFinishPos = nil
+            currentTargetPosition = nil
+            jobState = "NONE"
+            task.wait(1)
+            continue
+        end
+        
+        local okFinish = flyToPosition(vehicle, adFinishPos, "FINISH")
+        if not autoDriveActive then break end
+        _lastProgressTick = tick()
+        
+        if okFinish then
+    if AD_StatusLabel then
+        AD_StatusLabel.Text = "⏳ Nunggu reward..."
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    end
+    
+    local waited = 0
+    local maxWait = 25
+    local lockedFinishPos = adFinishPos
+    
+    while autoDriveActive and waited < maxWait do
+        if jobState == "NONE" then break end
+        task.wait(0.5)
+        waited = waited + 0.5
+        
+        local v = getMyVehicle()
+        if v and v.PrimaryPart and lockedFinishPos then
+            local cur = v.PrimaryPart.Position
+            local tgt = Vector3.new(lockedFinishPos.X, cur.Y, lockedFinishPos.Z)
+            local dist = (cur - tgt).Magnitude
+            if dist > 5 then
+                pcall(function()
+                    v.PrimaryPart.CFrame = CFrame.new(tgt)
+                    v.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    v.PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end)
+            end
+        end
+    end
+end
+        
+        if not autoDriveActive then break end
+        _lastProgressTick = tick()
+        
+        jobCounter = jobCounter + 1
+        if AD_StatsLabel then
+            local elapsed = tick() - sessionStartTime
+            local hrs = math.floor(elapsed / 3600)
+            local mins = math.floor((elapsed % 3600) / 60)
+            local secs = math.floor(elapsed % 60)
+            AD_StatsLabel.Text = string.format("📊 Job: %d  |  ⏱️ %02d:%02d:%02d", jobCounter, hrs, mins, secs)
+        end
+        
+        if AD_StatusLabel then
+            AD_StatusLabel.Text = "🎉 Job #" .. jobCounter .. " selesai!"
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        end
+        
+        adTargetPos = nil
+        adFinishPos = nil
+        currentTargetPosition = nil
+        jobState = "NONE"
+        currentJobId = nil
+        task.wait(1.5)
+        
+        if myGen ~= _loopGeneration then
+            return
+        end
+    end
+end
+
+local function restartAutoDrive()
+    if _restarting then return end
+    _restarting = true
+    
+    warn("[Auto-Drive] Restarting loop (anti-stuck)...")
+    
+    _loopGeneration = _loopGeneration + 1
+    autoDriveActive = false
+    
+    adTargetPos = nil
+    adFinishPos = nil
+    currentTargetPosition = nil
+    jobState = "NONE"
+    currentJobId = nil
+    
+    task.wait(2)
+    
+    autoDriveActive = true
+    _lastProgressTick = tick()
+    _restarting = false
+    task.spawn(autoRunJob)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(10)
+        if autoDriveActive and not _restarting then
+            local now = tick()
+            local elapsed = now - _lastProgressTick
+            local timeout = 120
+            
+            if AD_PhaseLabel and AD_PhaseLabel.Text then
+                if AD_PhaseLabel.Text:find("IDLE") or AD_PhaseLabel.Text:find("Trigger") then
+                    timeout = 45
+                elseif AD_PhaseLabel.Text:find("FLY") or AD_PhaseLabel.Text:find("GROUND") then
+                    timeout = 90
+                elseif AD_PhaseLabel.Text:find("WAIT") or AD_PhaseLabel.Text:find("Nunggu") then
+                    timeout = 60
+                elseif AD_PhaseLabel.Text:find("DONE") then
+                    timeout = 30
+                end
+            end
+            
+            if elapsed > timeout then
+                restartAutoDrive()
+            end
+        else
+            _lastProgressTick = tick()
+        end
+    end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DVExploitsBrewokUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999
+ScreenGui.IgnoreGuiInset = true
+safeParent(ScreenGui)
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 440, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(16, 12, 12)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+
+local border = Instance.new("Frame", MainFrame)
+border.Name = "Border"
+border.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+border.BorderSizePixel = 0
+border.Size = UDim2.new(1, 2, 1, 2)
+border.Position = UDim2.new(0, -1, 0, -1)
+border.ZIndex = 0
+Instance.new("UICorner", border).CornerRadius = UDim.new(0, 11)
+
+task.spawn(function()
+    while ScreenGui.Parent do
+        local hue = (tick() * 6) % 1
+        border.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+        RunService.RenderStepped:Wait()
+    end
+end)
+
+local Header = Instance.new("Frame", MainFrame)
+Header.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+Header.BorderSizePixel = 0
+Header.Size = UDim2.new(1, 0, 0, 38)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
+
+local iconFrame = Instance.new("Frame", Header)
+iconFrame.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+iconFrame.BorderSizePixel = 0
+iconFrame.Position = UDim2.new(0, 10, 0.5, -9)
+iconFrame.Size = UDim2.new(0, 18, 0, 18)
+Instance.new("UICorner", iconFrame).CornerRadius = UDim.new(1, 0)
+
+local iconText = Instance.new("TextLabel", iconFrame)
+iconText.BackgroundTransparency = 1
+iconText.Size = UDim2.new(1, 0, 1, 0)
+iconText.Font = Enum.Font.GothamBold
+iconText.Text = "DV"
+iconText.TextColor3 = Color3.fromRGB(255, 255, 255)
+iconText.TextSize = 9
+iconText.TextScaled = true
+
+local Title = Instance.new("TextLabel", Header)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 35, 0, 0)
+Title.Size = UDim2.new(0, 250, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "DV EXPLOITS - HUB"
+Title.TextColor3 = Color3.fromRGB(255, 70, 70)
+Title.TextSize = 11
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
+CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 11
+CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+
+local MinBtn = Instance.new("TextButton", Header)
+MinBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20)
+MinBtn.Position = UDim2.new(1, -58, 0.5, -11)
+MinBtn.Size = UDim2.new(0, 22, 0, 22)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.Text = "−"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.TextSize = 13
+MinBtn.BorderSizePixel = 0
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 5)
+
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(0, 110, 1, -48)
+TabBar.Position = UDim2.new(0, 8, 0, 42)
+TabBar.BackgroundColor3 = Color3.fromRGB(22, 16, 16)
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
+
+local function makeTabBtn(name, text, yPos)
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Name = name
+    btn.Size = UDim2.new(1, -12, 0, 30)
+    btn.Position = UDim2.new(0, 6, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(220, 180, 180)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 10
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    return btn
+end
+
+local TabMaxgenBtn = makeTabBtn("TabMaxgen", "📦 Maxgen", 6)
+local TabBrewokBtn = makeTabBtn("TabBrewok", "🍺 Brewok", 40)
+local TabLightBtn = makeTabBtn("TabLight", "💡 Lighting", 74)
+local TabAddonsBtn = makeTabBtn("TabAddons", "🧩 Addons", 108)
+local TabInfoBtn = makeTabBtn("TabInfo", "ℹ️ Info", 142)
+
+local ContainerMaxgen = Instance.new("ScrollingFrame", MainFrame)
+ContainerMaxgen.Size = UDim2.new(1, -132, 1, -48)
+ContainerMaxgen.Position = UDim2.new(0, 124, 0, 42)
+ContainerMaxgen.BackgroundTransparency = 1
+ContainerMaxgen.CanvasSize = UDim2.new(0, 0, 0, 680)
+ContainerMaxgen.ScrollBarThickness = 3
+ContainerMaxgen.Visible = true
+
+local ContainerBrewok = Instance.new("ScrollingFrame", MainFrame)
+ContainerBrewok.Size = UDim2.new(1, -132, 1, -48)
+ContainerBrewok.Position = UDim2.new(0, 124, 0, 42)
+ContainerBrewok.BackgroundTransparency = 1
+ContainerBrewok.CanvasSize = UDim2.new(0, 0, 0, 240)
+ContainerBrewok.ScrollBarThickness = 3
+ContainerBrewok.Visible = false
+
+local ContainerLight = Instance.new("Frame", MainFrame)
+ContainerLight.Size = UDim2.new(1, -132, 1, -48)
+ContainerLight.Position = UDim2.new(0, 124, 0, 42)
+ContainerLight.BackgroundTransparency = 1
+ContainerLight.Visible = false
+
+local ContainerAddons = Instance.new("ScrollingFrame", MainFrame)
+ContainerAddons.Size = UDim2.new(1, -132, 1, -48)
+ContainerAddons.Position = UDim2.new(0, 124, 0, 42)
+ContainerAddons.BackgroundTransparency = 1
+ContainerAddons.CanvasSize = UDim2.new(0, 0, 0, 500)
+ContainerAddons.ScrollBarThickness = 3
+ContainerAddons.Visible = false
+
+local ContainerInfo = Instance.new("ScrollingFrame", MainFrame)
+ContainerInfo.Size = UDim2.new(1, -132, 1, -48)
+ContainerInfo.Position = UDim2.new(0, 124, 0, 42)
+ContainerInfo.BackgroundTransparency = 1
+ContainerInfo.CanvasSize = UDim2.new(0, 0, 0, 320)
+ContainerInfo.ScrollBarThickness = 3
+ContainerInfo.Visible = false
+
+local function switchTab(tabName)
+    activeTabName = tabName
+    ContainerMaxgen.Visible = (tabName == "Maxgen")
+    ContainerBrewok.Visible = (tabName == "Brewok")
+    ContainerLight.Visible = (tabName == "Light")
+    ContainerAddons.Visible = (tabName == "Addons")
+    ContainerInfo.Visible = (tabName == "Info")
+
+    TabMaxgenBtn.BackgroundColor3 = (tabName == "Maxgen") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
+    TabMaxgenBtn.TextColor3 = (tabName == "Maxgen") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+    TabBrewokBtn.BackgroundColor3 = (tabName == "Brewok") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
+    TabBrewokBtn.TextColor3 = (tabName == "Brewok") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+    TabLightBtn.BackgroundColor3 = (tabName == "Light") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
+    TabLightBtn.TextColor3 = (tabName == "Light") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+    TabAddonsBtn.BackgroundColor3 = (tabName == "Addons") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
+    TabAddonsBtn.TextColor3 = (tabName == "Addons") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+    TabInfoBtn.BackgroundColor3 = (tabName == "Info") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
+    TabInfoBtn.TextColor3 = (tabName == "Info") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+end
+
+TabMaxgenBtn.MouseButton1Click:Connect(function() switchTab("Maxgen") end)
+TabBrewokBtn.MouseButton1Click:Connect(function() switchTab("Brewok") end)
+TabLightBtn.MouseButton1Click:Connect(function() switchTab("Light") end)
+TabAddonsBtn.MouseButton1Click:Connect(function() switchTab("Addons") end)
+TabInfoBtn.MouseButton1Click:Connect(function() switchTab("Info") end)
+
+MinBtn.MouseButton1Click:Connect(function()
+    local isVis = TabBar.Visible
+    TabBar.Visible = not isVis
+    if isVis then
+        ContainerMaxgen.Visible = false
+        ContainerBrewok.Visible = false
+        ContainerLight.Visible = false
+        ContainerAddons.Visible = false
+        ContainerInfo.Visible = false
+        MainFrame.Size = UDim2.new(0, 440, 0, 38)
+        MinBtn.Text = "⊕"
+    else
+        MainFrame.Size = UDim2.new(0, 440, 0, 500)
+        MinBtn.Text = "−"
+        switchTab(activeTabName)
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() 
+    autoDeliveryActive = false
+    autoDriveActive = false
+    _G_AutoFarmBrewok = false
+    LockSeatEnabled = false
+    lockSeat_stopWatchdog()
+    if _anchoredVehicle then pcall(function() unlockVehicle(_anchoredVehicle) end) end
+    ScreenGui:Destroy() 
+end)
+
+local statusText = Instance.new("TextLabel", ContainerMaxgen)
+statusText.BackgroundTransparency = 1
+statusText.Position = UDim2.new(0, 0, 0, 4)
+statusText.Size = UDim2.new(1, -10, 0, 20)
+statusText.Font = Enum.Font.Gotham
+statusText.Text = "⏸️ Delivery Paused"
+statusText.TextColor3 = Color3.fromRGB(180, 160, 210)
+statusText.TextSize = 11
+statusText.TextXAlignment = Enum.TextXAlignment.Center
+
+local toggleButton = Instance.new("TextButton", ContainerMaxgen)
+toggleButton.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+toggleButton.Position = UDim2.new(0, 0, 0, 28)
+toggleButton.Size = UDim2.new(1, -10, 0, 30)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Text = "🟢 START DELIVERY (TP)"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 11
+toggleButton.BorderSizePixel = 0
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
+
+local triggerCarBtn = Instance.new("TextButton", ContainerMaxgen)
+triggerCarBtn.BackgroundColor3 = Color3.fromRGB(30, 80, 50)
+triggerCarBtn.Position = UDim2.new(0, 0, 0, 62)
+triggerCarBtn.Size = UDim2.new(1, -10, 0, 28)
+triggerCarBtn.Font = Enum.Font.GothamBold
+triggerCarBtn.Text = "🚗 Trigger Car"
+triggerCarBtn.TextColor3 = Color3.fromRGB(180, 255, 200)
+triggerCarBtn.TextSize = 11
+triggerCarBtn.BorderSizePixel = 0
+Instance.new("UICorner", triggerCarBtn).CornerRadius = UDim.new(0, 6)
+
+local manualTpButton = Instance.new("TextButton", ContainerMaxgen)
+manualTpButton.BackgroundColor3 = Color3.fromRGB(50, 30, 80)
+manualTpButton.Position = UDim2.new(0, 0, 0, 94)
+manualTpButton.Size = UDim2.new(1, -10, 0, 28)
+manualTpButton.Font = Enum.Font.GothamBold
+manualTpButton.Text = "📍 TP KE PANGKALAN"
+manualTpButton.TextColor3 = Color3.fromRGB(200, 180, 255)
+manualTpButton.TextSize = 11
+manualTpButton.BorderSizePixel = 0
+Instance.new("UICorner", manualTpButton).CornerRadius = UDim.new(0, 6)
+
+local function createDeliveryInput(nameText, defaultVal, yPos, updateKey)
+    local lbl = Instance.new("TextLabel", ContainerMaxgen)
+    lbl.BackgroundTransparency = 1
+    lbl.Position = UDim2.new(0, 0, 0, yPos)
+    lbl.Size = UDim2.new(0, 170, 0, 24)
+    lbl.Font = Enum.Font.Gotham
+    lbl.Text = nameText
+    lbl.TextColor3 = Color3.fromRGB(180, 160, 210)
+    lbl.TextSize = 10
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local box = Instance.new("TextBox", ContainerMaxgen)
+    box.BackgroundColor3 = Color3.fromRGB(35, 25, 50)
+    box.BorderSizePixel = 0
+    box.Position = UDim2.new(1, -95, 0, yPos)
+    box.Size = UDim2.new(0, 85, 0, 24)
+    box.Font = Enum.Font.GothamBold
+    box.Text = tostring(defaultVal)
+    box.TextColor3 = Color3.fromRGB(255, 200, 100)
+    box.TextSize = 11
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+    
+    box.FocusLost:Connect(function()
+        local val = tonumber(box.Text)
+        if val and val >= 0 then
+            deliverySettings[updateKey] = val
+        else
+            box.Text = tostring(deliverySettings[updateKey])
+        end
+    end)
+    return box
+end
+
+createDeliveryInput("⚡ Delay TP Karakter:", deliverySettings.DelayCharTP, 128, "DelayCharTP")
+createDeliveryInput("⚡ Delay Mobil Target:", deliverySettings.DelayCarTP, 158, "DelayCarTP")
+createDeliveryInput("⚡ Delay TP Finish:", deliverySettings.DelayFinishTP, 188, "DelayFinishTP")
+
+local LockSeatBtn = Instance.new("TextButton", ContainerMaxgen)
+LockSeatBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
+LockSeatBtn.Position = UDim2.new(0, 0, 0, 218)
+LockSeatBtn.Size = UDim2.new(1, -10, 0, 30)
+LockSeatBtn.Font = Enum.Font.GothamBold
+LockSeatBtn.Text = "🔒 LOCK SEAT: OFF"
+LockSeatBtn.TextColor3 = Color3.fromRGB(120, 110, 130)
+LockSeatBtn.TextSize = 11
+LockSeatBtn.BorderSizePixel = 0
+LockSeatBtn.AutoButtonColor = false
+Instance.new("UICorner", LockSeatBtn).CornerRadius = UDim.new(0, 6)
+
+local function updateLockSeatVisual()
+    if LockSeatEnabled then
+        LockSeatBtn.Text = "🔒 LOCK SEAT: ON"
+        LockSeatBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 130)
+        LockSeatBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
+    else
+        LockSeatBtn.Text = "🔒 LOCK SEAT: OFF"
+        if autoDeliveryActive then
+            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 60)
+            LockSeatBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+        else
+            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
+            LockSeatBtn.TextColor3 = Color3.fromRGB(120, 110, 130)
+        end
+    end
+end
+
+local function setLockSeat(state)
+    if state and not autoDeliveryActive then
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "⚠️ Nyalain Delivery dulu!", Duration = 3})
+        end)
+        return false
+    end
+    LockSeatEnabled = state
+    if state then
+        pcall(function()
+            local char = LocalPlayer.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            local vehicle = getMyVehicle()
+            if humanoid and vehicle then lockSeat_forceSit(humanoid, vehicle) end
+        end)
+        lockSeat_bindListener()
+        lockSeat_startWatchdog()
+    else
+        lockSeat_stopWatchdog()
+    end
+    updateLockSeatVisual()
+    return true
+end
+
+LockSeatBtn.MouseButton1Click:Connect(function()
+    if not LockSeatEnabled then
+        if not autoDeliveryActive then
+            pcall(function()
+                StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "⚠️ Nyalain Delivery dulu!", Duration = 3})
+            end)
+            return
+        end
+        setLockSeat(true)
+    else
+        setLockSeat(false)
+    end
+end)
+
+local ADSectionTitle = Instance.new("TextLabel", ContainerMaxgen)
+ADSectionTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
+ADSectionTitle.Position = UDim2.new(0, 0, 0, 258)
+ADSectionTitle.Size = UDim2.new(1, -10, 0, 24)
+ADSectionTitle.Font = Enum.Font.GothamBold
+ADSectionTitle.Text = "🚀 AUTO-DRIVE (Fly Mode)"
+ADSectionTitle.TextColor3 = Color3.fromRGB(255, 200, 100)
+ADSectionTitle.TextSize = 11
+Instance.new("UICorner", ADSectionTitle).CornerRadius = UDim.new(0, 6)
+
+local AD_StatusLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_StatusLabel.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+AD_StatusLabel.Position = UDim2.new(0, 0, 0, 286)
+AD_StatusLabel.Size = UDim2.new(1, -10, 0, 22)
+AD_StatusLabel.Font = Enum.Font.GothamBold
+AD_StatusLabel.Text = "⚪ IDLE"
+AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+AD_StatusLabel.TextSize = 10
+AD_StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+Instance.new("UICorner", AD_StatusLabel).CornerRadius = UDim.new(0, 6)
+
+local AD_LED = Instance.new("Frame", ContainerMaxgen)
+AD_LED.Size = UDim2.new(0, 8, 0, 8)
+AD_LED.Position = UDim2.new(0, 6, 0, 293)
+AD_LED.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+AD_LED.BorderSizePixel = 0
+AD_LED.ZIndex = 5
+Instance.new("UICorner", AD_LED).CornerRadius = UDim.new(1, 0)
+
+local AD_TargetLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_TargetLabel.BackgroundTransparency = 1
+AD_TargetLabel.Position = UDim2.new(0, 0, 0, 312)
+AD_TargetLabel.Size = UDim2.new(1, -10, 0, 16)
+AD_TargetLabel.Font = Enum.Font.Gotham
+AD_TargetLabel.Text = "📍 Target: —"
+AD_TargetLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+AD_TargetLabel.TextSize = 9
+AD_TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local AD_FinishLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_FinishLabel.BackgroundTransparency = 1
+AD_FinishLabel.Position = UDim2.new(0, 0, 0, 328)
+AD_FinishLabel.Size = UDim2.new(1, -10, 0, 16)
+AD_FinishLabel.Font = Enum.Font.Gotham
+AD_FinishLabel.Text = "🏁 Finish: —"
+AD_FinishLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+AD_FinishLabel.TextSize = 9
+AD_FinishLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local AD_PhaseLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_PhaseLabel.BackgroundTransparency = 1
+AD_PhaseLabel.Position = UDim2.new(0, 0, 0, 344)
+AD_PhaseLabel.Size = UDim2.new(0.5, -5, 0, 16)
+AD_PhaseLabel.Font = Enum.Font.Gotham
+AD_PhaseLabel.Text = "🎯 Phase: —"
+AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 180)
+AD_PhaseLabel.TextSize = 9
+AD_PhaseLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local AD_DistanceLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_DistanceLabel.BackgroundTransparency = 1
+AD_DistanceLabel.Position = UDim2.new(0.5, 0, 0, 344)
+AD_DistanceLabel.Size = UDim2.new(0.5, -10, 0, 16)
+AD_DistanceLabel.Font = Enum.Font.Gotham
+AD_DistanceLabel.Text = "📏 Jarak: —"
+AD_DistanceLabel.TextColor3 = Color3.fromRGB(255, 180, 255)
+AD_DistanceLabel.TextSize = 9
+AD_DistanceLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+local AD_ProgressBG = Instance.new("Frame", ContainerMaxgen)
+AD_ProgressBG.BackgroundColor3 = Color3.fromRGB(30, 20, 30)
+AD_ProgressBG.Position = UDim2.new(0, 0, 0, 364)
+AD_ProgressBG.Size = UDim2.new(1, -10, 0, 14)
+AD_ProgressBG.BorderSizePixel = 0
+Instance.new("UICorner", AD_ProgressBG).CornerRadius = UDim.new(0, 7)
+
+local AD_ProgressFill = Instance.new("Frame", AD_ProgressBG)
+AD_ProgressFill.Size = UDim2.new(0, 0, 1, 0)
+AD_ProgressFill.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+AD_ProgressFill.BorderSizePixel = 0
+Instance.new("UICorner", AD_ProgressFill).CornerRadius = UDim.new(0, 7)
+
+local AD_ProgressText = Instance.new("TextLabel", AD_ProgressBG)
+AD_ProgressText.Size = UDim2.new(1, 0, 1, 0)
+AD_ProgressText.BackgroundTransparency = 1
+AD_ProgressText.Font = Enum.Font.GothamBold
+AD_ProgressText.Text = "0%"
+AD_ProgressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+AD_ProgressText.TextSize = 9
+
+local AD_SitBtn = Instance.new("TextButton", ContainerMaxgen)
+AD_SitBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+AD_SitBtn.Position = UDim2.new(0, 0, 0, 386)
+AD_SitBtn.Size = UDim2.new(0.5, -5, 0, 30)
+AD_SitBtn.Font = Enum.Font.GothamBold
+AD_SitBtn.Text = "🪑 DUDUK"
+AD_SitBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+AD_SitBtn.TextSize = 10
+AD_SitBtn.BorderSizePixel = 0
+Instance.new("UICorner", AD_SitBtn).CornerRadius = UDim.new(0, 6)
+
+local AD_StartBtn = Instance.new("TextButton", ContainerMaxgen)
+AD_StartBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+AD_StartBtn.Position = UDim2.new(0.5, 5, 0, 386)
+AD_StartBtn.Size = UDim2.new(0.5, -15, 0, 30)
+AD_StartBtn.Font = Enum.Font.GothamBold
+AD_StartBtn.Text = "🟢 AUTO START"
+AD_StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AD_StartBtn.TextSize = 10
+AD_StartBtn.BorderSizePixel = 0
+Instance.new("UICorner", AD_StartBtn).CornerRadius = UDim.new(0, 6)
+
+local AD_HeightLbl = Instance.new("TextLabel", ContainerMaxgen)
+AD_HeightLbl.BackgroundTransparency = 1
+AD_HeightLbl.Position = UDim2.new(0, 0, 0, 424)
+AD_HeightLbl.Size = UDim2.new(0.5, -5, 0, 16)
+AD_HeightLbl.Font = Enum.Font.GothamBold
+AD_HeightLbl.Text = "⬆️ Height:"
+AD_HeightLbl.TextColor3 = Color3.fromRGB(180, 255, 255)
+AD_HeightLbl.TextSize = 9
+AD_HeightLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local AD_HeightBox = Instance.new("TextBox", ContainerMaxgen)
+AD_HeightBox.BackgroundColor3 = Color3.fromRGB(30, 50, 60)
+AD_HeightBox.BorderSizePixel = 0
+AD_HeightBox.Position = UDim2.new(0.5, 0, 0, 422)
+AD_HeightBox.Size = UDim2.new(0.5, -10, 0, 22)
+AD_HeightBox.Font = Enum.Font.GothamBold
+AD_HeightBox.Text = tostring(flyHeight)
+AD_HeightBox.TextColor3 = Color3.fromRGB(180, 255, 255)
+AD_HeightBox.TextSize = 10
+Instance.new("UICorner", AD_HeightBox).CornerRadius = UDim.new(0, 4)
+
+local AD_SpeedLbl = Instance.new("TextLabel", ContainerMaxgen)
+AD_SpeedLbl.BackgroundTransparency = 1
+AD_SpeedLbl.Position = UDim2.new(0, 0, 0, 448)
+AD_SpeedLbl.Size = UDim2.new(0.5, -5, 0, 16)
+AD_SpeedLbl.Font = Enum.Font.GothamBold
+AD_SpeedLbl.Text = "🚀 Speed:"
+AD_SpeedLbl.TextColor3 = Color3.fromRGB(255, 200, 100)
+AD_SpeedLbl.TextSize = 9
+AD_SpeedLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local AD_SpeedBox = Instance.new("TextBox", ContainerMaxgen)
+AD_SpeedBox.BackgroundColor3 = Color3.fromRGB(60, 50, 30)
+AD_SpeedBox.BorderSizePixel = 0
+AD_SpeedBox.Position = UDim2.new(0.5, 0, 0, 446)
+AD_SpeedBox.Size = UDim2.new(0.5, -10, 0, 22)
+AD_SpeedBox.Font = Enum.Font.GothamBold
+AD_SpeedBox.Text = tostring(flySpeed)
+AD_SpeedBox.TextColor3 = Color3.fromRGB(255, 200, 100)
+AD_SpeedBox.TextSize = 10
+Instance.new("UICorner", AD_SpeedBox).CornerRadius = UDim.new(0, 4)
+
+AD_HeightBox.FocusLost:Connect(function()
+    local val = tonumber(AD_HeightBox.Text)
+    if val and val >= 5 and val <= 200 then
+        flyHeight = val
+        AD_HeightBox.Text = tostring(val)
+    else
+        AD_HeightBox.Text = tostring(flyHeight)
+    end
+end)
+
+AD_SpeedBox.FocusLost:Connect(function()
+    local val = tonumber(AD_SpeedBox.Text)
+    if val and val >= 20 and val <= 500 then
+        flySpeed = val
+        AD_SpeedBox.Text = tostring(val)
+    else
+        AD_SpeedBox.Text = tostring(flySpeed)
+    end
+end)
+
+local AD_DynamicBtn = Instance.new("TextButton", ContainerMaxgen)
+AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 80)
+AD_DynamicBtn.Position = UDim2.new(0, 0, 0, 476)
+AD_DynamicBtn.Size = UDim2.new(0.5, -5, 0, 22)
+AD_DynamicBtn.Font = Enum.Font.GothamBold
+AD_DynamicBtn.Text = "⚡ Dynamic: ON"
+AD_DynamicBtn.TextColor3 = Color3.fromRGB(180, 255, 255)
+AD_DynamicBtn.TextSize = 9
+AD_DynamicBtn.BorderSizePixel = 0
+Instance.new("UICorner", AD_DynamicBtn).CornerRadius = UDim.new(0, 5)
+
+local AD_NoClipBtn = Instance.new("TextButton", ContainerMaxgen)
+AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 100)
+AD_NoClipBtn.Position = UDim2.new(0.5, 5, 0, 476)
+AD_NoClipBtn.Size = UDim2.new(0.5, -15, 0, 22)
+AD_NoClipBtn.Font = Enum.Font.GothamBold
+AD_NoClipBtn.Text = "🚫 No-Clip: ON"
+AD_NoClipBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
+AD_NoClipBtn.TextSize = 9
+AD_NoClipBtn.BorderSizePixel = 0
+Instance.new("UICorner", AD_NoClipBtn).CornerRadius = UDim.new(0, 5)
+
+local AD_NoFlyBtn = Instance.new("TextButton", ContainerMaxgen)
+AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 60)
+AD_NoFlyBtn.Position = UDim2.new(0, 0, 0, 502)
+AD_NoFlyBtn.Size = UDim2.new(1, -10, 0, 22)
+AD_NoFlyBtn.Font = Enum.Font.GothamBold
+AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): ON"
+AD_NoFlyBtn.TextColor3 = Color3.fromRGB(220, 255, 200)
+AD_NoFlyBtn.TextSize = 9
+AD_NoFlyBtn.BorderSizePixel = 0
+Instance.new("UICorner", AD_NoFlyBtn).CornerRadius = UDim.new(0, 5)
+
+AD_NoFlyBtn.MouseButton1Click:Connect(function()
+    noFlyMode = not noFlyMode
+    if noFlyMode then
+        AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): ON"
+        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 60)
+        AD_NoFlyBtn.TextColor3 = Color3.fromRGB(220, 255, 200)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Auto-Drive Mode",
+                Text = "🛞 Ground Mode (No-Fly)",
+                Duration = 3
+            })
+        end)
+    else
+        AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): OFF"
+        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 80)
+        AD_NoFlyBtn.TextColor3 = Color3.fromRGB(180, 220, 255)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Auto-Drive Mode",
+                Text = "✈️ Fly Mode",
+                Duration = 3
+            })
+        end)
+    end
+end)
+
+local AD_StatsLabel = Instance.new("TextLabel", ContainerMaxgen)
+AD_StatsLabel.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+AD_StatsLabel.Position = UDim2.new(0, 0, 0, 532)
+AD_StatsLabel.Size = UDim2.new(1, -10, 0, 22)
+AD_StatsLabel.Font = Enum.Font.GothamBold
+AD_StatsLabel.Text = "📊 Job: 0  |  ⏱️ 00:00:00"
+AD_StatsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+AD_StatsLabel.TextSize = 9
+Instance.new("UICorner", AD_StatsLabel).CornerRadius = UDim.new(0, 5)
+
+local beamColorEnabled = true
+local beamColorValue = Color3.fromRGB(0, 255, 100)
+local beamRainbow = false
+
+local BeamTitle = Instance.new("TextLabel", ContainerMaxgen)
+BeamTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
+BeamTitle.Position = UDim2.new(0, 0, 0, 560)
+BeamTitle.Size = UDim2.new(1, -10, 0, 24)
+BeamTitle.Font = Enum.Font.GothamBold
+BeamTitle.Text = "🎨 BEAM COLOR"
+BeamTitle.TextColor3 = Color3.fromRGB(200, 150, 255)
+BeamTitle.TextSize = 11
+Instance.new("UICorner", BeamTitle).CornerRadius = UDim.new(0, 6)
+
+local BeamColorBtn = Instance.new("TextButton", ContainerMaxgen)
+BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+BeamColorBtn.Position = UDim2.new(0, 0, 0, 588)
+BeamColorBtn.Size = UDim2.new(0.5, -5, 0, 26)
+BeamColorBtn.Font = Enum.Font.GothamBold
+BeamColorBtn.Text = "🎨 Custom: ON"
+BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+BeamColorBtn.TextSize = 9
+BeamColorBtn.BorderSizePixel = 0
+Instance.new("UICorner", BeamColorBtn).CornerRadius = UDim.new(0, 5)
+
+local BeamRainbowBtn = Instance.new("TextButton", ContainerMaxgen)
+BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
+BeamRainbowBtn.Position = UDim2.new(0.5, 5, 0, 588)
+BeamRainbowBtn.Size = UDim2.new(0.5, -15, 0, 26)
+BeamRainbowBtn.Font = Enum.Font.GothamBold
+BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
+BeamRainbowBtn.TextColor3 = Color3.fromRGB(220, 180, 220)
+BeamRainbowBtn.TextSize = 9
+BeamRainbowBtn.BorderSizePixel = 0
+Instance.new("UICorner", BeamRainbowBtn).CornerRadius = UDim.new(0, 5)
+
+local presetColors = {
+    {name = "🟢 Hijau", color = Color3.fromRGB(0, 255, 100)},
+    {name = "🔵 Biru", color = Color3.fromRGB(0, 200, 255)},
+    {name = "🟣 Ungu", color = Color3.fromRGB(200, 0, 255)},
+    {name = "🟡 Kuning", color = Color3.fromRGB(255, 200, 0)},
+    {name = "🟠 Orange", color = Color3.fromRGB(255, 100, 0)},
+    {name = "🔴 Merah", color = Color3.fromRGB(255, 50, 50)},
+    {name = "⚪ Putih", color = Color3.fromRGB(255, 255, 255)},
+}
+
+local colorButtons = {}
+local rowY = 618
+
+for i, preset in ipairs(presetColors) do
+    local col = (i - 1) % 3
+    local row = math.floor((i - 1) / 3)
+    local btn = Instance.new("TextButton", ContainerMaxgen)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 25, 35)
+    btn.Position = UDim2.new(col / 3, col * 2, 0, rowY + row * 28)
+    btn.Size = UDim2.new(1/3 - 4/3, -2, 0, 24)
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = preset.name
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.TextSize = 9
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    table.insert(colorButtons, btn)
+    
+    btn.MouseButton1Click:Connect(function()
+        beamColorValue = preset.color
+        beamRainbow = false
+        beamColorEnabled = true
+        BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
+        BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
+        BeamRainbowBtn.TextColor3 = Color3.fromRGB(220, 180, 220)
+        BeamColorBtn.Text = "🎨 Custom: ON"
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        
+        for _, b in ipairs(colorButtons) do
+            b.BackgroundColor3 = Color3.fromRGB(35, 25, 35)
+        end
+        btn.BackgroundColor3 = preset.color
+        btn.TextColor3 = (preset.color.R + preset.color.G + preset.color.B > 1.5) and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+        
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Beam Color",
+                Text = "Warna: " .. preset.name,
+                Duration = 2
+            })
+        end)
+    end)
+end
+
+local customHexLbl = Instance.new("TextLabel", ContainerMaxgen)
+customHexLbl.BackgroundTransparency = 1
+customHexLbl.Position = UDim2.new(0, 0, 0, rowY + 3 * 28 + 4)
+customHexLbl.Size = UDim2.new(0.5, -5, 0, 22)
+customHexLbl.Font = Enum.Font.Gotham
+customHexLbl.Text = "🎨 Hex (#RRGGBB):"
+customHexLbl.TextColor3 = Color3.fromRGB(180, 180, 220)
+customHexLbl.TextSize = 9
+customHexLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local customHexBox = Instance.new("TextBox", ContainerMaxgen)
+customHexBox.BackgroundColor3 = Color3.fromRGB(40, 30, 50)
+customHexBox.BorderSizePixel = 0
+customHexBox.Position = UDim2.new(0.5, 0, 0, rowY + 3 * 28 + 4)
+customHexBox.Size = UDim2.new(0.5, -10, 0, 22)
+customHexBox.Font = Enum.Font.GothamBold
+customHexBox.Text = "00FF64"
+customHexBox.TextColor3 = Color3.fromRGB(255, 200, 255)
+customHexBox.TextSize = 9
+customHexBox.PlaceholderText = "00FF64"
+Instance.new("UICorner", customHexBox).CornerRadius = UDim.new(0, 4)
+
+customHexBox.FocusLost:Connect(function()
+    local hex = customHexBox.Text:gsub("#", "")
+    local ok, color = pcall(function()
+        local r = tonumber(hex:sub(1, 2), 16) / 255
+        local g = tonumber(hex:sub(3, 4), 16) / 255
+        local b = tonumber(hex:sub(5, 6), 16) / 255
+        return Color3.new(r, g, b)
+    end)
+    if ok and color then
+        beamColorValue = color
+        beamRainbow = false
+        beamColorEnabled = true
+        BeamColorBtn.Text = "🎨 Custom: ON"
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
+        BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Beam Color",
+                Text = "Custom hex: #" .. hex,
+                Duration = 2
+            })
+        end)
+    else
+        customHexBox.Text = "00FF64"
+    end
+end)
+
+BeamColorBtn.MouseButton1Click:Connect(function()
+    beamColorEnabled = not beamColorEnabled
+    if beamColorEnabled then
+        BeamColorBtn.Text = "🎨 Custom: ON"
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+    else
+        BeamColorBtn.Text = "🎨 Custom: OFF"
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+    end
+end)
+
+BeamRainbowBtn.MouseButton1Click:Connect(function()
+    beamRainbow = not beamRainbow
+    if beamRainbow then
+        BeamRainbowBtn.Text = "🌈 Rainbow: ON"
+        BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 100)
+        BeamRainbowBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
+        beamColorEnabled = true
+        BeamColorBtn.Text = "🎨 Custom: ON"
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+    else
+        BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
+        BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
+        BeamRainbowBtn.TextColor3 = Color3.fromRGB(220, 180, 220)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        if beamColorEnabled then
+            pcall(function()
+                local color
+                if beamRainbow then
+                    local hue = (tick() * 0.5) % 1
+                    color = Color3.fromHSV(hue, 1, 1)
+                else
+                    color = beamColorValue
+                end
+                
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("Beam") then
+                        obj.Color = ColorSequence.new(color)
+                    end
+                end
+                for _, obj in ipairs(LocalPlayer.PlayerGui:GetDescendants()) do
+                    if obj:IsA("Beam") then
+                        obj.Color = ColorSequence.new(color)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+ContainerMaxgen.CanvasSize = UDim2.new(0, 0, 0, rowY + 3 * 28 + 40)
+
+AD_SitBtn.MouseButton1Click:Connect(function()
+    local ok = sitInVehicle()
+    if ok then
+        AD_StatusLabel.Text = "✅ Duduk sukses!"
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+    else
+        AD_StatusLabel.Text = "⚠️ Gagal duduk"
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+    end
+end)
+
+AD_DynamicBtn.MouseButton1Click:Connect(function()
+    dynamicSpeed = not dynamicSpeed
+    if dynamicSpeed then
+        AD_DynamicBtn.Text = "⚡ Dynamic: ON"
+        AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 80)
+        AD_DynamicBtn.TextColor3 = Color3.fromRGB(180, 255, 255)
+    else
+        AD_DynamicBtn.Text = "⚡ Dynamic: OFF"
+        AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
+        AD_DynamicBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+    end
+end)
+
+AD_NoClipBtn.MouseButton1Click:Connect(function()
+    noClipEnabled = not noClipEnabled
+    if noClipEnabled then
+        AD_NoClipBtn.Text = "🚫 No-Clip: ON"
+        AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 100)
+        AD_NoClipBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
+    else
+        AD_NoClipBtn.Text = "🚫 No-Clip: OFF"
+        AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
+        AD_NoClipBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+    end
+end)
+
+AD_StartBtn.MouseButton1Click:Connect(function()
+    if not autoDriveActive then
+        _loopGeneration = _loopGeneration + 1
+        task.wait(0.3)
+        
+        local hasActiveState = (adTargetPos ~= nil) or (adFinishPos ~= nil) 
+            or (currentTargetPosition ~= nil) or (jobState ~= "NONE")
+        
+        autoDriveActive = true
+        _restarting = false
+        _pauseTime = 0
+        AD_StartBtn.Text = "🔴 STOP"
+        AD_StartBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 40)
+        sessionStartTime = tick()
+        jobCounter = 0
+        _lastProgressTick = tick()
+        _jobStartTime = tick()
+        AD_StatsLabel.Text = "📊 Job: 0  |  ⏱️ 00:00:00"
+        
+        local char = LocalPlayer.Character
+        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+        if not humanoid or not humanoid.SeatPart then
+            sitInVehicle()
+            task.wait(0.5)
+        end
+        
+        if hasActiveState then
+            AD_StatusLabel.Text = "♻️ Resume job..."
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+            warn("[DV] Resume state:", jobState)
+        else
+            AD_StatusLabel.Text = "🟢 Auto-Loop started!"
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        end
+        
+        task.spawn(autoRunJob)
+    else
+        autoDriveActive = false
+        _restarting = false
+        _pauseTime = tick()
+        AD_StartBtn.Text = "🟢 AUTO START"
+        AD_StartBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        AD_StatusLabel.Text = "⏸️ Paused (state preserved)"
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+        AD_PhaseLabel.Text = "🎯 Phase: —"
+        
+        pcall(function()
+            local vehicle = getMyVehicle()
+            if vehicle and vehicle.PrimaryPart then
+                vehicle.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                vehicle.PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while ScreenGui.Parent do
+        task.wait(1)
+        if autoDriveActive then
+            local elapsed = tick() - sessionStartTime
+            local hrs = math.floor(elapsed / 3600)
+            local mins = math.floor((elapsed % 3600) / 60)
+            local secs = math.floor(elapsed % 60)
+            AD_StatsLabel.Text = string.format("📊 Job: %d  |  ⏱️ %02d:%02d:%02d", jobCounter, hrs, mins, secs)
+        end
+        
+        if adTargetPos then
+            AD_TargetLabel.Text = string.format("📍 Target: %.1f, %.1f, %.1f", adTargetPos.X, adTargetPos.Y, adTargetPos.Z)
+            AD_TargetLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            AD_TargetLabel.Text = "📍 Target: —"
+            AD_TargetLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
+        if adFinishPos then
+            AD_FinishLabel.Text = string.format("🏁 Finish: %.1f, %.1f, %.1f", adFinishPos.X, adFinishPos.Y, adFinishPos.Z)
+            AD_FinishLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            AD_FinishLabel.Text = "🏁 Finish: —"
+            AD_FinishLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
+    end
+end)
+
+toggleButton.MouseButton1Click:Connect(function()
+    autoDeliveryActive = not autoDeliveryActive
+    if autoDeliveryActive then
+        toggleButton.Text = "🔴 STOP DELIVERY"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+        if statusText then 
+            statusText.Text = "🔥 Triggering Job (TP)..." 
+            statusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+        end
+        touchStartJob()
+        updateLockSeatVisual()
+    else
+        toggleButton.Text = "🟢 START DELIVERY (TP)"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+        if statusText then 
+            statusText.Text = "⏸️ Delivery Paused" 
+            statusText.TextColor3 = Color3.fromRGB(180, 160, 210)
+        end
+        if LockSeatEnabled then
+            setLockSeat(false)
+            pcall(function()
+                StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "🔓 Auto-OFF", Duration = 3})
+            end)
+        end
+        if _anchoredVehicle then pcall(function() unlockVehicle(_anchoredVehicle) end) end
+        updateLockSeatVisual()
+    end
+end)
+
+triggerCarBtn.MouseButton1Click:Connect(function()
+    triggerCarSpawn()
+    triggerCarBtn.Text = "✨ Car Teleported!"
+    task.wait(1)
+    triggerCarBtn.Text = "🚗 Trigger Car"
+end)
+
+manualTpButton.MouseButton1Click:Connect(function()
+    pcall(function()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(3121, 23, 17)
+        end
+    end)
+    manualTpButton.Text = "✨ Teleported!"
+    task.wait(1)
+    manualTpButton.Text = "📍 TP KE PANGKALAN"
+end)
+
+local function executeDeliveryToTarget(targetPos)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char or not autoDeliveryActive then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not humanoid or not autoDeliveryActive then return end
+        local vehicle = getMyVehicle()
+        if not vehicle or not vehicle.PrimaryPart or not autoDeliveryActive then return end
+        
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then part.Anchored = false end
+        end
+        
+        local targetCFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+        unlockVehicle(vehicle)
+        task.wait(0.05)
+        
+        if not breakableWait(deliverySettings.DelayCharTP) then return end
+        if not autoDeliveryActive then return end
+        hrp.CFrame = targetCFrame + Vector3.new(0, 2, 0)
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        
+        if not breakableWait(deliverySettings.DelayCarTP) then return end
+        if not autoDeliveryActive then return end
+        vehicle:SetPrimaryPartCFrame(targetCFrame)
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+        task.wait(0.04)
+        
+        if LockSeatEnabled then
+            lockSeat_forceSit(humanoid, vehicle)
+        else
+            sitToSeat(humanoid, vehicle)
+        end
+        
+        waitForJobState("WAITING", 10)
+        local confirmed = jobState == "WAITING" or jobState == "RETURNING"
+        if confirmed and autoDeliveryActive then
+            lockVehicle(vehicle)
+            task.wait(0.15)
+            if LockSeatEnabled then lockSeat_forceSit(humanoid, vehicle) end
+        end
+        waitForJobComplete(30)
+        unlockVehicle(vehicle)
+    end)
+end
+
+local function executeReturnToFinish(targetPos)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char or not autoDeliveryActive then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not humanoid or not autoDeliveryActive then return end
+        local vehicle = getMyVehicle()
+        if not vehicle or not vehicle.PrimaryPart or not autoDeliveryActive then return end
+        
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then part.Anchored = false end
+        end
+        
+        local targetCFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+        unlockVehicle(vehicle)
+        task.wait(0.05)
+        pcall(function()
+            local seat = humanoid.SeatPart
+            if seat then seat:Sit() end
+        end)
+        task.wait(0.05)
+        
+        if not breakableWait(deliverySettings.DelayFinishTP) then return end
+        if not autoDeliveryActive then return end
+        hrp.CFrame = targetCFrame + Vector3.new(0, 2, 0)
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        task.wait(0.03)
+        
+        if not autoDeliveryActive then return end
+        vehicle:SetPrimaryPartCFrame(targetCFrame)
+        for _, part in ipairs(vehicle:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+        task.wait(0.04)
+        
+        if LockSeatEnabled then
+            lockSeat_forceSit(humanoid, vehicle)
+        else
+            sitToSeat(humanoid, vehicle)
+        end
+        
+        waitForJobState("RETURNING", 10)
+        if jobState ~= "RETURNING" then waitForJobState("NONE", 5) end
+        if jobState == "RETURNING" or jobState == "NONE" then
+            lockVehicle(vehicle)
+            task.wait(0.15)
+            if LockSeatEnabled then lockSeat_forceSit(humanoid, vehicle) end
+        end
+        local unlockWait = tick()
+while autoDeliveryActive and (tick() - unlockWait) < 25 do
+    if jobState == "NONE" then break end
+    task.wait(0.3)
+end
+unlockVehicle(vehicle)
+pcall(function()
+    local seat = humanoid.SeatPart
+    if seat then seat:Sit() end
+end)
+if statusText then
+    statusText.Text = "✅ Reward selesai, ulang..."
+    statusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+end
+    end)
+end
+
+local function applyBodyState(rootPart, humanoid)
+    if not rootPart then return end
+    if _G_BodyState == "KepalaBawah" then
+        if humanoid then humanoid.PlatformStand = true end
+        rootPart.Anchored = false
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(180), 0, 0)
+    elseif _G_BodyState == "Terlentang" then
+        if humanoid then humanoid.PlatformStand = true end
+        rootPart.Anchored = false
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(90), 0, 0)
+    else
+        if humanoid and not _G_AutoFlyActive then humanoid.PlatformStand = false end
+        rootPart.Anchored = false
+    end
+end
+
+local function toggleFly(state)
+    if not _G_AutoFlyEnabled then
+        if flyConnection then flyConnection:Disconnect() end
+        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum and _G_BodyState == "Berdiri" then hum.PlatformStand = false end
+        return
+    end
+    _G_AutoFlyActive = state
+    local char = LocalPlayer.Character
+    if not char then return end
+    local rootPart = char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if state then
+        if humanoid then humanoid.PlatformStand = true end
+        if not rootPart then return end
+        if not bodyVelocity then
+            bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = rootPart
+        end
+        if not bodyGyro then
+            bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bodyGyro.CFrame = rootPart.CFrame
+            bodyGyro.Parent = rootPart
+        end
+        if flyConnection then flyConnection:Disconnect() end
+        flyConnection = RunService.RenderStepped:Connect(function()
+            if not _G_AutoFlyActive or not char or not rootPart then return end
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyGyro.CFrame = Workspace.CurrentCamera.CFrame
+        end)
+    else
+        if humanoid and _G_BodyState == "Berdiri" then humanoid.PlatformStand = false end
+        if flyConnection then flyConnection:Disconnect() end
+        if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+        if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+    end
+end
+
+local function burstInstantTeleport(targetCFrame)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not rootPart then return end
+        task.spawn(function()
+            for i = 1, _G_BurstCount do
+                if rootPart and _G_AutoFarmBrewok then
+                    rootPart.CFrame = targetCFrame
+                    applyBodyState(rootPart, humanoid)
+                    task.wait(0.01)
+                else
+                    break
+                end
+            end
+        end)
+    end)
+end
+
+local function manualTeleportBrewok(targetCFrame)
+    pcall(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not rootPart then return end
+        if humanoid then humanoid.PlatformStand = false end
+        rootPart.Anchored = false
+        rootPart.CFrame = targetCFrame
+    end)
+end
+
+local remoteEventConnection = nil
+local function hookGameRemotes()
+    pcall(function()
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local jobRemotes = remotes and remotes:FindFirstChild("Job")
+        local brewogUIEvent = jobRemotes and jobRemotes:FindFirstChild("BrewogUI")
+        if brewogUIEvent and brewogUIEvent:IsA("RemoteEvent") then
+            if remoteEventConnection then remoteEventConnection:Disconnect() end
+            remoteEventConnection = brewogUIEvent.OnClientEvent:Connect(function(actionType, value)
+                if actionType == "Stage2" or actionType == "Progress2" or (actionType == "Progress" and value and type(value) == "number" and value >= 5) then
+                    _G_CurrentStage = "Stage2"
+                    if ProgressDisplay then 
+                        ProgressDisplay.Text = "Status: Tempat Taruh 2" 
+                        ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120) 
+                    end
+                elseif actionType == "Progress1" then
+                    _G_CurrentProgressCount = value or 0
+                    if _G_CurrentProgressCount >= 5 then
+                        _G_CurrentStage = "Stage2"
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "Progres 1 Selesai -> Taruh 2" 
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120) 
+                        end
+                    else
+                        _G_CurrentStage = "Progress1"
+                        if ProgressDisplay then 
+                            ProgressDisplay.Text = "Progres 1: " .. _G_CurrentProgressCount .. " / 5" 
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 160, 160) 
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+end
+hookGameRemotes()
+
+local ToggleBrewokBtn = Instance.new("TextButton", ContainerBrewok)
+ToggleBrewokBtn.Size = UDim2.new(1, -12, 0, 32)
+ToggleBrewokBtn.Position = UDim2.new(0, 0, 0, 8)
+ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: OFF"
+ToggleBrewokBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBrewokBtn.Font = Enum.Font.GothamBold
+ToggleBrewokBtn.TextSize = 11
+ToggleBrewokBtn.BorderSizePixel = 0
+Instance.new("UICorner", ToggleBrewokBtn).CornerRadius = UDim.new(0, 6)
+
+ToggleBrewokBtn.MouseButton1Click:Connect(function()
+    _G_AutoFarmBrewok = not _G_AutoFarmBrewok
+    if _G_AutoFarmBrewok then
+        ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: ON"
+        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+        if _G_AutoFlyEnabled then toggleFly(true) end
+    else
+        ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: OFF"
+        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+        toggleFly(false)
+    end
+end)
+
+local FlyModeBtn = Instance.new("TextButton", ContainerBrewok)
+FlyModeBtn.Size = UDim2.new(1, -12, 0, 28)
+FlyModeBtn.Position = UDim2.new(0, 0, 0, 46)
+FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+FlyModeBtn.Text = "Mode: FLY (Mati)"
+FlyModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyModeBtn.Font = Enum.Font.GothamBold
+FlyModeBtn.TextSize = 10
+FlyModeBtn.BorderSizePixel = 0
+Instance.new("UICorner", FlyModeBtn).CornerRadius = UDim.new(0, 6)
+
+FlyModeBtn.MouseButton1Click:Connect(function()
+    _G_AutoFlyEnabled = not _G_AutoFlyEnabled
+    if _G_AutoFlyEnabled then
+        FlyModeBtn.Text = "Mode: FLY (Aktif)"
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        if _G_AutoFarmBrewok then toggleFly(true) end
+    else
+        FlyModeBtn.Text = "Mode: FLY (Mati)"
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+        toggleFly(false)
+    end
+end)
+
+local BodyStateBtn = Instance.new("TextButton", ContainerBrewok)
+BodyStateBtn.Size = UDim2.new(1, -12, 0, 28)
+BodyStateBtn.Position = UDim2.new(0, 0, 0, 80)
+BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
+BodyStateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BodyStateBtn.Font = Enum.Font.GothamBold
+BodyStateBtn.TextSize = 10
+BodyStateBtn.BorderSizePixel = 0
+Instance.new("UICorner", BodyStateBtn).CornerRadius = UDim.new(0, 6)
+
+BodyStateBtn.MouseButton1Click:Connect(function()
+    if _G_BodyState == "Terlentang" then
+        _G_BodyState = "Berdiri"
+        BodyStateBtn.Text = "Posisi: Berdiri (Normal)"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+    elseif _G_BodyState == "Berdiri" then
+        _G_BodyState = "KepalaBawah"
+        BodyStateBtn.Text = "Posisi: Kepala di Bawah"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
+    else
+        _G_BodyState = "Terlentang"
+        BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+    end
+end)
+
+local DelayBox = Instance.new("TextBox", ContainerBrewok)
+DelayBox.Size = UDim2.new(0.48, -4, 0, 28)
+DelayBox.Position = UDim2.new(0, 0, 0, 114)
+DelayBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+DelayBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+DelayBox.PlaceholderText = "Delay TP"
+DelayBox.Text = tostring(_G_ActionDelay)
+DelayBox.Font = Enum.Font.GothamBold
+DelayBox.TextSize = 10
+DelayBox.BorderSizePixel = 0
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+
+DelayBox.FocusLost:Connect(function()
+    local val = tonumber(DelayBox.Text)
+    if val and val > 0 then _G_ActionDelay = val end
+end)
+
+local BurstBox = Instance.new("TextBox", ContainerBrewok)
+BurstBox.Size = UDim2.new(0.48, -4, 0, 28)
+BurstBox.Position = UDim2.new(0.52, 0, 0, 114)
+BurstBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
+BurstBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+BurstBox.PlaceholderText = "Burst Count"
+BurstBox.Text = tostring(_G_BurstCount)
+BurstBox.Font = Enum.Font.GothamBold
+BurstBox.TextSize = 10
+BurstBox.BorderSizePixel = 0
+Instance.new("UICorner", BurstBox).CornerRadius = UDim.new(0, 6)
+
+BurstBox.FocusLost:Connect(function()
+    local val = tonumber(BurstBox.Text)
+    if val and val > 0 then _G_BurstCount = math.floor(val) end
+end)
+
+ProgressDisplay = Instance.new("TextLabel", ContainerBrewok)
+ProgressDisplay.Size = UDim2.new(1, -12, 0, 26)
+ProgressDisplay.Position = UDim2.new(0, 0, 0, 148)
+ProgressDisplay.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+ProgressDisplay.BorderSizePixel = 0
+ProgressDisplay.Text = "Progres: Menunggu Sinyal..."
+ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120)
+ProgressDisplay.Font = Enum.Font.GothamBold
+ProgressDisplay.TextSize = 10
+Instance.new("UICorner", ProgressDisplay).CornerRadius = UDim.new(0, 6)
+
+local ManualTpBrewokBtn = Instance.new("TextButton", ContainerBrewok)
+ManualTpBrewokBtn.Size = UDim2.new(1, -12, 0, 30)
+ManualTpBrewokBtn.Position = UDim2.new(0, 0, 0, 180)
+ManualTpBrewokBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+ManualTpBrewokBtn.Text = "📍 TP Manual ke Brewog"
+ManualTpBrewokBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ManualTpBrewokBtn.Font = Enum.Font.GothamBold
+ManualTpBrewokBtn.TextSize = 11
+ManualTpBrewokBtn.BorderSizePixel = 0
+Instance.new("UICorner", ManualTpBrewokBtn).CornerRadius = UDim.new(0, 6)
+
+ManualTpBrewokBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local jobPart = ReplicatedStorage.LOKASI["\240\159\146\188 BREWOG"]
+        if jobPart then
+            local targetCFrame = jobPart:IsA("BasePart") and jobPart.CFrame or jobPart:GetPivot()
+            manualTeleportBrewok(targetCFrame)
+        end
+    end)
+end)
+
+local AddonsTitle = Instance.new("TextLabel", ContainerAddons)
+AddonsTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
+AddonsTitle.Position = UDim2.new(0, 0, 0, 4)
+AddonsTitle.Size = UDim2.new(1, -10, 0, 24)
+AddonsTitle.Font = Enum.Font.GothamBold
+AddonsTitle.Text = "📥 PILIH SCRIPT:"
+AddonsTitle.TextColor3 = Color3.fromRGB(255, 200, 100)
+AddonsTitle.TextSize = 11
+Instance.new("UICorner", AddonsTitle).CornerRadius = UDim.new(0, 6)
+
+local LoadBankBtn = Instance.new("TextButton", ContainerAddons)
+LoadBankBtn.Size = UDim2.new(1, -10, 0, 34)
+LoadBankBtn.Position = UDim2.new(0, 0, 0, 34)
+LoadBankBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadBankBtn.Text = "🏦 LOAD BANK SCRIPT"
+LoadBankBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBankBtn.Font = Enum.Font.GothamBold
+LoadBankBtn.TextSize = 11
+LoadBankBtn.BorderSizePixel = 0
+Instance.new("UICorner", LoadBankBtn).CornerRadius = UDim.new(0, 6)
+
+LoadBankBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/nY9yeiyH"))()
+    end)
+end)
+
+local LoadBypassBtn = Instance.new("TextButton", ContainerAddons)
+LoadBypassBtn.Size = UDim2.new(1, -10, 0, 34)
+LoadBypassBtn.Position = UDim2.new(0, 0, 0, 74)
+LoadBypassBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadBypassBtn.Text = "🛡️ LOAD BYPASS SCRIPT"
+LoadBypassBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBypassBtn.Font = Enum.Font.GothamBold
+LoadBypassBtn.TextSize = 11
+LoadBypassBtn.BorderSizePixel = 0
+Instance.new("UICorner", LoadBypassBtn).CornerRadius = UDim.new(0, 6)
+
+LoadBypassBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DV-EXPLOITSX/LOADER-IGR/refs/heads/main/4"))()
+    end)
+end)
+
+local LoadH42Btn = Instance.new("TextButton", ContainerAddons)
+LoadH42Btn.Size = UDim2.new(1, -10, 0, 34)
+LoadH42Btn.Position = UDim2.new(0, 0, 0, 114)
+LoadH42Btn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadH42Btn.Text = "🍺 LOAD H42 BREWOK"
+LoadH42Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadH42Btn.Font = Enum.Font.GothamBold
+LoadH42Btn.TextSize = 11
+LoadH42Btn.BorderSizePixel = 0
+Instance.new("UICorner", LoadH42Btn).CornerRadius = UDim.new(0, 6)
+
+LoadH42Btn.MouseButton1Click:Connect(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DV-EXPLOITSX/LOADER-IGR/refs/heads/main/3"))()
+    end)
+end)
+
+local DevCard = Instance.new("Frame", ContainerAddons)
+DevCard.Size = UDim2.new(1, -10, 0, 140)
+DevCard.Position = UDim2.new(0, 0, 0, 170)
+DevCard.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+DevCard.BorderSizePixel = 0
+Instance.new("UICorner", DevCard).CornerRadius = UDim.new(0, 10)
+
+local DevAvatar = Instance.new("ImageLabel", DevCard)
+DevAvatar.Size = UDim2.new(0, 80, 0, 80)
+DevAvatar.Position = UDim2.new(0.5, -40, 0, 12)
+DevAvatar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+DevAvatar.BorderSizePixel = 0
+DevAvatar.Image = "rbxassetid://0"
+Instance.new("UICorner", DevAvatar).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", DevAvatar).Color = Color3.fromRGB(255, 50, 50)
+
+pcall(function()
+    local devUserId = 0
+    pcall(function()
+        devUserId = Players:GetUserIdFromNameAsync("suyadi_irengbadeg")
+    end)
+    if devUserId and devUserId > 0 then
+        DevAvatar.Image = Players:GetUserThumbnailAsync(devUserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+    end
+end)
+
+local DevLabel = Instance.new("TextLabel", DevCard)
+DevLabel.BackgroundTransparency = 1
+DevLabel.Size = UDim2.new(1, 0, 0, 20)
+DevLabel.Position = UDim2.new(0, 0, 0, 96)
+DevLabel.Font = Enum.Font.GothamBold
+DevLabel.Text = "GZ"
+DevLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+DevLabel.TextSize = 16
+
+local DevSubLabel = Instance.new("TextLabel", DevCard)
+DevSubLabel.BackgroundTransparency = 1
+DevSubLabel.Size = UDim2.new(1, 0, 0, 16)
+DevSubLabel.Position = UDim2.new(0, 0, 0, 116)
+DevSubLabel.Font = Enum.Font.Gotham
+DevSubLabel.Text = "Developer & Owner"
+DevSubLabel.TextColor3 = Color3.fromRGB(180, 150, 150)
+DevSubLabel.TextSize = 10
+
+local LToggle = Instance.new("TextButton", ContainerLight)
+LToggle.Size = UDim2.new(1, -12, 0, 34)
+LToggle.Position = UDim2.new(0, 0, 0, 8)
+LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+LToggle.Text = "⚡ Status Lighting: OFF"
+LToggle.TextColor3 = Color3.new(1,1,1)
+LToggle.Font = Enum.Font.GothamBold
+LToggle.TextSize = 11
+Instance.new("UICorner", LToggle).CornerRadius = UDim.new(0, 6)
+
+local ClockBox = Instance.new("TextBox", ContainerLight)
+ClockBox.Size = UDim2.new(1, -12, 0, 30)
+ClockBox.Position = UDim2.new(0, 0, 0, 48)
+ClockBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+ClockBox.PlaceholderText = "ClockTime (Cth: 14)"
+ClockBox.Text = "14"
+ClockBox.TextColor3 = Color3.new(1,1,1)
+ClockBox.Font = Enum.Font.GothamBold
+ClockBox.TextSize = 11
+Instance.new("UICorner", ClockBox).CornerRadius = UDim.new(0, 6)
+
+local BrightBox = Instance.new("TextBox", ContainerLight)
+BrightBox.Size = UDim2.new(1, -12, 0, 30)
+BrightBox.Position = UDim2.new(0, 0, 0, 84)
+BrightBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+BrightBox.PlaceholderText = "Brightness (Cth: 3)"
+BrightBox.Text = "3"
+BrightBox.TextColor3 = Color3.new(1,1,1)
+BrightBox.Font = Enum.Font.GothamBold
+BrightBox.TextSize = 11
+Instance.new("UICorner", BrightBox).CornerRadius = UDim.new(0, 6)
+
+local SBtn = Instance.new("TextButton", ContainerLight)
+SBtn.Size = UDim2.new(1, -12, 0, 32)
+SBtn.Position = UDim2.new(0, 0, 0, 120)
+SBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 20)
+SBtn.Text = "🌑 Global Shadows: OFF"
+SBtn.TextColor3 = Color3.fromRGB(220, 150, 150)
+SBtn.Font = Enum.Font.GothamBold
+SBtn.TextSize = 11
+Instance.new("UICorner", SBtn).CornerRadius = UDim.new(0, 6)
+
+local shadowOff = true
+
+local function updateLight()
+    if not lightOn then return end
+    Lighting.ClockTime = tonumber(ClockBox.Text) or 14
+    Lighting.Brightness = tonumber(BrightBox.Text) or 3
+    Lighting.GlobalShadows = not shadowOff
+    Lighting.OutdoorAmbient = Color3.fromRGB(220, 220, 220)
+end
+
+LToggle.MouseButton1Click:Connect(function()
+    lightOn = not lightOn
+    if lightOn then
+        LToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 60)
+        LToggle.Text = "⚡ Status Lighting: ON"
+        updateLight()
+    else
+        LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+        LToggle.Text = "⚡ Status Lighting: OFF"
+        Lighting.GlobalShadows = true
+        Lighting.Brightness = 1
+        Lighting.ClockTime = 14
+    end
+end)
+
+SBtn.MouseButton1Click:Connect(function()
+    shadowOff = not shadowOff
+    SBtn.Text = shadowOff and "🌑 Global Shadows: OFF" or "🌑 Global Shadows: ON"
+    if lightOn then updateLight() end
+end)
+
+ClockBox:GetPropertyChangedSignal("Text"):Connect(updateLight)
+BrightBox:GetPropertyChangedSignal("Text"):Connect(updateLight)
+
+local function createInfoCard(parent, title, yPos, height)
+    local card = Instance.new("Frame", parent)
+    card.Size = UDim2.new(1, -8, 0, height)
+    card.Position = UDim2.new(0, 0, 0, yPos)
+    card.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+    card.BorderSizePixel = 0
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+    local titleLbl = Instance.new("TextLabel", card)
+    titleLbl.Size = UDim2.new(1, -12, 0, 20)
+    titleLbl.Position = UDim2.new(0, 8, 0, 4)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Font = Enum.Font.GothamBold
+    titleLbl.Text = title
+    titleLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
+    titleLbl.TextSize = 11
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    return card
+end
+
+local profileCard = createInfoCard(ContainerInfo, "👤  PROFILE", 4, 78)
+local AvatarBox = Instance.new("ImageLabel", profileCard)
+AvatarBox.Size = UDim2.new(0, 48, 0, 48)
+AvatarBox.Position = UDim2.new(0, 8, 0, 24)
+AvatarBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AvatarBox.BorderSizePixel = 0
+AvatarBox.Image = "rbxassetid://0"
+Instance.new("UICorner", AvatarBox).CornerRadius = UDim.new(0, 8)
+pcall(function()
+    AvatarBox.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+end)
+
+local profileName = Instance.new("TextLabel", profileCard)
+profileName.Size = UDim2.new(1, -70, 0, 18)
+profileName.Position = UDim2.new(0, 64, 0, 24)
+profileName.BackgroundTransparency = 1
+profileName.Font = Enum.Font.GothamBold
+profileName.Text = LocalPlayer.DisplayName
+profileName.TextColor3 = Color3.fromRGB(255, 255, 255)
+profileName.TextSize = 13
+profileName.TextXAlignment = Enum.TextXAlignment.Left
+profileName.TextTruncate = Enum.TextTruncate.AtEnd
+
+local profileUser = Instance.new("TextLabel", profileCard)
+profileUser.Size = UDim2.new(1, -70, 0, 16)
+profileUser.Position = UDim2.new(0, 64, 0, 42)
+profileUser.BackgroundTransparency = 1
+profileUser.Font = Enum.Font.Gotham
+profileUser.Text = "@" .. LocalPlayer.Name
+profileUser.TextColor3 = Color3.fromRGB(180, 160, 180)
+profileUser.TextSize = 11
+profileUser.TextXAlignment = Enum.TextXAlignment.Left
+
+local profileExtra = Instance.new("TextLabel", profileCard)
+profileExtra.Size = UDim2.new(1, -70, 0, 16)
+profileExtra.Position = UDim2.new(0, 64, 0, 58)
+profileExtra.BackgroundTransparency = 1
+profileExtra.Font = Enum.Font.Gotham
+profileExtra.Text = "ID: " .. LocalPlayer.UserId .. "  |  Age: " .. LocalPlayer.AccountAge .. "D"
+profileExtra.TextColor3 = Color3.fromRGB(160, 140, 160)
+profileExtra.TextSize = 10
+profileExtra.TextXAlignment = Enum.TextXAlignment.Left
+
+local execCard = createInfoCard(ContainerInfo, "⚙️  EXECUTOR", 88, 52)
+local execLabel = Instance.new("TextLabel", execCard)
+execLabel.Size = UDim2.new(1, -16, 1, -24)
+execLabel.Position = UDim2.new(0, 8, 0, 22)
+execLabel.BackgroundTransparency = 1
+execLabel.Font = Enum.Font.Gotham
+execLabel.Text = "Loading..."
+execLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
+execLabel.TextSize = 11
+execLabel.TextXAlignment = Enum.TextXAlignment.Left
+execLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+local gameCard = createInfoCard(ContainerInfo, "🗺️  GAME", 146, 68)
+local gameLabel = Instance.new("TextLabel", gameCard)
+gameLabel.Size = UDim2.new(1, -16, 1, -24)
+gameLabel.Position = UDim2.new(0, 8, 0, 22)
+gameLabel.BackgroundTransparency = 1
+gameLabel.Font = Enum.Font.Gotham
+gameLabel.Text = "Loading..."
+gameLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
+gameLabel.TextSize = 11
+gameLabel.TextXAlignment = Enum.TextXAlignment.Left
+gameLabel.TextYAlignment = Enum.TextYAlignment.Top
+gameLabel.TextWrapped = true
+
+local perfCard = createInfoCard(ContainerInfo, "📊  SESSION & SYSTEM", 220, 78)
+local perfLabel = Instance.new("TextLabel", perfCard)
+perfLabel.Size = UDim2.new(1, -16, 1, -24)
+perfLabel.Position = UDim2.new(0, 8, 0, 22)
+perfLabel.BackgroundTransparency = 1
+perfLabel.Font = Enum.Font.Gotham
+perfLabel.Text = "Loading..."
+perfLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
+perfLabel.TextSize = 11
+perfLabel.TextXAlignment = Enum.TextXAlignment.Left
+perfLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+local cachedMapName = "Loading..."
+pcall(function()
+    local mpInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+    if mpInfo and mpInfo.Name then cachedMapName = mpInfo.Name end
+end)
+
+local scriptLoadTime = tick()
+
+local function formatTime(seconds)
+    local hrs = math.floor(seconds / 3600)
+    local mins = math.floor((seconds % 3600) / 60)
+    local secs = math.floor(seconds % 60)
+    return string.format("%02d:%02d:%02d", hrs, mins, secs)
+end
+
+local function getExecInfo()
+    local name, ver = "Unknown", "v1.0"
+    pcall(function()
+        if identifyexecutor then
+            name, ver = identifyexecutor()
+        elseif getexecutorname then
+            name = getexecutorname()
+        end
+    end)
+    return tostring(name), tostring(ver or "Latest")
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            local fps = math.floor(Workspace:GetRealPhysicsFPS())
+            local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+            local memory = math.floor(game:GetService("Stats"):GetMemoryUsageMbForTag(Enum.DeveloperMemoryTag.Script))
+            local execName, execVer = getExecInfo()
+            local isPrem = LocalPlayer.MembershipType == Enum.MembershipType.Premium and "Yes" or "No"
+            local sessionSecs = math.floor(tick() - scriptLoadTime)
+            local uptimeSecs = math.floor(workspace.DistributedGameTime)
+            execLabel.Text = execName .. "  |  " .. execVer
+            gameLabel.Text = cachedMapName .. "\nPlace: " .. game.PlaceId .. "  |  Players: " .. #Players:GetPlayers() .. "\nServer: " .. string.sub(game.JobId, 1, 8) .. "..."
+            perfLabel.Text = "Session: " .. formatTime(sessionSecs) .. "  |  Uptime: " .. formatTime(uptimeSecs) .. 
+                             "\nFPS: " .. fps .. "   Ping: " .. ping .. "ms   Mem: " .. memory .. "MB" ..
+                             "\nPremium: " .. isPrem
+        end)
+    end
+end)
+
+local notificationCounts = {}
+local notificationDurations = {
+    ["JOB_STARTED"] = 3,
+    ["JOB_ARRIVED_TARGET"] = 6,
+    ["JOB_RETURNING"] = 4,
+    ["JOB_FINISHED"] = 6,
+    ["JOB_ENDED"] = 6,
+    ["JOB_TIMEOUT"] = 6,
+    ["JOB_CANCELLED_SUSPICIOUS"] = 6,
+    ["JOB_MUST_BE_IN_VEHICLE"] = 3,
+    ["JOB_SERVER_BUSY"] = 4,
+    ["JOB_NO_TARGET"] = 4,
+    ["JOB_SPAWN_FAIL"] = 4,
+    ["JOB_ALREADY_ACTIVE"] = 3,
+    ["JOB_NO_CHARACTER"] = 4,
+    ["DEFAULT"] = 3
+}
+
+if deliveryRemote then
+    deliveryRemote.OnClientEvent:Connect(function(param1, param2)
+        if typeof(param1) == "string" then
+            if param1 == "JOB_STARTED" then
+                currentJobId = param2
+                jobState = "DELIVERING"
+            elseif param1 == "JOB_ARRIVED_TARGET" then
+                jobState = "WAITING"
+            elseif param1 == "JOB_RETURNING" then
+                jobState = "RETURNING"
+            elseif param1 == "JOB_FINISHED" or param1 == "JOB_ENDED" or param1 == "JOB_TIMEOUT" or param1 == "JOB_SPAWN_FAIL" then
+                jobState = "NONE"
+                currentTargetPosition = nil
+                adTargetPos = nil
+                adFinishPos = nil
+                currentJobId = nil
+                if autoDeliveryActive then
+                    task.spawn(function()
+                        task.wait(2)
+                        if autoDeliveryActive and jobState == "NONE" then
+                            touchStartJob()
+                        end
+                    end)
+                end
+            elseif param1 == "JOB_CANCELLED_SUSPICIOUS" then
+                jobState = "NONE"
+                currentTargetPosition = nil
+                adTargetPos = nil
+                adFinishPos = nil
+                currentJobId = nil
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "⚠️ Suspicious! Cooldown 5s"
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                    AD_LED.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+                end
+                task.spawn(function()
+                    task.wait(5)
+                    if autoDeliveryActive or autoDriveActive then
+                        touchStartJob()
+                    end
+                end)
+            elseif param1 == "JOB_MUST_BE_IN_VEHICLE" then
+                if autoDriveActive then
+                    task.spawn(function()
+                        task.wait(0.5)
+                        sitInVehicle()
+                    end)
+                end
+            elseif param1 == "JOB_SERVER_BUSY" then
+                task.spawn(function()
+                    task.wait(5)
+                    if autoDeliveryActive or autoDriveActive then
+                        touchStartJob()
+                    end
+                end)
+            elseif param1 == "JOB_NO_TARGET" then
+                task.spawn(function()
+                    task.wait(3)
+                    if autoDeliveryActive or autoDriveActive then
+                        touchStartJob()
+                    end
+                end)
+            elseif param1 == "JOB_ALREADY_ACTIVE" then
+            elseif param1 == "JOB_NO_CHARACTER" then
+                task.spawn(function()
+                    task.wait(2)
+                    if LockSeatEnabled then lockSeat_bindListener() end
+                    if autoDriveActive then sitInVehicle() end
+                end)
+            end
+            notificationCounts[param1] = notificationCounts[param1] or 0
+            if notificationCounts[param1] < 2 then
+                notificationCounts[param1] = notificationCounts[param1] + 1
+                pcall(function()
+                    local textMsg = "Status Job: " .. param1
+                    if param1 == "JOB_MUST_BE_IN_VEHICLE" then textMsg = "Harus berada di dalam kendaraan!"
+                    elseif param1 == "JOB_CANCELLED_SUSPICIOUS" then textMsg = "⚠️ Terdeteksi Suspicious!"
+                    elseif param1 == "JOB_FINISHED" then textMsg = "🎉 Job Selesai!"
+                    elseif param1 == "JOB_ALREADY_ACTIVE" then textMsg = "Job sudah aktif!"
+                    elseif param1 == "JOB_SERVER_BUSY" then textMsg = "Server sibuk!"
+                    elseif param1 == "JOB_NO_TARGET" then textMsg = "Ga ada target!"
+                    end
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "DV Delivery System",
+                        Text = textMsg,
+                        Duration = notificationDurations[param1] or 3
+                    })
+                end)
+            end
+        elseif typeof(param1) == "Vector3" then
+    if param2 == nil or param2 == currentJobId then
+        currentTargetPosition = param1
+        if jobState == "RETURNING" then
+            if not adFinishPos then
+                adFinishPos = param1
+                warn("[DV] Finish pos LOCKED:", adFinishPos)
+            end
+        else
+            if not adTargetPos then
+                adTargetPos = param1
+            end
+        end
+    end
+        elseif param1 == nil then
+            jobState = "NONE"
+            currentTargetPosition = nil
+            adTargetPos = nil
+            adFinishPos = nil
+            currentJobId = nil
+        end
+    end)
+end
+
+task.spawn(function()
+    local frameSkip = 0
+    while true do
+        task.wait(0.05)
+        if not autoDeliveryActive then 
+            task.wait(0.5)
+        else
+            pcall(function()
+                local char = LocalPlayer.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+                if deliverySettings.AntiAFK then
+                    frameSkip = frameSkip + 1
+                    if frameSkip % 10 == 0 then
+                        pcall(function()
+                            VirtualUser:CaptureController()
+                            VirtualUser:ClickButton2(Vector2.new())
+                        end)
+                    end
+                end
+                if currentTargetPosition and autoDeliveryActive then
+                    if jobState == "RETURNING" then
+                        executeReturnToFinish(currentTargetPosition)
+                    else
+                        executeDeliveryToTarget(currentTargetPosition)
+                    end
+                    if not autoDeliveryActive then return end
+                    task.wait(getHumanizedDelay())
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(15)
+        if autoDriveActive or autoDeliveryActive then
+            pcall(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(_G_ActionDelay)
+        if not remoteEventConnection then hookGameRemotes() end
+        if _G_AutoFarmBrewok then
+            pcall(function()
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                local userId = LocalPlayer.UserId
+                local activeJobs = Workspace:FindFirstChild("Ekonomi") and Workspace.Ekonomi:FindFirstChild("ActiveJobs")
+                local myJob = activeJobs and activeJobs:FindFirstChild("Brewog_" .. tostring(userId))
+                local targetCFrame = nil
+                if not myJob then
+                    _G_CurrentStage = "Progress1"
+                    local jobTrigger = Workspace.Ekonomi.Job:FindFirstChild("Brewog")
+                    if jobTrigger then
+                        targetCFrame = jobTrigger:IsA("BasePart") and jobTrigger.CFrame or jobTrigger:GetPivot()
+                    end
+                else
+                    local tempatAmbil = myJob:FindFirstChild("TempatAmbil")
+                    local tempatTaruh1 = myJob:FindFirstChild("Taruh1")
+                    local tempatTaruh2 = myJob:FindFirstChild("Taruh2")
+                    local holdingTool = char:FindFirstChildOfClass("Tool")
+                    local targetPart = nil
+                    if not holdingTool and tempatAmbil then
+                        targetPart = tempatAmbil
+                    else
+                        if _G_CurrentStage == "Stage2" and tempatTaruh2 then
+                            targetPart = tempatTaruh2
+                        else
+                            targetPart = tempatTaruh1 or tempatTaruh2
+                        end
+                    end
+                    if targetPart then targetCFrame = targetPart.CFrame end
+                end
+                if targetCFrame then burstInstantTeleport(targetCFrame) end
+            end)
+        end
+    end
+end)
+
+LocalPlayer.CharacterRemoving:Connect(function()
+    currentTargetPosition = nil
+    adTargetPos = nil
+    adFinishPos = nil
+    jobState = "NONE"
+    _lastProgressTick = tick()
+end)
