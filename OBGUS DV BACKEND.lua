@@ -1,4 +1,15 @@
--- hide.lat / lite / 747dab587641588f036d97c8
+--[[
+██████╗ ██╗   ██╗    ██╗  ██╗██╗   ██╗██████╗
+██╔══██╗██║   ██║    ██║  ██║██║   ██║██╔══██╗
+██║  ██║██║   ██║    ███████║██║   ██║██████╔╝
+██║  ██║╚██╗ ██╔╝    ██╔══██║██║   ██║██╔══██╗
+██████╔╝ ╚████╔╝     ██║  ██║╚██████╔╝██████╔╝
+╚═════╝   ╚═══╝      ╚═╝  ╚═╝ ╚═════╝ ╚═════╝
+
+              ⚡ DV HUB ⚡
+         PROTECTED & SECURED
+             © 2026 DV HUB
+]]
 local jiiOiIO00OLL=(getfenv and getfenv(1)) or _ENV or _G
 local lLilIoiol,ILjjjI0l0jIL1=string.byte,string.char
 local function lolO0lo(jOL1OL,Ll1lO1L0LoOil)
