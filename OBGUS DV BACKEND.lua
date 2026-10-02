@@ -1,22 +1,3 @@
---[[
-██████╗ ██╗   ██╗    ███████╗██╗  ██╗██████╗ ██╗      ██████╗ ██╗████████╗███████╗
-██╔══██╗██║   ██║    ██╔════╝╚██╗██╔╝██╔══██╗██║     ██╔═══██╗██║╚══██╔══╝██╔════╝
-██║  ██║██║   ██║    █████╗   ╚███╔╝ ██████╔╝██║     ██║   ██║██║   ██║   ███████╗
-██║  ██║╚██╗ ██╔╝    ██╔══╝   ██╔██╗ ██╔═══╝ ██║     ██║   ██║██║   ██║   ╚════██║
-██████╔╝ ╚████╔╝     ███████╗██╔╝ ██╗██║     ███████╗╚██████╔╝██║   ██║   ███████║
-╚═════╝   ╚═══╝      ╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝
-
-                    ⚡ DV EXPLOITS HUB ⚡
-                Protected & Secured by DV Exploits
-                    Copyright © 2026 - All Rights Reserved
-
-  ┌─────────────────────────────────────────────────┐
-  │  Owner    : GZ                     │  
-  │  Version  : v9.0                                │
-  │  License  : Private Use Only                    │
-  │  ⚠️  Dilarang menjual ulang tanpa izin!         │
-  └─────────────────────────────────────────────────┘
-]]
 local LI0jj1jj0lI=(getfenv and getfenv(1)) or _ENV or _G
 local i11llO,iLoIli11ILi=string.byte,string.char
 local function llOOoIi1llio(iLi0lo,LLILiIj1i)
