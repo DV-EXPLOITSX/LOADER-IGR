@@ -129,6 +129,8 @@ local headTagConnections = {}
 local roleCache = {}
 local roleCacheTime = 0
 local borderAnimationConnection = nil
+local roleBadgeGrad = nil
+local startBorderAnimation
 
 local function HttpGet(url)
     local ok, res = pcall(function() return game:HttpGet(url, true) end)
@@ -550,7 +552,7 @@ task.spawn(function()
     while loadingBorder and loadingBorder.Parent do
         rot = (rot + 12) % 360
         loadGrad.Rotation = rot
-        task.wait(0.016)
+        task.wait(0.05)
     end
 end)
 
@@ -723,7 +725,7 @@ mainGrad.Color = ColorSequence.new({
 })
 mainGrad.Parent = mainWrap
 
-local function startBorderAnimation(role)
+startBorderAnimation = function(role)
     if borderAnimationConnection then
         borderAnimationConnection:Disconnect()
         borderAnimationConnection = nil
@@ -1095,7 +1097,7 @@ task.spawn(function()
     while ownerPanel and ownerPanel.Parent do
         rot = (rot + 12) % 360
         opGrad.Rotation = rot
-        task.wait(0.016)
+        task.wait(0.05)
     end
 end)
 
@@ -1763,8 +1765,6 @@ local currentSearchFilter = ""
 local currentRoleFilter = "all"
 local currentBanDuration = "permanent"
 
-local roleBadgeGrad = nil
-
 local function SetRoleVisual(role)
     if roleBadgeGrad then
         roleBadgeGrad:Destroy()
@@ -1859,7 +1859,9 @@ local function SetRoleVisual(role)
 
     reqBtn.Visible = (role == "denied" or role == "expired")
     
-    startBorderAnimation(role)
+    if startBorderAnimation then
+        startBorderAnimation(role)
+    end
 end
 
 local function DoCheckAccount()
