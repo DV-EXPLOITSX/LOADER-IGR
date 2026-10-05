@@ -586,7 +586,7 @@ local function flyToPosition(vehicle, targetPos, label)
     if not vehicle or not vehicle.PrimaryPart then return false end
     local ownerId = vehicle:GetAttribute("OwnerUserId")
     if ownerId ~= nil and ownerId ~= LocalPlayer.UserId then return false end
-    
+
     for _, part in ipairs(vehicle:GetDescendants()) do
         if part:IsA("BasePart") then
             part.Anchored = false
@@ -596,17 +596,10 @@ local function flyToPosition(vehicle, targetPos, label)
         end
     end
     task.wait(0.15)
-    
+
     local primaryPart = vehicle.PrimaryPart
     local driveSeat = getDriveSeat()
-    
-    local flyTargetY
-    if noFlyMode then
-        flyTargetY = getGroundY(targetPos.X, targetPos.Z, targetPos.Y, vehicle)
-    else
-        flyTargetY = targetPos.Y + flyHeight
-    end
-    
+
     local char = LocalPlayer.Character
     local humanoid = char and char:FindFirstChildOfClass("Humanoid")
     if not humanoid or not humanoid.SeatPart then
@@ -616,13 +609,13 @@ local function flyToPosition(vehicle, targetPos, label)
         humanoid = char and char:FindFirstChildOfClass("Humanoid")
         if not humanoid or not humanoid.SeatPart then return false end
     end
-    
+
     pcall(function()
         for _, part in ipairs(vehicle:GetDescendants()) do
             if part:IsA("BasePart") then part:SetNetworkOwner(LocalPlayer) end
         end
     end)
-    
+
     local savedState = {}
     pcall(function()
         for _, part in ipairs(vehicle:GetDescendants()) do
@@ -639,7 +632,7 @@ local function flyToPosition(vehicle, targetPos, label)
             end
         end
     end)
-    
+
     if noClipEnabled then
         pcall(function()
             for _, part in ipairs(vehicle:GetDescendants()) do
@@ -651,23 +644,162 @@ local function flyToPosition(vehicle, targetPos, label)
             end
         end)
     end
-    
+
+    local function raycastGround(x, z, fromY)
+        local rp = RaycastParams.new()
+        rp.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+        rp.FilterType = Enum.RaycastFilterType.Exclude
+        rp.IgnoreWater = true
+        local origin = Vector3.new(x, fromY + 800, z)
+        local hit = Workspace:Raycast(origin, Vector3.new(0, -3000, 0), rp)
+        if hit then return hit.Position.Y + groundHeight end
+        return nil
+    end
+
     if noFlyMode then
+        local gy = raycastGround(targetPos.X, targetPos.Z, targetPos.Y)
+        if not gy then
+            gy = raycastGround(targetPos.X, targetPos.Z, primaryPart.Position.Y)
+        end
+        if not gy then
+            gy = primaryPart.Position.Y
+        end
+        local targetY = gy
+
         if AD_PhaseLabel then
-            AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
+            AD_PhaseLabel.Text = "🛞 Phase: GROUND"
             AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         end
+
+        local groundTimeout = tick() + 60
+        local runConn
+        local done = false
+        local groundTimer = 0
+
+        runConn = RunService.Heartbeat:Connect(function(dt)
+            if done or not autoDriveActive then
+                if runConn then runConn:Disconnect() end
+                return
+            end
+            if tick() > groundTimeout then
+                if runConn then runConn:Disconnect() end
+                return
+            end
+
+            if noClipEnabled then
+                pcall(function()
+                    for _, part in ipairs(vehicle:GetDescendants()) do
+                        if part:IsA("BasePart") and part ~= driveSeat then
+                            part.CanCollide = false
+                            part.CanQuery = false
+                            part.CanTouch = false
+                        end
+                    end
+                end)
+            end
+
+            local currentPos = primaryPart.Position
+
+            groundTimer = groundTimer + dt
+            if groundTimer >= 0.1 then
+                groundTimer = 0
+                local newY = raycastGround(currentPos.X, currentPos.Z, currentPos.Y)
+                if newY then
+                    targetY = newY
+                end
+            end
+
+            local horizDist = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
+
+            if AD_DistanceLabel then
+                AD_DistanceLabel.Text = "📏 Jarak: " .. math.floor(horizDist) .. " studs"
+            end
+            if AD_ProgressFill then
+                local prog = math.clamp(1 - (horizDist / 500), 0, 1)
+                AD_ProgressFill.Size = UDim2.new(prog, 0, 1, 0)
+                if AD_ProgressText then
+                    AD_ProgressText.Text = math.floor(prog * 100) .. "%"
+                end
+            end
+
+            if horizDist < 1.5 then
+                pcall(function()
+                    primaryPart.CFrame = CFrame.new(targetPos.X, targetY, targetPos.Z)
+                    primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end)
+                if runConn then runConn:Disconnect() end
+                done = true
+                return
+            end
+
+            local dir = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Unit
+            local speed
+            if dynamicSpeed then
+                if horizDist > 150 then speed = flySpeed
+                elseif horizDist > 50 then speed = flySpeed * (0.5 + 0.5 * (horizDist / 150))
+                else speed = flySpeed * 0.4 end
+            else
+                speed = flySpeed
+            end
+            speed = math.max(speed, 30)
+            speed = speed * 0.7
+
+            pcall(function()
+                local stepSize = math.max(speed * 0.05, 1)
+                local newPos = Vector3.new(
+                    currentPos.X + dir.X * stepSize,
+                    targetY,
+                    currentPos.Z + dir.Z * stepSize
+                )
+                primaryPart.CFrame = CFrame.new(newPos, Vector3.new(targetPos.X, targetY, targetPos.Z))
+                primaryPart.AssemblyLinearVelocity = Vector3.new(dir.X * speed, 0, dir.Z * speed)
+                primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
+            end)
+        end)
+
+        while not done and autoDriveActive and (tick() < groundTimeout) do
+            task.wait(0.1)
+        end
+        if runConn then runConn:Disconnect() end
+
+        if noClipEnabled then
+            pcall(function()
+                for part, state in pairs(savedState) do
+                    if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                        part.CanCollide = state.CanCollide
+                        part.CanQuery = state.CanQuery
+                        part.CanTouch = state.CanTouch
+                    end
+                end
+            end)
+        end
+
+        if not autoDriveActive then return false end
+
         pcall(function()
-            primaryPart.CFrame = CFrame.new(primaryPart.Position.X, flyTargetY, primaryPart.Position.Z)
+            local finalY = raycastGround(targetPos.X, targetPos.Z, targetPos.Y)
+            if not finalY then finalY = raycastGround(targetPos.X, targetPos.Z, primaryPart.Position.Y) end
+            if not finalY then finalY = primaryPart.Position.Y end
+            primaryPart.CFrame = CFrame.new(targetPos.X, finalY, targetPos.Z)
             primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
             primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
         end)
-        task.wait(0.1)
-    else
+        task.wait(0.2)
+
         if AD_PhaseLabel then
-            AD_PhaseLabel.Text = "🎯 Phase: ASCEND"
+            AD_PhaseLabel.Text = "🛞 Phase: LANDED"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+        end
+    else
+        local flyTargetY = targetPos.Y + flyHeight
+
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "✈️ Phase: ASCEND"
             AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
         end
+
         local ascendTimeout = tick() + 5
         while autoDriveActive and (tick() < ascendTimeout) do
             local currentY = primaryPart.Position.Y
@@ -681,142 +813,128 @@ local function flyToPosition(vehicle, targetPos, label)
             end)
             task.wait(0.05)
         end
-    end
-    
-    if not autoDriveActive then
-        if noClipEnabled then
-            pcall(function()
-                for part, state in pairs(savedState) do
-                    if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
-                        part.CanCollide = state.CanCollide
-                        part.CanQuery = state.CanQuery
-                        part.CanTouch = state.CanTouch
+
+        if not autoDriveActive then
+            if noClipEnabled then
+                pcall(function()
+                    for part, state in pairs(savedState) do
+                        if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                            part.CanCollide = state.CanCollide
+                            part.CanQuery = state.CanQuery
+                            part.CanTouch = state.CanTouch
+                        end
                     end
-                end
-            end)
+                end)
+            end
+            return false
         end
-        return false
-    end
-    
-    if AD_PhaseLabel then
-        if noFlyMode then
-            AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
-        else
-            AD_PhaseLabel.Text = "🎯 Phase: FLY"
+
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "✈️ Phase: FLY"
             AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
         end
-    end
-    
-    local flyCFrame = CFrame.new(targetPos.X, flyTargetY, targetPos.Z)
-    local flyTimeout = tick() + 30
-    local runConnection
-    local flyDone = false
-    
-    runConnection = RunService.Heartbeat:Connect(function()
-        if flyDone or not autoDriveActive then
-            if runConnection then runConnection:Disconnect() end
-            return
-        end
-        if tick() > flyTimeout then
-            if runConnection then runConnection:Disconnect() end
-            return
-        end
-        
-        if noClipEnabled then
-            pcall(function()
-                for _, part in ipairs(vehicle:GetDescendants()) do
-                    if part:IsA("BasePart") and part ~= driveSeat then
-                        part.CanCollide = false
-                        part.CanQuery = false
-                        part.CanTouch = false
+
+        local flyCFrame = CFrame.new(targetPos.X, flyTargetY, targetPos.Z)
+        local flyTimeout = tick() + 30
+        local runConnection
+        local flyDone = false
+
+        runConnection = RunService.Heartbeat:Connect(function()
+            if flyDone or not autoDriveActive then
+                if runConnection then runConnection:Disconnect() end
+                return
+            end
+            if tick() > flyTimeout then
+                if runConnection then runConnection:Disconnect() end
+                return
+            end
+
+            if noClipEnabled then
+                pcall(function()
+                    for _, part in ipairs(vehicle:GetDescendants()) do
+                        if part:IsA("BasePart") and part ~= driveSeat then
+                            part.CanCollide = false
+                            part.CanQuery = false
+                            part.CanTouch = false
+                        end
                     end
+                end)
+            end
+
+            local currentPos = primaryPart.Position
+            local dist = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
+
+            if AD_DistanceLabel then
+                AD_DistanceLabel.Text = "📏 Jarak: " .. math.floor(dist) .. " studs"
+            end
+            if AD_ProgressFill then
+                local prog = math.clamp(1 - (dist / 500), 0, 1)
+                AD_ProgressFill.Size = UDim2.new(prog, 0, 1, 0)
+                if AD_ProgressText then
+                    AD_ProgressText.Text = math.floor(prog * 100) .. "%"
                 end
-            end)
-        end
-        
-        local currentPos = primaryPart.Position
-        
-        if noFlyMode then
-            flyCFrame = CFrame.new(targetPos.X, flyTargetY, targetPos.Z)
-        end
-        
-        local dist = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Magnitude
-        
-        if AD_DistanceLabel then
-            AD_DistanceLabel.Text = "📏 Jarak: " .. math.floor(dist) .. " studs"
-        end
-        if AD_ProgressFill then
-            local prog = math.clamp(1 - (dist / 500), 0, 1)
-            AD_ProgressFill.Size = UDim2.new(prog, 0, 1, 0)
-            AD_ProgressText.Text = math.floor(prog * 100) .. "%"
-        end
-        
-        if dist < 5 then
+            end
+
+            if dist < 5 then
+                pcall(function()
+                    primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end)
+                if runConnection then runConnection:Disconnect() end
+                flyDone = true
+                return
+            end
+
+            local dir = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Unit
+            local speed
+            if dynamicSpeed then
+                if dist > 150 then speed = flySpeed
+                elseif dist > 50 then speed = flySpeed * (0.5 + 0.5 * (dist / 150))
+                else speed = flySpeed * 0.4 end
+            else
+                speed = flySpeed
+            end
+            speed = math.max(speed, 30)
+
             pcall(function()
-                primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                local stepSize = math.max(speed * 0.05, 1)
+                local newPos = Vector3.new(
+                    currentPos.X + dir.X * stepSize,
+                    flyTargetY,
+                    currentPos.Z + dir.Z * stepSize
+                )
+                primaryPart.CFrame = CFrame.new(newPos, Vector3.new(flyCFrame.X, flyTargetY, flyCFrame.Z))
+                primaryPart.AssemblyLinearVelocity = Vector3.new(dir.X * speed, 0, dir.Z * speed)
                 primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
             end)
-            if runConnection then runConnection:Disconnect() end
-            flyDone = true
-            return
-        end
-        
-        local dir = (Vector3.new(flyCFrame.X, 0, flyCFrame.Z) - Vector3.new(currentPos.X, 0, currentPos.Z)).Unit
-        local speed
-        if dynamicSpeed then
-            if dist > 150 then speed = flySpeed
-            elseif dist > 50 then speed = flySpeed * (0.5 + 0.5 * (dist / 150))
-            else speed = flySpeed * 0.4 end
-        else
-            speed = flySpeed
-        end
-        speed = math.max(speed, 30)
-        
-        if noFlyMode then
-            speed = speed * 0.7
-        end
-        
-        pcall(function()
-            local stepSize = math.max(speed * 0.05, 1)
-            local newPos = Vector3.new(
-                currentPos.X + dir.X * stepSize,
-                flyTargetY,
-                currentPos.Z + dir.Z * stepSize
-            )
-            primaryPart.CFrame = CFrame.new(newPos, Vector3.new(flyCFrame.X, flyTargetY, flyCFrame.Z))
-            primaryPart.AssemblyLinearVelocity = Vector3.new(dir.X * speed, 0, dir.Z * speed)
-            primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-            pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
         end)
-    end)
-    
-    while not flyDone and autoDriveActive and (tick() < flyTimeout) do
-        task.wait(0.1)
-    end
-    if runConnection then runConnection:Disconnect() end
-    
-    if not autoDriveActive then
-        if noClipEnabled then
-            pcall(function()
-                for part, state in pairs(savedState) do
-                    if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
-                        part.CanCollide = state.CanCollide
-                        part.CanQuery = state.CanQuery
-                        part.CanTouch = state.CanTouch
-                    end
-                end
-            end)
+
+        while not flyDone and autoDriveActive and (tick() < flyTimeout) do
+            task.wait(0.1)
         end
-        return false
-    end
-    
-    if not noFlyMode then
+        if runConnection then runConnection:Disconnect() end
+
+        if not autoDriveActive then
+            if noClipEnabled then
+                pcall(function()
+                    for part, state in pairs(savedState) do
+                        if part and part.Parent and state ~= "SKIP" and type(state) == "table" then
+                            part.CanCollide = state.CanCollide
+                            part.CanQuery = state.CanQuery
+                            part.CanTouch = state.CanTouch
+                        end
+                    end
+                end)
+            end
+            return false
+        end
+
         if AD_PhaseLabel then
-            AD_PhaseLabel.Text = "🎯 Phase: DESCEND"
+            AD_PhaseLabel.Text = "✈️ Phase: DESCEND"
             AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 150, 255)
         end
-        
+
         local descendTimeout = tick() + 10
         while autoDriveActive and (tick() < descendTimeout) do
             local currentPos = primaryPart.Position
@@ -836,51 +954,41 @@ local function flyToPosition(vehicle, targetPos, label)
             end)
             task.wait(0.05)
         end
-    end
-    
-    if AD_PhaseLabel then
-        AD_PhaseLabel.Text = "🎯 Phase: LAND"
-        AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
-    end
-    
-pcall(function()
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    
-    local rayOrigin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
-    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -1000, 0), rayParams)
-    
-    local landY
-    if result then
-        landY = result.Position.Y + groundHeight
-    else
-        landY = targetPos.Y + groundHeight
-    end
-    
-    primaryPart.CFrame = CFrame.new(targetPos.X, landY, targetPos.Z)
-    primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-    primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-end)
-task.wait(0.3)
 
-pcall(function()
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    
-    local rayOrigin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
-    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -1000, 0), rayParams)
-    
-    if result then
-        local finalY = result.Position.Y + groundHeight
-        primaryPart.CFrame = CFrame.new(targetPos.X, finalY, targetPos.Z)
-        primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        if AD_PhaseLabel then
+            AD_PhaseLabel.Text = "✈️ Phase: LAND"
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+        end
+
+        pcall(function()
+            local rp = RaycastParams.new()
+            rp.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+            rp.FilterType = Enum.RaycastFilterType.Exclude
+            local origin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
+            local result = Workspace:Raycast(origin, Vector3.new(0, -1000, 0), rp)
+            local landY = result and (result.Position.Y + groundHeight) or (targetPos.Y + groundHeight)
+            primaryPart.CFrame = CFrame.new(targetPos.X, landY, targetPos.Z)
+            primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        end)
+        task.wait(0.3)
+
+        pcall(function()
+            local rp = RaycastParams.new()
+            rp.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+            rp.FilterType = Enum.RaycastFilterType.Exclude
+            local origin = Vector3.new(targetPos.X, targetPos.Y + 500, targetPos.Z)
+            local result = Workspace:Raycast(origin, Vector3.new(0, -1000, 0), rp)
+            if result then
+                local finalY = result.Position.Y + groundHeight
+                primaryPart.CFrame = CFrame.new(targetPos.X, finalY, targetPos.Z)
+                primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end)
+        task.wait(0.1)
     end
-end)
-task.wait(0.1)
-    
+
     if noClipEnabled then
         pcall(function()
             for part, state in pairs(savedState) do
@@ -892,50 +1000,67 @@ task.wait(0.1)
             end
         end)
     end
-    
+
     local freezeStart = tick()
     local freezeMaxTime = 30
     local freezeTargetPos = Vector3.new(targetPos.X, primaryPart.Position.Y, targetPos.Z)
-    local TOLERANCE = 0.5
-    
+    local TOLERANCE = 0.15
+
     local freezeGyro = Instance.new("BodyGyro")
     freezeGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     freezeGyro.P = 100000
     freezeGyro.D = 500
     freezeGyro.CFrame = primaryPart.CFrame
     freezeGyro.Parent = primaryPart
-    
+
+    local finalGroundTimer = 0
     while autoDriveActive and (tick() - freezeStart) < freezeMaxTime do
         if jobState == "WAITING" or jobState == "RETURNING" or jobState == "NONE" then
             break
         end
-        
+
         pcall(function()
+            if noFlyMode then
+                finalGroundTimer = finalGroundTimer + 0.03
+                if finalGroundTimer >= 0.1 then
+                    finalGroundTimer = 0
+                    local rp = RaycastParams.new()
+                    rp.FilterDescendantsInstances = {vehicle, LocalPlayer.Character}
+                    rp.FilterType = Enum.RaycastFilterType.Exclude
+                    rp.IgnoreWater = true
+                    local origin = Vector3.new(freezeTargetPos.X, freezeTargetPos.Y + 800, freezeTargetPos.Z)
+                    local hit = Workspace:Raycast(origin, Vector3.new(0, -3000, 0), rp)
+                    if hit then
+                        freezeTargetPos = Vector3.new(freezeTargetPos.X, hit.Position.Y + groundHeight, freezeTargetPos.Z)
+                    end
+                end
+            end
+
             local currentPos = primaryPart.Position
             local dist = (currentPos - freezeTargetPos).Magnitude
-            
+
             if dist > TOLERANCE then
                 primaryPart.CFrame = CFrame.new(freezeTargetPos) * (primaryPart.CFrame - primaryPart.CFrame.Position)
             end
-            
+
             primaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
             primaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-            
+
             freezeGyro.CFrame = CFrame.new(primaryPart.Position, primaryPart.Position + primaryPart.CFrame.LookVector)
-            
+
             pcall(function() primaryPart:SetNetworkOwner(LocalPlayer) end)
         end)
-        
+
         local chk = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if chk and not chk.SeatPart then
             sitInVehicle()
         end
-        
+
         task.wait(0.03)
     end
-    
+
     if freezeGyro then freezeGyro:Destroy() end
-    
+
     if AD_PhaseLabel then
         if jobState == "WAITING" or jobState == "RETURNING" then
             AD_PhaseLabel.Text = "🎯 Phase: DONE (confirmed)"
@@ -1644,6 +1769,13 @@ AD_HeightBox.FocusLost:Connect(function()
         AD_HeightBox.Text = tostring(val)
     else
         AD_HeightBox.Text = tostring(flyHeight)
+    end
+end)
+
+AD_SpeedBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local val = tonumber(AD_SpeedBox.Text)
+    if val and val >= 20 and val <= 500 then
+        flySpeed = val
     end
 end)
 
