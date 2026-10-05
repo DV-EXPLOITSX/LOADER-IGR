@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -27,6 +28,107 @@ local ROLE_ICONS = {
 local function getRoleIcon(role)
     return ROLE_ICONS[role] or nil
 end
+
+local HEAD_TAG_CONFIG = {
+    owner = {
+        text = "OWNER",
+        image = TAG_ASSETS.owner,
+        color = Color3.fromRGB(255, 215, 0),
+        bgColor = Color3.fromRGB(30, 20, 0),
+        strokeColor = Color3.fromRGB(255, 215, 0),
+        rainbow = true,
+        iconSize = 28,
+        textSize = 15,
+        billboardSize = UDim2.new(0, 140, 0, 38),
+        cornerRadius = 8,
+        strokeThickness = 2,
+    },
+    admin = {
+        text = "ADMIN",
+        image = TAG_ASSETS.admin,
+        color = Color3.fromRGB(100, 180, 255),
+        bgColor = Color3.fromRGB(0, 15, 35),
+        strokeColor = Color3.fromRGB(100, 180, 255),
+        rainbow = false,
+        iconSize = 26,
+        textSize = 14,
+        billboardSize = UDim2.new(0, 130, 0, 36),
+        cornerRadius = 8,
+        strokeThickness = 2,
+    },
+    vip = {
+        text = "VIP",
+        image = TAG_ASSETS.vip,
+        color = Color3.fromRGB(255, 215, 0),
+        bgColor = Color3.fromRGB(25, 20, 0),
+        strokeColor = Color3.fromRGB(255, 215, 0),
+        rainbow = false,
+        iconSize = 24,
+        textSize = 14,
+        billboardSize = UDim2.new(0, 120, 0, 34),
+        cornerRadius = 8,
+        strokeThickness = 2,
+    },
+    user = {
+        text = "USER",
+        image = TAG_ASSETS.user,
+        color = Color3.fromRGB(100, 255, 150),
+        bgColor = Color3.fromRGB(8, 25, 12),
+        strokeColor = Color3.fromRGB(100, 255, 150),
+        rainbow = false,
+        iconSize = 22,
+        textSize = 13,
+        billboardSize = UDim2.new(0, 110, 0, 32),
+        cornerRadius = 7,
+        strokeThickness = 1.5,
+    },
+}
+
+local ROLE_THEMES = {
+    owner = {
+        borderColors = {
+            Color3.fromRGB(255, 0, 0),
+            Color3.fromRGB(255, 255, 0),
+            Color3.fromRGB(0, 255, 0),
+            Color3.fromRGB(0, 255, 255),
+            Color3.fromRGB(0, 100, 255),
+            Color3.fromRGB(255, 0, 255),
+        },
+        borderSpeed = 12,
+    },
+    admin = {
+        borderColors = {
+            Color3.fromRGB(0, 0, 0),
+            Color3.fromRGB(100, 180, 255),
+            Color3.fromRGB(0, 0, 0),
+            Color3.fromRGB(150, 220, 255),
+        },
+        borderSpeed = 10,
+    },
+    vip = {
+        borderColors = {
+            Color3.fromRGB(0, 0, 0),
+            Color3.fromRGB(255, 215, 0),
+            Color3.fromRGB(0, 0, 0),
+            Color3.fromRGB(255, 230, 100),
+        },
+        borderSpeed = 10,
+    },
+    user = {
+        borderColors = {
+            Color3.fromRGB(0, 0, 0),
+            Color3.fromRGB(100, 255, 150),
+        },
+        borderSpeed = 8,
+    },
+}
+
+local HEAD_TAGS_ENABLED = true
+local activeHeadTags = {}
+local headTagConnections = {}
+local roleCache = {}
+local roleCacheTime = 0
+local borderAnimationConnection = nil
 
 local function HttpGet(url)
     local ok, res = pcall(function() return game:HttpGet(url, true) end)
@@ -129,8 +231,8 @@ local CHAT_STATE = { isOpen = false, isEnabled = true, autoClear = true, clearIn
 local ROLE_COLORS = {
     owner = Color3.fromRGB(255, 215, 0),
     admin = Color3.fromRGB(100, 180, 255),
-    vip = Color3.fromRGB(200, 150, 255),
-    user = Color3.fromRGB(150, 255, 180),
+    vip = Color3.fromRGB(255, 215, 0),
+    user = Color3.fromRGB(100, 255, 150),
     guest = Color3.fromRGB(180, 180, 180),
 }
 
@@ -201,17 +303,6 @@ local function clearAllChat()
     FirebasePut("/Chat", nil)
 end
 
-local function updateChatSettings()
-    if currentRole ~= "owner" and currentRole ~= "admin" then return end
-    FirebasePut("/Config/ChatSettings", {
-        Enabled = CHAT_STATE.isEnabled,
-        AutoClear = CHAT_STATE.autoClear,
-        ClearInterval = CHAT_STATE.clearInterval,
-        UpdatedBy = LocalPlayer.Name,
-        UpdatedAt = os.time(),
-    })
-end
-
 local function ParseDate(s)
     if not s or type(s) ~= "string" then return nil end
     local y, m, d = s:match("(%d+)-(%d+)-(%d+)")
@@ -225,7 +316,7 @@ local function FormatDate(t)
 end
 
 local ROLE_ORDER = { user = 1, admin = 2, vip = 3, owner = 4 }
-local ROLE_LABEL = { user = "✅ USER", admin = "🛡️ ADMIN", vip = "🏆 VIP", owner = "👑 OWNER" }
+local ROLE_LABEL = { user = "✅ USER", admin = "🛡️ ADMIN", vip = "👑 VIP", owner = "👑 OWNER" }
 local ADMIN_ROLES = { moderator = 1, admin = 2, owner = 3 }
 
 local function LogAction(action, target, detail)
@@ -294,6 +385,134 @@ local function CheckUserRole()
     currentIsOwner = data.isOwner or false
     currentIsAdmin = data.isAdmin or false
     return currentRole
+end
+
+local function refreshRoleCache()
+    local wlData = FirebaseGet("/Whitelist")
+    if type(wlData) ~= "table" then return end
+    roleCache = {}
+    for userId, info in pairs(wlData) do
+        if type(info) == "table" and info.Role then
+            roleCache[tostring(userId)] = tostring(info.Role):lower()
+        end
+    end
+    roleCacheTime = tick()
+end
+
+local function getCachedRole(userId)
+    if (tick() - roleCacheTime) > 30 then
+        refreshRoleCache()
+    end
+    return roleCache[tostring(userId)] or "user"
+end
+
+local function removeHeadTag(player)
+    if activeHeadTags[player] then
+        pcall(function()
+            if activeHeadTags[player].billboard then
+                activeHeadTags[player].billboard:Destroy()
+            end
+        end)
+        activeHeadTags[player] = nil
+    end
+    if headTagConnections[player] then
+        pcall(function() headTagConnections[player]:Disconnect() end)
+        headTagConnections[player] = nil
+    end
+end
+
+local function createHeadTag(player)
+    if not HEAD_TAGS_ENABLED then return end
+    if activeHeadTags[player] then return end
+    
+    local character = player.Character
+    if not character then return end
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+    
+    local role = getCachedRole(player.UserId)
+    local config = HEAD_TAG_CONFIG[role]
+    if not config then return end
+    
+    local oldTag = head:FindFirstChild("DV_RoleTag")
+    if oldTag then oldTag:Destroy() end
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "DV_RoleTag"
+    billboard.Size = config.billboardSize or UDim2.new(0, 120, 0, 32)
+    billboard.StudsOffset = Vector3.new(0, 3.2, 0)
+    billboard.AlwaysOnTop = true
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = 500
+    billboard.Parent = head
+    
+    local bg = Instance.new("Frame", billboard)
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.BackgroundColor3 = config.bgColor
+    bg.BackgroundTransparency = 0.1
+    bg.BorderSizePixel = 0
+    Instance.new("UICorner", bg).CornerRadius = UDim.new(0, config.cornerRadius or 6)
+    
+    local stroke = Instance.new("UIStroke", bg)
+    stroke.Color = config.strokeColor
+    stroke.Thickness = config.strokeThickness or 1.5
+    stroke.Transparency = 0.05
+    
+    local icon = Instance.new("ImageLabel", bg)
+    icon.Size = UDim2.new(0, config.iconSize + 6, 0, config.iconSize + 6)
+    icon.Position = UDim2.new(0, 5, 0.5, -(config.iconSize + 6) / 2)
+    icon.BackgroundTransparency = 1
+    icon.Image = config.image
+    icon.ScaleType = Enum.ScaleType.Fit
+    
+    local label = Instance.new("TextLabel", bg)
+    label.Size = UDim2.new(1, -(config.iconSize + 20), 1, 0)
+    label.Position = UDim2.new(0, config.iconSize + 14, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.Text = config.text
+    label.TextColor3 = config.color
+    label.TextSize = config.textSize
+    label.TextStrokeTransparency = 0.4
+    label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    if config.rainbow then
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
+            if not bg.Parent then
+                conn:Disconnect()
+                return
+            end
+            local hue = (tick() * 0.5) % 1
+            local rainbowColor = Color3.fromHSV(hue, 1, 1)
+            label.TextColor3 = rainbowColor
+            stroke.Color = rainbowColor
+        end)
+        headTagConnections[player] = conn
+    end
+    
+    activeHeadTags[player] = {
+        billboard = billboard,
+        role = role,
+    }
+end
+
+local function setupPlayerTag(player)
+    if player == LocalPlayer then return end
+    
+    local function onCharacter(char)
+        task.wait(1)
+        if HEAD_TAGS_ENABLED then
+            createHeadTag(player)
+        end
+    end
+    
+    if player.Character then
+        task.spawn(onCharacter, player.Character)
+    end
+    
+    player.CharacterAdded:Connect(onCharacter)
 end
 
 if PlayerGui:FindFirstChild("DV EXPLOITS") then
@@ -504,14 +723,57 @@ mainGrad.Color = ColorSequence.new({
 })
 mainGrad.Parent = mainWrap
 
-task.spawn(function()
-    local rot = 0
-    while mainWrap and mainWrap.Parent do
-        rot = (rot + 12) % 360
-        mainGrad.Rotation = rot
-        task.wait(0.016)
+local function startBorderAnimation(role)
+    if borderAnimationConnection then
+        borderAnimationConnection:Disconnect()
+        borderAnimationConnection = nil
     end
-end)
+    
+    if role == "owner" then
+        borderAnimationConnection = RunService.RenderStepped:Connect(function()
+            if not mainWrap or not mainWrap.Parent then
+                if borderAnimationConnection then
+                    borderAnimationConnection:Disconnect()
+                end
+                return
+            end
+            local hue = (tick() * 0.8) % 1
+            mainGrad.Color = ColorSequence.new(
+                Color3.fromHSV(hue, 1, 1),
+                Color3.fromHSV((hue + 0.5) % 1, 1, 1)
+            )
+        end)
+    else
+        local theme = ROLE_THEMES[role] or ROLE_THEMES.user
+        local colors = theme.borderColors
+        local speed = theme.borderSpeed or 6
+        local index = 1
+        local lastChange = tick()
+        
+        borderAnimationConnection = RunService.RenderStepped:Connect(function()
+            if not mainWrap or not mainWrap.Parent then
+                if borderAnimationConnection then
+                    borderAnimationConnection:Disconnect()
+                end
+                return
+            end
+            
+            if (tick() - lastChange) >= (1 / speed) then
+                lastChange = tick()
+                index = index + 1
+                if index > #colors then index = 1 end
+            end
+            
+            local nextIndex = index + 1
+            if nextIndex > #colors then nextIndex = 1 end
+            
+            local c1 = colors[index]
+            local c2 = colors[nextIndex]
+            
+            mainGrad.Color = ColorSequence.new(c1, c2)
+        end)
+    end
+end
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = mainWrap
@@ -552,6 +814,18 @@ titleLbl.TextColor3 = Color3.fromRGB(255, 70, 70)
 titleLbl.TextSize = 12
 titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 
+local tagToggleBtn = Instance.new("TextButton")
+tagToggleBtn.Parent = topBar
+tagToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 30, 80)
+tagToggleBtn.Position = UDim2.new(1, -105, 0.5, -11)
+tagToggleBtn.Size = UDim2.new(0, 22, 0, 22)
+tagToggleBtn.Font = Enum.Font.GothamBold
+tagToggleBtn.Text = "🏷️"
+tagToggleBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+tagToggleBtn.TextSize = 11
+tagToggleBtn.BorderSizePixel = 0
+Instance.new("UICorner", tagToggleBtn).CornerRadius = UDim.new(0, 5)
+
 local minBtn = Instance.new("TextButton")
 minBtn.Parent = topBar
 minBtn.BackgroundColor3 = Color3.fromRGB(50, 15, 15)
@@ -587,6 +861,37 @@ closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.TextSize = 13
 closeBtn.BorderSizePixel = 0
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+
+tagToggleBtn.MouseButton1Click:Connect(function()
+    HEAD_TAGS_ENABLED = not HEAD_TAGS_ENABLED
+    if HEAD_TAGS_ENABLED then
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            setupPlayerTag(player)
+        end
+        tagToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 30, 80)
+        tagToggleBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "🏷️ Tag Aktif",
+                Text = "Role muncul di atas kepala",
+                Duration = 2
+            })
+        end)
+    else
+        for player, _ in pairs(activeHeadTags) do
+            removeHeadTag(player)
+        end
+        tagToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        tagToggleBtn.TextColor3 = Color3.fromRGB(120, 120, 120)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "🏷️ Tag Dimatikan",
+                Text = "Role disembunyikan",
+                Duration = 2
+            })
+        end)
+    end
+end)
 
 local content = Instance.new("Frame")
 content.Parent = mainFrame
@@ -965,110 +1270,8 @@ opWLFrame.Size = UDim2.new(1, 0, 1, 0)
 opWLFrame.BackgroundTransparency = 1
 opWLFrame.Visible = true
 
-local opAddUserArea = Instance.new("Frame", opWLFrame)
-opAddUserArea.Size = UDim2.new(1, 0, 0, 110)
-opAddUserArea.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
-opAddUserArea.BorderSizePixel = 0
-Instance.new("UICorner", opAddUserArea).CornerRadius = UDim.new(0, 6)
-
-local opAddTitle = Instance.new("TextLabel", opAddUserArea)
-opAddTitle.Size = UDim2.new(1, -12, 0, 14)
-opAddTitle.Position = UDim2.new(0, 6, 0, 3)
-opAddTitle.BackgroundTransparency = 1
-opAddTitle.Text = "➕ ADD USER KE WHITELIST"
-opAddTitle.TextColor3 = Color3.fromRGB(255, 200, 100)
-opAddTitle.Font = Enum.Font.GothamBold
-opAddTitle.TextSize = 9
-opAddTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local opAddInput = Instance.new("TextBox", opAddUserArea)
-opAddInput.Size = UDim2.new(1, -12, 0, 22)
-opAddInput.Position = UDim2.new(0, 6, 0, 20)
-opAddInput.BackgroundColor3 = Color3.fromRGB(40, 25, 10)
-opAddInput.BorderSizePixel = 0
-opAddInput.PlaceholderText = "Username atau UserId"
-opAddInput.PlaceholderColor3 = Color3.fromRGB(150, 130, 100)
-opAddInput.Text = ""
-opAddInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-opAddInput.Font = Enum.Font.Code
-opAddInput.TextSize = 10
-opAddInput.ClearTextOnFocus = false
-Instance.new("UICorner", opAddInput).CornerRadius = UDim.new(0, 4)
-
-local opAddRoleBtn = Instance.new("TextButton", opAddUserArea)
-opAddRoleBtn.Size = UDim2.new(0.32, -4, 0, 22)
-opAddRoleBtn.Position = UDim2.new(0, 6, 0, 48)
-opAddRoleBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 15)
-opAddRoleBtn.Text = "ROLE: USER"
-opAddRoleBtn.TextColor3 = Color3.fromRGB(255, 220, 150)
-opAddRoleBtn.Font = Enum.Font.GothamBold
-opAddRoleBtn.TextSize = 9
-opAddRoleBtn.BorderSizePixel = 0
-Instance.new("UICorner", opAddRoleBtn).CornerRadius = UDim.new(0, 4)
-
-local opAddExpTypeBtn = Instance.new("TextButton", opAddUserArea)
-opAddExpTypeBtn.Size = UDim2.new(0.32, -4, 0, 22)
-opAddExpTypeBtn.Position = UDim2.new(0.34, 0, 0, 48)
-opAddExpTypeBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 15)
-opAddExpTypeBtn.Text = "📅 Lifetime"
-opAddExpTypeBtn.TextColor3 = Color3.fromRGB(255, 220, 150)
-opAddExpTypeBtn.Font = Enum.Font.GothamBold
-opAddExpTypeBtn.TextSize = 9
-opAddExpTypeBtn.BorderSizePixel = 0
-Instance.new("UICorner", opAddExpTypeBtn).CornerRadius = UDim.new(0, 4)
-
-local opAddSubmit = Instance.new("TextButton", opAddUserArea)
-opAddSubmit.Size = UDim2.new(0.32, -6, 0, 22)
-opAddSubmit.Position = UDim2.new(0.68, 0, 0, 48)
-opAddSubmit.BackgroundColor3 = Color3.fromRGB(20, 100, 40)
-opAddSubmit.Text = "➕ ADD"
-opAddSubmit.TextColor3 = Color3.fromRGB(200, 255, 200)
-opAddSubmit.Font = Enum.Font.GothamBold
-opAddSubmit.TextSize = 10
-opAddSubmit.BorderSizePixel = 0
-Instance.new("UICorner", opAddSubmit).CornerRadius = UDim.new(0, 4)
-
-local opAddDurationBox = Instance.new("TextBox", opAddUserArea)
-opAddDurationBox.Size = UDim2.new(0.4, -4, 0, 22)
-opAddDurationBox.Position = UDim2.new(0, 6, 0, 76)
-opAddDurationBox.BackgroundColor3 = Color3.fromRGB(40, 25, 10)
-opAddDurationBox.BorderSizePixel = 0
-opAddDurationBox.PlaceholderText = "Angka (contoh: 30)"
-opAddDurationBox.PlaceholderColor3 = Color3.fromRGB(150, 130, 100)
-opAddDurationBox.Text = ""
-opAddDurationBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-opAddDurationBox.Font = Enum.Font.Code
-opAddDurationBox.TextSize = 10
-opAddDurationBox.ClearTextOnFocus = false
-opAddDurationBox.Visible = false
-Instance.new("UICorner", opAddDurationBox).CornerRadius = UDim.new(0, 4)
-
-local opAddUnitBtn = Instance.new("TextButton", opAddUserArea)
-opAddUnitBtn.Size = UDim2.new(0.28, -4, 0, 22)
-opAddUnitBtn.Position = UDim2.new(0.42, 0, 0, 76)
-opAddUnitBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 15)
-opAddUnitBtn.Text = "HARI"
-opAddUnitBtn.TextColor3 = Color3.fromRGB(255, 220, 150)
-opAddUnitBtn.Font = Enum.Font.GothamBold
-opAddUnitBtn.TextSize = 9
-opAddUnitBtn.BorderSizePixel = 0
-opAddUnitBtn.Visible = false
-Instance.new("UICorner", opAddUnitBtn).CornerRadius = UDim.new(0, 4)
-
-local opAddPreview = Instance.new("TextLabel", opAddUserArea)
-opAddPreview.Size = UDim2.new(0.3, -6, 0, 22)
-opAddPreview.Position = UDim2.new(0.7, 0, 0, 76)
-opAddPreview.BackgroundTransparency = 1
-opAddPreview.Text = ""
-opAddPreview.TextColor3 = Color3.fromRGB(180, 255, 180)
-opAddPreview.Font = Enum.Font.Gotham
-opAddPreview.TextSize = 9
-opAddPreview.TextXAlignment = Enum.TextXAlignment.Left
-opAddPreview.Visible = false
-
 local opWLSearchBar = Instance.new("Frame", opWLFrame)
 opWLSearchBar.Size = UDim2.new(1, 0, 0, 26)
-opWLSearchBar.Position = UDim2.new(0, 0, 0, 114)
 opWLSearchBar.BackgroundColor3 = Color3.fromRGB(25, 15, 5)
 opWLSearchBar.BorderSizePixel = 0
 Instance.new("UICorner", opWLSearchBar).CornerRadius = UDim.new(0, 5)
@@ -1085,148 +1288,6 @@ opWLSearch.Font = Enum.Font.Gotham
 opWLSearch.TextSize = 10
 opWLSearch.ClearTextOnFocus = false
 
-local currentAddRole = "user"
-local isLifetime = true
-local currentUnit = "hari"
-
-local addRoles = {"user", "vip", "admin"}
-local addRoleIndex = 1
-local units = {"menit", "jam", "hari"}
-local unitIndex = 3
-
-opAddRoleBtn.MouseButton1Click:Connect(function()
-    addRoleIndex = addRoleIndex % #addRoles + 1
-    currentAddRole = addRoles[addRoleIndex]
-    opAddRoleBtn.Text = "ROLE: " .. currentAddRole:upper()
-end)
-
-opAddExpTypeBtn.MouseButton1Click:Connect(function()
-    isLifetime = not isLifetime
-    if isLifetime then
-        opAddExpTypeBtn.Text = "📅 Lifetime"
-        opAddDurationBox.Visible = false
-        opAddUnitBtn.Visible = false
-        opAddPreview.Visible = false
-    else
-        opAddExpTypeBtn.Text = "⏱️ Manual"
-        opAddDurationBox.Visible = true
-        opAddUnitBtn.Visible = true
-        opAddPreview.Visible = true
-    end
-end)
-
-opAddUnitBtn.MouseButton1Click:Connect(function()
-    unitIndex = unitIndex % #units + 1
-    currentUnit = units[unitIndex]
-    opAddUnitBtn.Text = currentUnit:upper()
-end)
-
-opAddDurationBox:GetPropertyChangedSignal("Text"):Connect(function()
-    local num = tonumber(opAddDurationBox.Text)
-    if num and num > 0 then
-        local text = ""
-        if currentUnit == "menit" then
-            text = num .. " menit"
-        elseif currentUnit == "jam" then
-            text = num .. " jam"
-        else
-            text = num .. " hari"
-        end
-        opAddPreview.Text = "→ " .. text
-    else
-        opAddPreview.Text = ""
-    end
-end)
-
-opAddSubmit.MouseButton1Click:Connect(function()
-    local input = opAddInput.Text:gsub("%s+", "")
-    if input == "" then
-        opStatus.Text = "⚠️ Isi Username atau UserId!"
-        return
-    end
-
-    local userId = nil
-    local username = nil
-
-    if input:match("^%d+$") then
-        userId = input
-        local ok, name = pcall(function()
-            return Players:GetNameFromUserIdAsync(tonumber(userId))
-        end)
-        username = ok and name or ("User_" .. userId)
-    else
-        local ok, id = pcall(function()
-            return Players:GetUserIdFromNameAsync(input)
-        end)
-        if not ok or not id then
-            opStatus.Text = "❌ Username tidak ditemukan!"
-            return
-        end
-        userId = tostring(id)
-        username = input
-    end
-
-    local existing = FirebaseGet("/Whitelist/" .. userId)
-    if existing then
-        opStatus.Text = "⚠️ User sudah terdaftar di Whitelist!"
-        return
-    end
-    
-    local expired = nil
-    if not isLifetime then
-        local num = tonumber(opAddDurationBox.Text)
-        if not num or num <= 0 then
-            opStatus.Text = "⚠️ Isi angka durasi yang valid!"
-            return
-        end
-
-        local seconds = 0
-        if currentUnit == "menit" then
-            seconds = num * 60
-        elseif currentUnit == "jam" then
-            seconds = num * 3600
-        else 
-            seconds = num * 86400
-        end
-
-        expired = FormatDate(os.time() + seconds)
-    end
-
-    local payload = {
-        Username = username,
-        UserId = tonumber(userId),
-        Role = currentAddRole,
-        Status = "ACTIVE",
-        Expired = expired,
-        Locked = false,
-        Source = "manual-owner",
-        ApprovedBy = LocalPlayer.Name,
-        ApprovedAt = os.time(),
-        RegisteredAt = os.time()
-    }
-
-    local result = FirebasePut("/Whitelist/" .. userId, payload, true)
-
-    if result.ok then
-        local expText = isLifetime and "Lifetime" or (opAddDurationBox.Text .. " " .. currentUnit)
-        LogAction("ADD_USER", username .. " (" .. userId .. ")", "Role: " .. currentAddRole .. " | Exp: " .. expText)
-        opStatus.Text = "✅ Berhasil add: " .. username .. " → " .. currentAddRole:upper()
-        opAddInput.Text = ""
-        opAddDurationBox.Text = ""
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "✅ User Added",
-                Text = username .. " → " .. currentAddRole:upper() .. " (" .. expText .. ")",
-                Duration = 4
-            })
-        end)
-        task.wait(0.3)
-        RenderWL()
-    else
-        opStatus.Text = "❌ Gagal: " .. tostring(result.message)
-    end
-end)
-
 local opRoleFilterBtn = Instance.new("TextButton", opWLSearchBar)
 opRoleFilterBtn.Size = UDim2.new(0, 68, 1, -6)
 opRoleFilterBtn.Position = UDim2.new(1, -74, 0, 3)
@@ -1240,7 +1301,7 @@ Instance.new("UICorner", opRoleFilterBtn).CornerRadius = UDim.new(0, 4)
 
 local opWLBulkBar = Instance.new("Frame", opWLFrame)
 opWLBulkBar.Size = UDim2.new(1, 0, 0, 22)
-opWLBulkBar.Position = UDim2.new(0, 0, 0, 144)
+opWLBulkBar.Position = UDim2.new(0, 0, 0, 28)
 opWLBulkBar.BackgroundColor3 = Color3.fromRGB(20, 12, 5)
 opWLBulkBar.BorderSizePixel = 0
 Instance.new("UICorner", opWLBulkBar).CornerRadius = UDim.new(0, 5)
@@ -1279,8 +1340,8 @@ opBulkBanBtn.BorderSizePixel = 0
 Instance.new("UICorner", opBulkBanBtn).CornerRadius = UDim.new(0, 4)
 
 local opWLScroll = Instance.new("ScrollingFrame", opWLFrame)
-opWLScroll.Size = UDim2.new(1, 0, 1, -170)
-opWLScroll.Position = UDim2.new(0, 0, 0, 170)
+opWLScroll.Size = UDim2.new(1, 0, 1, -54)
+opWLScroll.Position = UDim2.new(0, 0, 0, 54)
 opWLScroll.BackgroundColor3 = Color3.fromRGB(20, 15, 5)
 opWLScroll.BorderSizePixel = 0
 opWLScroll.ScrollBarThickness = 3
@@ -1716,8 +1777,8 @@ local function SetRoleVisual(role)
     local roleInfo = {
         owner = { icon = TAG_ASSETS.owner, color = Color3.fromRGB(255, 215, 0), fallback = "👑" },
         admin = { icon = TAG_ASSETS.admin, color = Color3.fromRGB(100, 180, 255), fallback = "🛡️" },
-        vip   = { icon = TAG_ASSETS.vip,   color = Color3.fromRGB(200, 100, 255), fallback = "💎" },
-        user  = { icon = TAG_ASSETS.user,  color = Color3.fromRGB(150, 255, 180), fallback = "✅" },
+        vip   = { icon = TAG_ASSETS.vip,   color = Color3.fromRGB(255, 215, 0), fallback = "👑" },
+        user  = { icon = TAG_ASSETS.user,  color = Color3.fromRGB(100, 255, 150), fallback = "✅" },
         pending = { icon = nil, color = Color3.fromRGB(255, 230, 100), fallback = "🟡" },
         expired = { icon = nil, color = Color3.fromRGB(255, 150, 100), fallback = "⏰" },
         banned = { icon = nil, color = Color3.fromRGB(255, 100, 100), fallback = "🚫" },
@@ -1797,6 +1858,8 @@ local function SetRoleVisual(role)
     end
 
     reqBtn.Visible = (role == "denied" or role == "expired")
+    
+    startBorderAnimation(role)
 end
 
 local function DoCheckAccount()
@@ -1809,8 +1872,8 @@ local function DoCheckAccount()
         statusInfo.Text = "👑 Selamat datang, OWNER!"
         statusInfo.TextColor3 = Color3.fromRGB(255, 215, 0)
     elseif role == "vip" then
-        statusInfo.Text = "🏆 Selamat datang, VIP!"
-        statusInfo.TextColor3 = Color3.fromRGB(255, 200, 255)
+        statusInfo.Text = "👑 Selamat datang, VIP!"
+        statusInfo.TextColor3 = Color3.fromRGB(255, 215, 0)
     elseif role == "admin" then
         statusInfo.Text = "🛡️ Admin aktif."
         statusInfo.TextColor3 = Color3.fromRGB(200, 180, 255)
@@ -2315,7 +2378,7 @@ local function renderChatMessages()
             badgeFallback.BackgroundTransparency = 1
             badgeFallback.Font = Enum.Font.GothamBold
             local fallbacks = {
-                owner = "👑", admin = "🛡️", vip = "💎", user = "✅", guest = "❓"
+                owner = "👑", admin = "🛡️", vip = "👑", user = "✅", guest = "❓"
             }
             badgeFallback.Text = fallbacks[role] or "?"
             badgeFallback.TextColor3 = getRoleColor(role)
@@ -2541,7 +2604,7 @@ function RenderWL()
             s.Color = Color3.fromRGB(255, 215, 0); s.Thickness = 1.5
         elseif source == "auto-vip-prefix" then
             local s = Instance.new("UIStroke", card)
-            s.Color = Color3.fromRGB(180, 100, 255); s.Thickness = 1
+            s.Color = Color3.fromRGB(255, 215, 0); s.Thickness = 1
         end
         local cb = Instance.new("TextButton", card)
         cb.Size = UDim2.new(0, 14, 0, 14)
@@ -2595,7 +2658,7 @@ function RenderWL()
         roleLbl.BackgroundTransparency = 1
         local roleText = ROLE_LABEL[currentRoleUser] or currentRoleUser
         local expired = (type(info) == "table" and info.Expired) and tostring(info.Expired) or "Lifetime"
-        local src = source == "auto-vip-prefix" and "  • 🌟AUTO" or ""
+        local src = source == "auto-vip-prefix" and "  • 👑AUTO" or ""
         roleLbl.Text = roleText .. "  •  " .. expired .. src
         roleLbl.TextColor3 = Color3.fromRGB(200, 180, 120)
         roleLbl.Font = Enum.Font.Gotham
@@ -3157,7 +3220,7 @@ local function RenderStats()
     end
     addStat("📊 Total WL", total, Color3.fromRGB(150, 255, 180))
     addStat("👑 Owner", counts.owner, Color3.fromRGB(255, 215, 0))
-    addStat("🏆 VIP", counts.vip, Color3.fromRGB(255, 200, 255))
+    addStat("👑 VIP", counts.vip, Color3.fromRGB(255, 215, 0))
     addStat("🛡️ Admin", counts.admin, Color3.fromRGB(200, 180, 255))
     addStat("✅ User", counts.user, Color3.fromRGB(150, 255, 180))
     addStat("🌟 Auto-Registered", auto, Color3.fromRGB(200, 150, 255))
@@ -3973,6 +4036,41 @@ task.spawn(function()
     loadingBorder:Destroy()
     mainWrap.Visible = true
     DoCheckAccount()
+    
+    refreshRoleCache()
+    
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        setupPlayerTag(player)
+    end
+    
+    game:GetService("Players").PlayerAdded:Connect(function(player)
+        task.wait(1)
+        setupPlayerTag(player)
+    end)
+    
+    game:GetService("Players").PlayerRemoving:Connect(function(player)
+        removeHeadTag(player)
+    end)
+    
+    task.spawn(function()
+        while true do
+            task.wait(30)
+            if HEAD_TAGS_ENABLED then
+                refreshRoleCache()
+                for player, data in pairs(activeHeadTags) do
+                    if player.Parent then
+                        local newRole = getCachedRole(player.UserId)
+                        if newRole ~= data.role then
+                            removeHeadTag(player)
+                            createHeadTag(player)
+                        end
+                    else
+                        removeHeadTag(player)
+                    end
+                end
+            end
+        end
+    end)
 end)
 
 createChatUI()
