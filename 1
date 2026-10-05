@@ -9,6 +9,46 @@ local CollectionService = game:GetService("CollectionService")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
+local NotificationModule
+local ok_NM = pcall(function()
+    NotificationModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("NotificationModule"))
+end)
+
+local function sendNotif(notifType, text, duration, id, cooldown)
+    if ok_NM and NotificationModule then
+        pcall(function()
+            NotificationModule:Notify(notifType, text, duration or 3, id or "DEFAULT", cooldown or 3)
+        end)
+    else
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "DV Exploits",
+                Text = text,
+                Duration = duration or 3
+            })
+        end)
+    end
+end
+
+local notificationCounts = {}
+local notificationDurations = {
+    ["JOB_STARTED"] = 3,
+    ["JOB_ARRIVED_TARGET"] = 6,
+    ["JOB_ARRIVED_WAYPOINT"] = 6,
+    ["JOB_RETURNING"] = 4,
+    ["JOB_FINISHED"] = 6,
+    ["JOB_ENDED"] = 6,
+    ["JOB_TIMEOUT"] = 6,
+    ["JOB_CANCELLED_SUSPICIOUS"] = 6,
+    ["JOB_MUST_BE_IN_VEHICLE"] = 3,
+    ["JOB_SERVER_BUSY"] = 4,
+    ["JOB_NO_TARGET"] = 4,
+    ["JOB_SPAWN_FAIL"] = 4,
+    ["JOB_ALREADY_ACTIVE"] = 3,
+    ["JOB_NO_CHARACTER"] = 4,
+    ["DEFAULT"] = 3
+}
+
 pcall(function()
     for _, v in pairs(CoreGui:GetChildren()) do
         if v.Name == "DVExploitsBrewokUI" or v.Name == "DVExploitsDelivery" or v.Name == "DVExploitsLoading" then v:Destroy() end
@@ -33,48 +73,48 @@ LoadScreenGui.IgnoreGuiInset = true
 safeParent(LoadScreenGui)
 
 local LoadFrame = Instance.new("Frame", LoadScreenGui)
-LoadFrame.Size = UDim2.new(0, 520, 0, 260)
-LoadFrame.Position = UDim2.new(0.5, -260, 0.5, -130)
+LoadFrame.Size = UDim2.new(0, 380, 0, 190)
+LoadFrame.Position = UDim2.new(0.5, -190, 0.5, -95)
 LoadFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 LoadFrame.BorderSizePixel = 0
-Instance.new("UICorner", LoadFrame).CornerRadius = UDim.new(0, 16)
+Instance.new("UICorner", LoadFrame).CornerRadius = UDim.new(0, 12)
 
 local loadBorder = Instance.new("Frame", LoadFrame)
 loadBorder.Name = "RGBBorder"
-loadBorder.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+loadBorder.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
 loadBorder.BorderSizePixel = 0
-loadBorder.Size = UDim2.new(1, 8, 1, 8)
-loadBorder.Position = UDim2.new(0, -4, 0, -4)
+loadBorder.Size = UDim2.new(1, 6, 1, 6)
+loadBorder.Position = UDim2.new(0, -3, 0, -3)
 loadBorder.ZIndex = 0
-Instance.new("UICorner", loadBorder).CornerRadius = UDim.new(0, 18)
+Instance.new("UICorner", loadBorder).CornerRadius = UDim.new(0, 14)
 
 task.spawn(function()
     while LoadScreenGui.Parent do
-        local hue = (tick() * 6) % 1
+        local hue = 0.13 + ((tick() * 0.05) % 0.04)
         loadBorder.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
         RunService.RenderStepped:Wait()
     end
 end)
 
 local LoadInner = Instance.new("Frame", LoadFrame)
-LoadInner.Size = UDim2.new(1, -8, 1, -8)
-LoadInner.Position = UDim2.new(0, 4, 0, 4)
+LoadInner.Size = UDim2.new(1, -6, 1, -6)
+LoadInner.Position = UDim2.new(0, 3, 0, 3)
 LoadInner.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 LoadInner.BorderSizePixel = 0
-Instance.new("UICorner", LoadInner).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", LoadInner).CornerRadius = UDim.new(0, 10)
 
 local LoadTitle = Instance.new("TextLabel", LoadInner)
-LoadTitle.Size = UDim2.new(1, 0, 0, 40)
-LoadTitle.Position = UDim2.new(0, 0, 0, 18)
+LoadTitle.Size = UDim2.new(1, 0, 0, 28)
+LoadTitle.Position = UDim2.new(0, 0, 0, 12)
 LoadTitle.BackgroundTransparency = 1
 LoadTitle.Font = Enum.Font.GothamBold
 LoadTitle.Text = "DV EXPLOITS - HUB LOADING"
-LoadTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
-LoadTitle.TextSize = 18
+LoadTitle.TextColor3 = Color3.fromRGB(255, 200, 0)
+LoadTitle.TextSize = 13
 
 local AvatarImg = Instance.new("ImageLabel", LoadInner)
-AvatarImg.Size = UDim2.new(0, 64, 0, 64)
-AvatarImg.Position = UDim2.new(0, 25, 0, 72)
+AvatarImg.Size = UDim2.new(0, 48, 0, 48)
+AvatarImg.Position = UDim2.new(0, 20, 0, 50)
 AvatarImg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 AvatarImg.BorderSizePixel = 0
 pcall(function()
@@ -83,47 +123,47 @@ end)
 Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
 
 local WelcomeText = Instance.new("TextLabel", LoadInner)
-WelcomeText.Size = UDim2.new(1, -105, 0, 20)
-WelcomeText.Position = UDim2.new(0, 100, 0, 72)
+WelcomeText.Size = UDim2.new(1, -85, 0, 16)
+WelcomeText.Position = UDim2.new(0, 78, 0, 50)
 WelcomeText.BackgroundTransparency = 1
 WelcomeText.Font = Enum.Font.GothamBold
 WelcomeText.Text = "Executing as:"
 WelcomeText.TextColor3 = Color3.fromRGB(180, 180, 180)
-WelcomeText.TextSize = 13
+WelcomeText.TextSize = 10
 WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 
 local NameText = Instance.new("TextLabel", LoadInner)
-NameText.Size = UDim2.new(1, -105, 0, 25)
-NameText.Position = UDim2.new(0, 100, 0, 96)
+NameText.Size = UDim2.new(1, -85, 0, 20)
+NameText.Position = UDim2.new(0, 78, 0, 68)
 NameText.BackgroundTransparency = 1
 NameText.Font = Enum.Font.GothamBold
 NameText.Text = LocalPlayer.Name
 NameText.TextColor3 = Color3.fromRGB(255, 255, 255)
-NameText.TextSize = 17
+NameText.TextSize = 13
 NameText.TextXAlignment = Enum.TextXAlignment.Left
 
 local StatusLoadText = Instance.new("TextLabel", LoadInner)
-StatusLoadText.Size = UDim2.new(1, -50, 0, 20)
-StatusLoadText.Position = UDim2.new(0, 25, 0, 158)
+StatusLoadText.Size = UDim2.new(1, -40, 0, 16)
+StatusLoadText.Position = UDim2.new(0, 20, 0, 112)
 StatusLoadText.BackgroundTransparency = 1
 StatusLoadText.Font = Enum.Font.GothamBold
 StatusLoadText.Text = "Memuat Hub Data... 0%"
-StatusLoadText.TextColor3 = Color3.fromRGB(255, 120, 120)
-StatusLoadText.TextSize = 14
+StatusLoadText.TextColor3 = Color3.fromRGB(255, 220, 100)
+StatusLoadText.TextSize = 11
 StatusLoadText.TextXAlignment = Enum.TextXAlignment.Left
 
 local TrackBar = Instance.new("Frame", LoadInner)
-TrackBar.Size = UDim2.new(1, -50, 0, 18)
-TrackBar.Position = UDim2.new(0, 25, 0, 190)
+TrackBar.Size = UDim2.new(1, -40, 0, 14)
+TrackBar.Position = UDim2.new(0, 20, 0, 138)
 TrackBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 TrackBar.BorderSizePixel = 0
-Instance.new("UICorner", TrackBar).CornerRadius = UDim.new(0, 9)
+Instance.new("UICorner", TrackBar).CornerRadius = UDim.new(0, 7)
 
 local FillBar = Instance.new("Frame", TrackBar)
 FillBar.Size = UDim2.new(0, 0, 1, 0)
-FillBar.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+FillBar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
 FillBar.BorderSizePixel = 0
-Instance.new("UICorner", FillBar).CornerRadius = UDim.new(0, 9)
+Instance.new("UICorner", FillBar).CornerRadius = UDim.new(0, 7)
 
 local loadingFinished = false
 task.spawn(function()
@@ -176,9 +216,11 @@ local currentTargetPosition = nil
 local jobState = "NONE"
 local currentJobId = nil
 
+local adFinishPos = nil
+local lastVectorHash = nil
+
 local autoDriveActive = false
 local adTargetPos = nil
-local adFinishPos = nil
 local noClipEnabled = true
 local flyHeight = 30
 local flySpeed = 90
@@ -517,6 +559,7 @@ LocalPlayer.CharacterAdded:Connect(function()
     currentTargetPosition = nil
     adTargetPos = nil
     adFinishPos = nil
+    lastVectorHash = nil
     _lastProgressTick = tick()
     
     if LockSeatEnabled then lockSeat_bindListener() end
@@ -612,7 +655,7 @@ local function flyToPosition(vehicle, targetPos, label)
     if noFlyMode then
         if AD_PhaseLabel then
             AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         end
         pcall(function()
             primaryPart.CFrame = CFrame.new(primaryPart.Position.X, flyTargetY, primaryPart.Position.Z)
@@ -623,7 +666,7 @@ local function flyToPosition(vehicle, targetPos, label)
     else
         if AD_PhaseLabel then
             AD_PhaseLabel.Text = "🎯 Phase: ASCEND"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
         end
         local ascendTimeout = tick() + 5
         while autoDriveActive and (tick() < ascendTimeout) do
@@ -658,10 +701,10 @@ local function flyToPosition(vehicle, targetPos, label)
     if AD_PhaseLabel then
         if noFlyMode then
             AD_PhaseLabel.Text = "🎯 Phase: GROUND MOVE"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 255, 150)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         else
             AD_PhaseLabel.Text = "🎯 Phase: FLY"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
         end
     end
     
@@ -771,7 +814,7 @@ local function flyToPosition(vehicle, targetPos, label)
     if not noFlyMode then
         if AD_PhaseLabel then
             AD_PhaseLabel.Text = "🎯 Phase: DESCEND"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 100, 255)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(200, 150, 255)
         end
         
         local descendTimeout = tick() + 10
@@ -797,7 +840,7 @@ local function flyToPosition(vehicle, targetPos, label)
     
     if AD_PhaseLabel then
         AD_PhaseLabel.Text = "🎯 Phase: LAND"
-        AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
     end
     
 pcall(function()
@@ -851,8 +894,8 @@ task.wait(0.1)
     end
     
     local freezeStart = tick()
-local freezeMaxTime = 20
-local freezeTargetPos = Vector3.new(targetPos.X, primaryPart.Position.Y, targetPos.Z)
+    local freezeMaxTime = 30
+    local freezeTargetPos = Vector3.new(targetPos.X, primaryPart.Position.Y, targetPos.Z)
     local TOLERANCE = 0.5
     
     local freezeGyro = Instance.new("BodyGyro")
@@ -896,7 +939,7 @@ local freezeTargetPos = Vector3.new(targetPos.X, primaryPart.Position.Y, targetP
     if AD_PhaseLabel then
         if jobState == "WAITING" or jobState == "RETURNING" then
             AD_PhaseLabel.Text = "🎯 Phase: DONE (confirmed)"
-            AD_PhaseLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AD_PhaseLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         else
             AD_PhaseLabel.Text = "🎯 Phase: DONE (timeout)"
             AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -917,279 +960,128 @@ local function autoRunJob()
     end
     
     while autoDriveActive and myGen == _loopGeneration do
-    _lastProgressTick = tick()
-    _jobStartTime = tick()
-    
-    if adTargetPos and (jobState == "WAITING" or jobState == "RETURNING") then
-        adTargetPos = nil
-    end
-    
-    if adFinishPos and jobState == "NONE" then
-        adFinishPos = nil
-    end
-    
-    local hasActiveJob = (adTargetPos ~= nil) or (adFinishPos ~= nil) 
-        or (currentTargetPosition ~= nil)
-    
-    if (not adTargetPos) and (not hasActiveJob) then
+        _lastProgressTick = tick()
+        _jobStartTime = tick()
+        
+        if adTargetPos and autoDriveActive then
+            local vehicle = getMyVehicle()
+            if vehicle then
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "🎯 Ke target..."
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+                    AD_LED.BackgroundColor3 = Color3.fromRGB(255, 220, 100)
+                end
+                
+                local targetCopy = adTargetPos
+                local ok = flyToPosition(vehicle, targetCopy, "TARGET")
+                _lastProgressTick = tick()
+                
+                if ok and adTargetPos == targetCopy then
+                    adTargetPos = nil
+                end
+                task.wait(0.5)
+            end
+        end
+        
+        if not autoDriveActive then break end
+        
+        if adFinishPos and jobState == "RETURNING" and autoDriveActive then
+            local vehicle = getMyVehicle()
+            if vehicle then
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "🏁 Ke FINISH..."
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+                    AD_LED.BackgroundColor3 = Color3.fromRGB(180, 255, 100)
+                end
+                
+                local finishCopy = adFinishPos
+                flyToPosition(vehicle, finishCopy, "FINISH")
+                _lastProgressTick = tick()
+                
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "⏳ Nunggu reward..."
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+                end
+                
+                local waitReward = tick()
+                while autoDriveActive and jobState ~= "NONE" and (tick() - waitReward) < 30 do
+                    task.wait(0.3)
+                    
+                    local v = getMyVehicle()
+                    if v and v.PrimaryPart then
+                        local cur = v.PrimaryPart.Position
+                        local tgt = Vector3.new(finishCopy.X, cur.Y, finishCopy.Z)
+                        if (cur - tgt).Magnitude > 5 then
+                            pcall(function()
+                                v.PrimaryPart.CFrame = CFrame.new(tgt)
+                                v.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                                v.PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                            end)
+                        end
+                    end
+                end
+                
+                adFinishPos = nil
+                currentTargetPosition = nil
+                adTargetPos = nil
+                lastVectorHash = nil
+                
+                jobCounter = jobCounter + 1
+                if AD_StatsLabel then
+                    local elapsed = tick() - sessionStartTime
+                    local hrs = math.floor(elapsed / 3600)
+                    local mins = math.floor((elapsed % 3600) / 60)
+                    local secs = math.floor(elapsed % 60)
+                    AD_StatsLabel.Text = string.format("📊 Job: %d  |  ⏱️ %02d:%02d:%02d", jobCounter, hrs, mins, secs)
+                end
+                
+                if AD_StatusLabel then
+                    AD_StatusLabel.Text = "🎉 Job #" .. jobCounter .. " selesai!"
+                    AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+                    AD_LED.BackgroundColor3 = Color3.fromRGB(180, 255, 100)
+                end
+                
+                task.wait(1.5)
+            end
+        end
+        
+        if not autoDriveActive then break end
+        
+        if not adTargetPos and not adFinishPos and jobState == "NONE" then
             if AD_StatusLabel then
                 AD_StatusLabel.Text = "🔄 Trigger job..."
-                AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-                AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+                AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+                AD_LED.BackgroundColor3 = Color3.fromRGB(255, 220, 100)
             end
             
-            local waitClean = tick()
-            while jobState ~= "NONE" and (tick() - waitClean) < 5 do
-                if not autoDriveActive then break end
-                task.wait(0.2)
-            end
-            
-            local humCheck = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if not humCheck or not humCheck.SeatPart then
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if not hum or not hum.SeatPart then
                 sitInVehicle()
                 task.wait(0.3)
             end
             
-            local jobPart = Workspace:FindFirstChild("Ekonomi")
-                and Workspace.Ekonomi:FindFirstChild("BedilPusat")
-                and Workspace.Ekonomi.BedilPusat:FindFirstChild("Job")
+            touchStartJob()
             
-            if jobPart then
-                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.CFrame = jobPart.CFrame + Vector3.new(0, 3, 0)
-                    task.wait(0.5)
-                    for i = 1, 3 do
-                        if firetouchinterest then
-                            firetouchinterest(hrp, jobPart, 0)
-                            task.wait(0.3)
-                            firetouchinterest(hrp, jobPart, 1)
-                            task.wait(0.3)
-                        end
-                        if adTargetPos then break end
-                    end
-                    
-                    if not adTargetPos then
-                        local vehicle = getMyVehicle()
-                        if vehicle and vehicle.PrimaryPart then
-                            vehicle:SetPrimaryPartCFrame(jobPart.CFrame + Vector3.new(0, 3, 0))
-                            task.wait(0.5)
-                            if firetouchinterest then
-                                firetouchinterest(hrp, jobPart, 0)
-                                task.wait(0.3)
-                                firetouchinterest(hrp, jobPart, 1)
-                            end
-                        end
-                    end
-                end
-            end
-            
-            local triggerWait = tick()
-            while not adTargetPos and (tick() - triggerWait) < 15 do
-                if not autoDriveActive then break end
+            local waitTrigger = tick()
+            while autoDriveActive and not adTargetPos and not adFinishPos and (tick() - waitTrigger) < 15 do
                 task.wait(0.2)
+                if jobState ~= "NONE" then break end
             end
             
-            if not adTargetPos then
+            if not autoDriveActive then break end
+            
+            if not adTargetPos and not adFinishPos and jobState == "NONE" then
                 if AD_StatusLabel then
                     AD_StatusLabel.Text = "⚠️ Target ga dateng, retry..."
                     AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
                     AD_LED.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
                 end
                 sitInVehicle()
-                task.wait(3)
-                continue
-            end
-        end
-        
-        if not autoDriveActive then break end
-_lastProgressTick = tick()
-
-local humCheck2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-if not humCheck2 or not humCheck2.SeatPart then
-    sitInVehicle()
-    task.wait(0.3)
-end
-
-if not adTargetPos then
-    if AD_StatusLabel then
-        AD_StatusLabel.Text = "♻️ Resume — skip target, langsung finish"
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-        AD_LED.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-    end
-    if jobState == "RETURNING" and not adFinishPos then
-        if AD_StatusLabel then
-            AD_StatusLabel.Text = "♻️ Resume RETURNING tanpa finish pos — tunggu 15s"
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-        end
-        local _waitF = tick()
-        while autoDriveActive and not adFinishPos and (tick() - _waitF) < 15 do
-            task.wait(0.2)
-        end
-        if not adFinishPos then
-            if AD_StatusLabel then
-                AD_StatusLabel.Text = "⚠️ Ga dapet finish pos — reset job baru"
-                AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-            end
-            jobState = "NONE"
-            currentTargetPosition = nil
-            adTargetPos = nil
-            adFinishPos = nil
-            currentJobId = nil
-            task.wait(1)
-            continue
-        end
-    end
-else
-    if AD_StatusLabel then
-        AD_StatusLabel.Text = "🎯 Ke TARGET..."
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
-    end
-    
-    local vehicle = getMyVehicle()
-    if not vehicle then
-        if AD_StatusLabel then
-            AD_StatusLabel.Text = "❌ Mobil ilang, retry..."
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-        end
-        adTargetPos = nil
-        adFinishPos = nil
-        task.wait(2)
-        continue
-    end
-    
-    local ok = flyToPosition(vehicle, adTargetPos, "TARGET")
-    if not autoDriveActive then break end
-    _lastProgressTick = tick()
-    
-    if ok then
-        if AD_StatusLabel then
-            AD_StatusLabel.Text = "⏳ Nunggu konfirm target..."
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-        end
-        waitForJobState("WAITING", 15)
-    end
-    
-    if not autoDriveActive then break end
-    _lastProgressTick = tick()
-end
-
-if not autoDriveActive then break end
-_lastProgressTick = tick()
-
-if AD_StatusLabel then
-    AD_StatusLabel.Text = "⏳ Nunggu finish pos..."
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
-        end
-        
-        local waitFinish = tick()
-        local finishGot = false
-        while (tick() - waitFinish) < 20 do
-            if not autoDriveActive then break end
-            if adFinishPos then
-                finishGot = true
-                break
-            end
-            if jobState == "NONE" then
                 task.wait(2)
-                adTargetPos = nil
-                adFinishPos = nil
-                currentTargetPosition = nil
-                break
-            end
-            task.wait(0.2)
-        end
-        
-        if not autoDriveActive then break end
-        _lastProgressTick = tick()
-        
-        if not finishGot or not adFinishPos then
-            adTargetPos = nil
-            adFinishPos = nil
-            currentTargetPosition = nil
-            jobState = "NONE"
-            task.wait(1)
-            continue
-        end
-        
-        if AD_StatusLabel then
-            AD_StatusLabel.Text = "🏁 Ke FINISH..."
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 200)
-        end
-        
-        vehicle = getMyVehicle()
-        if not vehicle then
-            adTargetPos = nil
-            adFinishPos = nil
-            currentTargetPosition = nil
-            jobState = "NONE"
-            task.wait(1)
-            continue
-        end
-        
-        local okFinish = flyToPosition(vehicle, adFinishPos, "FINISH")
-        if not autoDriveActive then break end
-        _lastProgressTick = tick()
-        
-        if okFinish then
-    if AD_StatusLabel then
-        AD_StatusLabel.Text = "⏳ Nunggu reward..."
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-    end
-    
-    local waited = 0
-    local maxWait = 25
-    local lockedFinishPos = adFinishPos
-    
-    while autoDriveActive and waited < maxWait do
-        if jobState == "NONE" then break end
-        task.wait(0.5)
-        waited = waited + 0.5
-        
-        local v = getMyVehicle()
-        if v and v.PrimaryPart and lockedFinishPos then
-            local cur = v.PrimaryPart.Position
-            local tgt = Vector3.new(lockedFinishPos.X, cur.Y, lockedFinishPos.Z)
-            local dist = (cur - tgt).Magnitude
-            if dist > 5 then
-                pcall(function()
-                    v.PrimaryPart.CFrame = CFrame.new(tgt)
-                    v.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                    v.PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                end)
             end
         end
-    end
-end
         
-        if not autoDriveActive then break end
-        _lastProgressTick = tick()
-        
-        jobCounter = jobCounter + 1
-        if AD_StatsLabel then
-            local elapsed = tick() - sessionStartTime
-            local hrs = math.floor(elapsed / 3600)
-            local mins = math.floor((elapsed % 3600) / 60)
-            local secs = math.floor(elapsed % 60)
-            AD_StatsLabel.Text = string.format("📊 Job: %d  |  ⏱️ %02d:%02d:%02d", jobCounter, hrs, mins, secs)
-        end
-        
-        if AD_StatusLabel then
-            AD_StatusLabel.Text = "🎉 Job #" .. jobCounter .. " selesai!"
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
-        end
-        
-        adTargetPos = nil
-        adFinishPos = nil
-        currentTargetPosition = nil
-        jobState = "NONE"
-        currentJobId = nil
-        task.wait(1.5)
+        task.wait(0.3)
         
         if myGen ~= _loopGeneration then
             return
@@ -1209,6 +1101,7 @@ local function restartAutoDrive()
     adTargetPos = nil
     adFinishPos = nil
     currentTargetPosition = nil
+    lastVectorHash = nil
     jobState = "NONE"
     currentJobId = nil
     
@@ -1226,7 +1119,7 @@ task.spawn(function()
         if autoDriveActive and not _restarting then
             local now = tick()
             local elapsed = now - _lastProgressTick
-            local timeout = 120
+            local timeout = 180
             
             if AD_PhaseLabel and AD_PhaseLabel.Text then
                 if AD_PhaseLabel.Text:find("IDLE") or AD_PhaseLabel.Text:find("Trigger") then
@@ -1257,42 +1150,34 @@ ScreenGui.IgnoreGuiInset = true
 safeParent(ScreenGui)
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 440, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -220, 0.5, -250)
-MainFrame.BackgroundColor3 = Color3.fromRGB(16, 12, 12)
+MainFrame.Size = UDim2.new(0, 360, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -180, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
 local border = Instance.new("Frame", MainFrame)
 border.Name = "Border"
-border.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+border.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
 border.BorderSizePixel = 0
 border.Size = UDim2.new(1, 2, 1, 2)
 border.Position = UDim2.new(0, -1, 0, -1)
 border.ZIndex = 0
-Instance.new("UICorner", border).CornerRadius = UDim.new(0, 11)
-
-task.spawn(function()
-    while ScreenGui.Parent do
-        local hue = (tick() * 6) % 1
-        border.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-        RunService.RenderStepped:Wait()
-    end
-end)
+Instance.new("UICorner", border).CornerRadius = UDim.new(0, 9)
 
 local Header = Instance.new("Frame", MainFrame)
-Header.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+Header.BackgroundColor3 = Color3.fromRGB(20, 18, 5)
 Header.BorderSizePixel = 0
-Header.Size = UDim2.new(1, 0, 0, 38)
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
+Header.Size = UDim2.new(1, 0, 0, 30)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
 
 local iconFrame = Instance.new("Frame", Header)
-iconFrame.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+iconFrame.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
 iconFrame.BorderSizePixel = 0
-iconFrame.Position = UDim2.new(0, 10, 0.5, -9)
-iconFrame.Size = UDim2.new(0, 18, 0, 18)
+iconFrame.Position = UDim2.new(0, 8, 0.5, -8)
+iconFrame.Size = UDim2.new(0, 16, 0, 16)
 Instance.new("UICorner", iconFrame).CornerRadius = UDim.new(1, 0)
 
 local iconText = Instance.new("TextLabel", iconFrame)
@@ -1300,105 +1185,105 @@ iconText.BackgroundTransparency = 1
 iconText.Size = UDim2.new(1, 0, 1, 0)
 iconText.Font = Enum.Font.GothamBold
 iconText.Text = "DV"
-iconText.TextColor3 = Color3.fromRGB(255, 255, 255)
-iconText.TextSize = 9
+iconText.TextColor3 = Color3.fromRGB(0, 0, 0)
+iconText.TextSize = 8
 iconText.TextScaled = true
 
 local Title = Instance.new("TextLabel", Header)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 35, 0, 0)
-Title.Size = UDim2.new(0, 250, 1, 0)
+Title.Position = UDim2.new(0, 30, 0, 0)
+Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "DV EXPLOITS - HUB"
-Title.TextColor3 = Color3.fromRGB(255, 70, 70)
-Title.TextSize = 11
+Title.TextColor3 = Color3.fromRGB(255, 200, 0)
+Title.TextSize = 10
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
 local CloseBtn = Instance.new("TextButton", Header)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
-CloseBtn.Position = UDim2.new(1, -30, 0.5, -11)
-CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
+CloseBtn.Position = UDim2.new(1, -26, 0.5, -9)
+CloseBtn.Size = UDim2.new(0, 18, 0, 18)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 11
+CloseBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+CloseBtn.TextSize = 10
 CloseBtn.BorderSizePixel = 0
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 4)
 
 local MinBtn = Instance.new("TextButton", Header)
-MinBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20)
-MinBtn.Position = UDim2.new(1, -58, 0.5, -11)
-MinBtn.Size = UDim2.new(0, 22, 0, 22)
+MinBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 0)
+MinBtn.Position = UDim2.new(1, -48, 0.5, -9)
+MinBtn.Size = UDim2.new(0, 18, 0, 18)
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.Text = "−"
-MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinBtn.TextSize = 13
+MinBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+MinBtn.TextSize = 12
 MinBtn.BorderSizePixel = 0
-Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 4)
 
 local TabBar = Instance.new("Frame", MainFrame)
-TabBar.Size = UDim2.new(0, 110, 1, -48)
-TabBar.Position = UDim2.new(0, 8, 0, 42)
-TabBar.BackgroundColor3 = Color3.fromRGB(22, 16, 16)
-Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
+TabBar.Size = UDim2.new(0, 90, 1, -38)
+TabBar.Position = UDim2.new(0, 6, 0, 34)
+TabBar.BackgroundColor3 = Color3.fromRGB(15, 13, 5)
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 6)
 
 local function makeTabBtn(name, text, yPos)
     local btn = Instance.new("TextButton", TabBar)
     btn.Name = name
-    btn.Size = UDim2.new(1, -12, 0, 30)
-    btn.Position = UDim2.new(0, 6, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
+    btn.Size = UDim2.new(1, -10, 0, 26)
+    btn.Position = UDim2.new(0, 5, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
     btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(220, 180, 180)
+    btn.TextColor3 = Color3.fromRGB(220, 190, 100)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
+    btn.TextSize = 9
     btn.BorderSizePixel = 0
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
     return btn
 end
 
-local TabMaxgenBtn = makeTabBtn("TabMaxgen", "📦 Maxgen", 6)
-local TabBrewokBtn = makeTabBtn("TabBrewok", "🍺 Brewok", 40)
-local TabLightBtn = makeTabBtn("TabLight", "💡 Lighting", 74)
-local TabAddonsBtn = makeTabBtn("TabAddons", "🧩 Addons", 108)
-local TabInfoBtn = makeTabBtn("TabInfo", "ℹ️ Info", 142)
+local TabMaxgenBtn = makeTabBtn("TabMaxgen", "📦 Maxgen", 5)
+local TabBrewokBtn = makeTabBtn("TabBrewok", "🍺 Brewok", 35)
+local TabLightBtn = makeTabBtn("TabLight", "💡 Lighting", 65)
+local TabAddonsBtn = makeTabBtn("TabAddons", "🧩 Addons", 95)
+local TabInfoBtn = makeTabBtn("TabInfo", "ℹ️ Info", 125)
 
 local ContainerMaxgen = Instance.new("ScrollingFrame", MainFrame)
-ContainerMaxgen.Size = UDim2.new(1, -132, 1, -48)
-ContainerMaxgen.Position = UDim2.new(0, 124, 0, 42)
+ContainerMaxgen.Size = UDim2.new(1, -108, 1, -38)
+ContainerMaxgen.Position = UDim2.new(0, 102, 0, 34)
 ContainerMaxgen.BackgroundTransparency = 1
 ContainerMaxgen.CanvasSize = UDim2.new(0, 0, 0, 680)
-ContainerMaxgen.ScrollBarThickness = 3
+ContainerMaxgen.ScrollBarThickness = 2
 ContainerMaxgen.Visible = true
 
 local ContainerBrewok = Instance.new("ScrollingFrame", MainFrame)
-ContainerBrewok.Size = UDim2.new(1, -132, 1, -48)
-ContainerBrewok.Position = UDim2.new(0, 124, 0, 42)
+ContainerBrewok.Size = UDim2.new(1, -108, 1, -38)
+ContainerBrewok.Position = UDim2.new(0, 102, 0, 34)
 ContainerBrewok.BackgroundTransparency = 1
 ContainerBrewok.CanvasSize = UDim2.new(0, 0, 0, 240)
-ContainerBrewok.ScrollBarThickness = 3
+ContainerBrewok.ScrollBarThickness = 2
 ContainerBrewok.Visible = false
 
 local ContainerLight = Instance.new("Frame", MainFrame)
-ContainerLight.Size = UDim2.new(1, -132, 1, -48)
-ContainerLight.Position = UDim2.new(0, 124, 0, 42)
+ContainerLight.Size = UDim2.new(1, -108, 1, -38)
+ContainerLight.Position = UDim2.new(0, 102, 0, 34)
 ContainerLight.BackgroundTransparency = 1
 ContainerLight.Visible = false
 
 local ContainerAddons = Instance.new("ScrollingFrame", MainFrame)
-ContainerAddons.Size = UDim2.new(1, -132, 1, -48)
-ContainerAddons.Position = UDim2.new(0, 124, 0, 42)
+ContainerAddons.Size = UDim2.new(1, -108, 1, -38)
+ContainerAddons.Position = UDim2.new(0, 102, 0, 34)
 ContainerAddons.BackgroundTransparency = 1
 ContainerAddons.CanvasSize = UDim2.new(0, 0, 0, 500)
-ContainerAddons.ScrollBarThickness = 3
+ContainerAddons.ScrollBarThickness = 2
 ContainerAddons.Visible = false
 
 local ContainerInfo = Instance.new("ScrollingFrame", MainFrame)
-ContainerInfo.Size = UDim2.new(1, -132, 1, -48)
-ContainerInfo.Position = UDim2.new(0, 124, 0, 42)
+ContainerInfo.Size = UDim2.new(1, -108, 1, -38)
+ContainerInfo.Position = UDim2.new(0, 102, 0, 34)
 ContainerInfo.BackgroundTransparency = 1
 ContainerInfo.CanvasSize = UDim2.new(0, 0, 0, 320)
-ContainerInfo.ScrollBarThickness = 3
+ContainerInfo.ScrollBarThickness = 2
 ContainerInfo.Visible = false
 
 local function switchTab(tabName)
@@ -1409,16 +1294,16 @@ local function switchTab(tabName)
     ContainerAddons.Visible = (tabName == "Addons")
     ContainerInfo.Visible = (tabName == "Info")
 
-    TabMaxgenBtn.BackgroundColor3 = (tabName == "Maxgen") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
-    TabMaxgenBtn.TextColor3 = (tabName == "Maxgen") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
-    TabBrewokBtn.BackgroundColor3 = (tabName == "Brewok") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
-    TabBrewokBtn.TextColor3 = (tabName == "Brewok") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
-    TabLightBtn.BackgroundColor3 = (tabName == "Light") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
-    TabLightBtn.TextColor3 = (tabName == "Light") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
-    TabAddonsBtn.BackgroundColor3 = (tabName == "Addons") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
-    TabAddonsBtn.TextColor3 = (tabName == "Addons") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
-    TabInfoBtn.BackgroundColor3 = (tabName == "Info") and Color3.fromRGB(180, 25, 25) or Color3.fromRGB(40, 22, 22)
-    TabInfoBtn.TextColor3 = (tabName == "Info") and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 180, 180)
+    TabMaxgenBtn.BackgroundColor3 = (tabName == "Maxgen") and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(30, 25, 5)
+    TabMaxgenBtn.TextColor3 = (tabName == "Maxgen") and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(220, 190, 100)
+    TabBrewokBtn.BackgroundColor3 = (tabName == "Brewok") and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(30, 25, 5)
+    TabBrewokBtn.TextColor3 = (tabName == "Brewok") and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(220, 190, 100)
+    TabLightBtn.BackgroundColor3 = (tabName == "Light") and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(30, 25, 5)
+    TabLightBtn.TextColor3 = (tabName == "Light") and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(220, 190, 100)
+    TabAddonsBtn.BackgroundColor3 = (tabName == "Addons") and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(30, 25, 5)
+    TabAddonsBtn.TextColor3 = (tabName == "Addons") and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(220, 190, 100)
+    TabInfoBtn.BackgroundColor3 = (tabName == "Info") and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(30, 25, 5)
+    TabInfoBtn.TextColor3 = (tabName == "Info") and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(220, 190, 100)
 end
 
 TabMaxgenBtn.MouseButton1Click:Connect(function() switchTab("Maxgen") end)
@@ -1436,10 +1321,10 @@ MinBtn.MouseButton1Click:Connect(function()
         ContainerLight.Visible = false
         ContainerAddons.Visible = false
         ContainerInfo.Visible = false
-        MainFrame.Size = UDim2.new(0, 440, 0, 38)
+        MainFrame.Size = UDim2.new(0, 360, 0, 30)
         MinBtn.Text = "⊕"
     else
-        MainFrame.Size = UDim2.new(0, 440, 0, 500)
+        MainFrame.Size = UDim2.new(0, 360, 0, 420)
         MinBtn.Text = "−"
         switchTab(activeTabName)
     end
@@ -1458,67 +1343,67 @@ end)
 local statusText = Instance.new("TextLabel", ContainerMaxgen)
 statusText.BackgroundTransparency = 1
 statusText.Position = UDim2.new(0, 0, 0, 4)
-statusText.Size = UDim2.new(1, -10, 0, 20)
+statusText.Size = UDim2.new(1, -8, 0, 18)
 statusText.Font = Enum.Font.Gotham
 statusText.Text = "⏸️ Delivery Paused"
-statusText.TextColor3 = Color3.fromRGB(180, 160, 210)
-statusText.TextSize = 11
+statusText.TextColor3 = Color3.fromRGB(200, 180, 100)
+statusText.TextSize = 10
 statusText.TextXAlignment = Enum.TextXAlignment.Center
 
 local toggleButton = Instance.new("TextButton", ContainerMaxgen)
-toggleButton.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
-toggleButton.Position = UDim2.new(0, 0, 0, 28)
-toggleButton.Size = UDim2.new(1, -10, 0, 30)
+toggleButton.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
+toggleButton.Position = UDim2.new(0, 0, 0, 26)
+toggleButton.Size = UDim2.new(1, -8, 0, 26)
 toggleButton.Font = Enum.Font.GothamBold
 toggleButton.Text = "🟢 START DELIVERY (TP)"
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.TextSize = 11
+toggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.TextSize = 10
 toggleButton.BorderSizePixel = 0
-Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 5)
 
 local triggerCarBtn = Instance.new("TextButton", ContainerMaxgen)
 triggerCarBtn.BackgroundColor3 = Color3.fromRGB(30, 80, 50)
-triggerCarBtn.Position = UDim2.new(0, 0, 0, 62)
-triggerCarBtn.Size = UDim2.new(1, -10, 0, 28)
+triggerCarBtn.Position = UDim2.new(0, 0, 0, 56)
+triggerCarBtn.Size = UDim2.new(1, -8, 0, 24)
 triggerCarBtn.Font = Enum.Font.GothamBold
 triggerCarBtn.Text = "🚗 Trigger Car"
 triggerCarBtn.TextColor3 = Color3.fromRGB(180, 255, 200)
-triggerCarBtn.TextSize = 11
+triggerCarBtn.TextSize = 10
 triggerCarBtn.BorderSizePixel = 0
-Instance.new("UICorner", triggerCarBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", triggerCarBtn).CornerRadius = UDim.new(0, 5)
 
 local manualTpButton = Instance.new("TextButton", ContainerMaxgen)
-manualTpButton.BackgroundColor3 = Color3.fromRGB(50, 30, 80)
-manualTpButton.Position = UDim2.new(0, 0, 0, 94)
-manualTpButton.Size = UDim2.new(1, -10, 0, 28)
+manualTpButton.BackgroundColor3 = Color3.fromRGB(60, 50, 10)
+manualTpButton.Position = UDim2.new(0, 0, 0, 84)
+manualTpButton.Size = UDim2.new(1, -8, 0, 24)
 manualTpButton.Font = Enum.Font.GothamBold
 manualTpButton.Text = "📍 TP KE PANGKALAN"
-manualTpButton.TextColor3 = Color3.fromRGB(200, 180, 255)
-manualTpButton.TextSize = 11
+manualTpButton.TextColor3 = Color3.fromRGB(255, 220, 120)
+manualTpButton.TextSize = 10
 manualTpButton.BorderSizePixel = 0
-Instance.new("UICorner", manualTpButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", manualTpButton).CornerRadius = UDim.new(0, 5)
 
 local function createDeliveryInput(nameText, defaultVal, yPos, updateKey)
     local lbl = Instance.new("TextLabel", ContainerMaxgen)
     lbl.BackgroundTransparency = 1
     lbl.Position = UDim2.new(0, 0, 0, yPos)
-    lbl.Size = UDim2.new(0, 170, 0, 24)
+    lbl.Size = UDim2.new(0, 140, 0, 20)
     lbl.Font = Enum.Font.Gotham
     lbl.Text = nameText
-    lbl.TextColor3 = Color3.fromRGB(180, 160, 210)
-    lbl.TextSize = 10
+    lbl.TextColor3 = Color3.fromRGB(200, 180, 100)
+    lbl.TextSize = 9
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     
     local box = Instance.new("TextBox", ContainerMaxgen)
-    box.BackgroundColor3 = Color3.fromRGB(35, 25, 50)
+    box.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
     box.BorderSizePixel = 0
-    box.Position = UDim2.new(1, -95, 0, yPos)
-    box.Size = UDim2.new(0, 85, 0, 24)
+    box.Position = UDim2.new(1, -75, 0, yPos)
+    box.Size = UDim2.new(0, 67, 0, 20)
     box.Font = Enum.Font.GothamBold
     box.Text = tostring(defaultVal)
-    box.TextColor3 = Color3.fromRGB(255, 200, 100)
-    box.TextSize = 11
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+    box.TextColor3 = Color3.fromRGB(255, 220, 100)
+    box.TextSize = 10
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 5)
     
     box.FocusLost:Connect(function()
         local val = tonumber(box.Text)
@@ -1531,44 +1416,42 @@ local function createDeliveryInput(nameText, defaultVal, yPos, updateKey)
     return box
 end
 
-createDeliveryInput("⚡ Delay TP Karakter:", deliverySettings.DelayCharTP, 128, "DelayCharTP")
-createDeliveryInput("⚡ Delay Mobil Target:", deliverySettings.DelayCarTP, 158, "DelayCarTP")
-createDeliveryInput("⚡ Delay TP Finish:", deliverySettings.DelayFinishTP, 188, "DelayFinishTP")
+createDeliveryInput("⚡ Delay TP Karakter:", deliverySettings.DelayCharTP, 114, "DelayCharTP")
+createDeliveryInput("⚡ Delay Mobil Target:", deliverySettings.DelayCarTP, 140, "DelayCarTP")
+createDeliveryInput("⚡ Delay TP Finish:", deliverySettings.DelayFinishTP, 166, "DelayFinishTP")
 
 local LockSeatBtn = Instance.new("TextButton", ContainerMaxgen)
-LockSeatBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
-LockSeatBtn.Position = UDim2.new(0, 0, 0, 218)
-LockSeatBtn.Size = UDim2.new(1, -10, 0, 30)
+LockSeatBtn.BackgroundColor3 = Color3.fromRGB(35, 30, 10)
+LockSeatBtn.Position = UDim2.new(0, 0, 0, 192)
+LockSeatBtn.Size = UDim2.new(1, -8, 0, 26)
 LockSeatBtn.Font = Enum.Font.GothamBold
 LockSeatBtn.Text = "🔒 LOCK SEAT: OFF"
-LockSeatBtn.TextColor3 = Color3.fromRGB(120, 110, 130)
-LockSeatBtn.TextSize = 11
+LockSeatBtn.TextColor3 = Color3.fromRGB(150, 130, 70)
+LockSeatBtn.TextSize = 10
 LockSeatBtn.BorderSizePixel = 0
 LockSeatBtn.AutoButtonColor = false
-Instance.new("UICorner", LockSeatBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", LockSeatBtn).CornerRadius = UDim.new(0, 5)
 
 local function updateLockSeatVisual()
     if LockSeatEnabled then
         LockSeatBtn.Text = "🔒 LOCK SEAT: ON"
-        LockSeatBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 130)
-        LockSeatBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
+        LockSeatBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+        LockSeatBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
     else
         LockSeatBtn.Text = "🔒 LOCK SEAT: OFF"
         if autoDeliveryActive then
-            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 60)
-            LockSeatBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 15)
+            LockSeatBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
         else
-            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(40, 35, 45)
-            LockSeatBtn.TextColor3 = Color3.fromRGB(120, 110, 130)
+            LockSeatBtn.BackgroundColor3 = Color3.fromRGB(35, 30, 10)
+            LockSeatBtn.TextColor3 = Color3.fromRGB(150, 130, 70)
         end
     end
 end
 
 local function setLockSeat(state)
     if state and not autoDeliveryActive then
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "⚠️ Nyalain Delivery dulu!", Duration = 3})
-        end)
+        sendNotif("INFO", "⚠️ Nyalain Delivery dulu!", 3, "LOCK_SEAT", 3)
         return false
     end
     LockSeatEnabled = state
@@ -1591,9 +1474,7 @@ end
 LockSeatBtn.MouseButton1Click:Connect(function()
     if not LockSeatEnabled then
         if not autoDeliveryActive then
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "⚠️ Nyalain Delivery dulu!", Duration = 3})
-            end)
+            sendNotif("INFO", "⚠️ Nyalain Delivery dulu!", 3, "LOCK_SEAT", 3)
             return
         end
         setLockSeat(true)
@@ -1603,29 +1484,29 @@ LockSeatBtn.MouseButton1Click:Connect(function()
 end)
 
 local ADSectionTitle = Instance.new("TextLabel", ContainerMaxgen)
-ADSectionTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
-ADSectionTitle.Position = UDim2.new(0, 0, 0, 258)
-ADSectionTitle.Size = UDim2.new(1, -10, 0, 24)
+ADSectionTitle.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
+ADSectionTitle.Position = UDim2.new(0, 0, 0, 228)
+ADSectionTitle.Size = UDim2.new(1, -8, 0, 22)
 ADSectionTitle.Font = Enum.Font.GothamBold
-ADSectionTitle.Text = "🚀 AUTO-DRIVE (Fly Mode)"
-ADSectionTitle.TextColor3 = Color3.fromRGB(255, 200, 100)
-ADSectionTitle.TextSize = 11
-Instance.new("UICorner", ADSectionTitle).CornerRadius = UDim.new(0, 6)
+ADSectionTitle.Text = "🚀 AUTO-DRIVE (Waypoint)"
+ADSectionTitle.TextColor3 = Color3.fromRGB(255, 220, 100)
+ADSectionTitle.TextSize = 10
+Instance.new("UICorner", ADSectionTitle).CornerRadius = UDim.new(0, 5)
 
 local AD_StatusLabel = Instance.new("TextLabel", ContainerMaxgen)
-AD_StatusLabel.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
-AD_StatusLabel.Position = UDim2.new(0, 0, 0, 286)
-AD_StatusLabel.Size = UDim2.new(1, -10, 0, 22)
+AD_StatusLabel.BackgroundColor3 = Color3.fromRGB(20, 18, 5)
+AD_StatusLabel.Position = UDim2.new(0, 0, 0, 254)
+AD_StatusLabel.Size = UDim2.new(1, -8, 0, 20)
 AD_StatusLabel.Font = Enum.Font.GothamBold
 AD_StatusLabel.Text = "⚪ IDLE"
 AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-AD_StatusLabel.TextSize = 10
+AD_StatusLabel.TextSize = 9
 AD_StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
-Instance.new("UICorner", AD_StatusLabel).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", AD_StatusLabel).CornerRadius = UDim.new(0, 5)
 
 local AD_LED = Instance.new("Frame", ContainerMaxgen)
-AD_LED.Size = UDim2.new(0, 8, 0, 8)
-AD_LED.Position = UDim2.new(0, 6, 0, 293)
+AD_LED.Size = UDim2.new(0, 6, 0, 6)
+AD_LED.Position = UDim2.new(0, 5, 0, 260)
 AD_LED.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
 AD_LED.BorderSizePixel = 0
 AD_LED.ZIndex = 5
@@ -1633,127 +1514,127 @@ Instance.new("UICorner", AD_LED).CornerRadius = UDim.new(1, 0)
 
 local AD_TargetLabel = Instance.new("TextLabel", ContainerMaxgen)
 AD_TargetLabel.BackgroundTransparency = 1
-AD_TargetLabel.Position = UDim2.new(0, 0, 0, 312)
-AD_TargetLabel.Size = UDim2.new(1, -10, 0, 16)
+AD_TargetLabel.Position = UDim2.new(0, 0, 0, 278)
+AD_TargetLabel.Size = UDim2.new(1, -8, 0, 14)
 AD_TargetLabel.Font = Enum.Font.Gotham
 AD_TargetLabel.Text = "📍 Target: —"
 AD_TargetLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-AD_TargetLabel.TextSize = 9
+AD_TargetLabel.TextSize = 8
 AD_TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local AD_FinishLabel = Instance.new("TextLabel", ContainerMaxgen)
 AD_FinishLabel.BackgroundTransparency = 1
-AD_FinishLabel.Position = UDim2.new(0, 0, 0, 328)
-AD_FinishLabel.Size = UDim2.new(1, -10, 0, 16)
+AD_FinishLabel.Position = UDim2.new(0, 0, 0, 292)
+AD_FinishLabel.Size = UDim2.new(1, -8, 0, 14)
 AD_FinishLabel.Font = Enum.Font.Gotham
 AD_FinishLabel.Text = "🏁 Finish: —"
 AD_FinishLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-AD_FinishLabel.TextSize = 9
+AD_FinishLabel.TextSize = 8
 AD_FinishLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local AD_PhaseLabel = Instance.new("TextLabel", ContainerMaxgen)
 AD_PhaseLabel.BackgroundTransparency = 1
-AD_PhaseLabel.Position = UDim2.new(0, 0, 0, 344)
-AD_PhaseLabel.Size = UDim2.new(0.5, -5, 0, 16)
+AD_PhaseLabel.Position = UDim2.new(0, 0, 0, 306)
+AD_PhaseLabel.Size = UDim2.new(0.5, -4, 0, 14)
 AD_PhaseLabel.Font = Enum.Font.Gotham
 AD_PhaseLabel.Text = "🎯 Phase: —"
 AD_PhaseLabel.TextColor3 = Color3.fromRGB(255, 220, 180)
-AD_PhaseLabel.TextSize = 9
+AD_PhaseLabel.TextSize = 8
 AD_PhaseLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local AD_DistanceLabel = Instance.new("TextLabel", ContainerMaxgen)
 AD_DistanceLabel.BackgroundTransparency = 1
-AD_DistanceLabel.Position = UDim2.new(0.5, 0, 0, 344)
-AD_DistanceLabel.Size = UDim2.new(0.5, -10, 0, 16)
+AD_DistanceLabel.Position = UDim2.new(0.5, 0, 0, 306)
+AD_DistanceLabel.Size = UDim2.new(0.5, -8, 0, 14)
 AD_DistanceLabel.Font = Enum.Font.Gotham
 AD_DistanceLabel.Text = "📏 Jarak: —"
-AD_DistanceLabel.TextColor3 = Color3.fromRGB(255, 180, 255)
-AD_DistanceLabel.TextSize = 9
+AD_DistanceLabel.TextColor3 = Color3.fromRGB(255, 200, 255)
+AD_DistanceLabel.TextSize = 8
 AD_DistanceLabel.TextXAlignment = Enum.TextXAlignment.Right
 
 local AD_ProgressBG = Instance.new("Frame", ContainerMaxgen)
-AD_ProgressBG.BackgroundColor3 = Color3.fromRGB(30, 20, 30)
-AD_ProgressBG.Position = UDim2.new(0, 0, 0, 364)
-AD_ProgressBG.Size = UDim2.new(1, -10, 0, 14)
+AD_ProgressBG.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
+AD_ProgressBG.Position = UDim2.new(0, 0, 0, 324)
+AD_ProgressBG.Size = UDim2.new(1, -8, 0, 12)
 AD_ProgressBG.BorderSizePixel = 0
-Instance.new("UICorner", AD_ProgressBG).CornerRadius = UDim.new(0, 7)
+Instance.new("UICorner", AD_ProgressBG).CornerRadius = UDim.new(0, 6)
 
 local AD_ProgressFill = Instance.new("Frame", AD_ProgressBG)
 AD_ProgressFill.Size = UDim2.new(0, 0, 1, 0)
-AD_ProgressFill.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+AD_ProgressFill.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
 AD_ProgressFill.BorderSizePixel = 0
-Instance.new("UICorner", AD_ProgressFill).CornerRadius = UDim.new(0, 7)
+Instance.new("UICorner", AD_ProgressFill).CornerRadius = UDim.new(0, 6)
 
 local AD_ProgressText = Instance.new("TextLabel", AD_ProgressBG)
 AD_ProgressText.Size = UDim2.new(1, 0, 1, 0)
 AD_ProgressText.BackgroundTransparency = 1
 AD_ProgressText.Font = Enum.Font.GothamBold
 AD_ProgressText.Text = "0%"
-AD_ProgressText.TextColor3 = Color3.fromRGB(255, 255, 255)
-AD_ProgressText.TextSize = 9
+AD_ProgressText.TextColor3 = Color3.fromRGB(0, 0, 0)
+AD_ProgressText.TextSize = 8
 
 local AD_SitBtn = Instance.new("TextButton", ContainerMaxgen)
-AD_SitBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
-AD_SitBtn.Position = UDim2.new(0, 0, 0, 386)
-AD_SitBtn.Size = UDim2.new(0.5, -5, 0, 30)
+AD_SitBtn.BackgroundColor3 = Color3.fromRGB(60, 50, 15)
+AD_SitBtn.Position = UDim2.new(0, 0, 0, 344)
+AD_SitBtn.Size = UDim2.new(0.5, -4, 0, 26)
 AD_SitBtn.Font = Enum.Font.GothamBold
 AD_SitBtn.Text = "🪑 DUDUK"
-AD_SitBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
-AD_SitBtn.TextSize = 10
+AD_SitBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
+AD_SitBtn.TextSize = 9
 AD_SitBtn.BorderSizePixel = 0
-Instance.new("UICorner", AD_SitBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", AD_SitBtn).CornerRadius = UDim.new(0, 5)
 
 local AD_StartBtn = Instance.new("TextButton", ContainerMaxgen)
 AD_StartBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-AD_StartBtn.Position = UDim2.new(0.5, 5, 0, 386)
-AD_StartBtn.Size = UDim2.new(0.5, -15, 0, 30)
+AD_StartBtn.Position = UDim2.new(0.5, 4, 0, 344)
+AD_StartBtn.Size = UDim2.new(0.5, -12, 0, 26)
 AD_StartBtn.Font = Enum.Font.GothamBold
 AD_StartBtn.Text = "🟢 AUTO START"
 AD_StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AD_StartBtn.TextSize = 10
+AD_StartBtn.TextSize = 9
 AD_StartBtn.BorderSizePixel = 0
-Instance.new("UICorner", AD_StartBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", AD_StartBtn).CornerRadius = UDim.new(0, 5)
 
 local AD_HeightLbl = Instance.new("TextLabel", ContainerMaxgen)
 AD_HeightLbl.BackgroundTransparency = 1
-AD_HeightLbl.Position = UDim2.new(0, 0, 0, 424)
-AD_HeightLbl.Size = UDim2.new(0.5, -5, 0, 16)
+AD_HeightLbl.Position = UDim2.new(0, 0, 0, 378)
+AD_HeightLbl.Size = UDim2.new(0.5, -4, 0, 14)
 AD_HeightLbl.Font = Enum.Font.GothamBold
 AD_HeightLbl.Text = "⬆️ Height:"
 AD_HeightLbl.TextColor3 = Color3.fromRGB(180, 255, 255)
-AD_HeightLbl.TextSize = 9
+AD_HeightLbl.TextSize = 8
 AD_HeightLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local AD_HeightBox = Instance.new("TextBox", ContainerMaxgen)
-AD_HeightBox.BackgroundColor3 = Color3.fromRGB(30, 50, 60)
+AD_HeightBox.BackgroundColor3 = Color3.fromRGB(30, 45, 55)
 AD_HeightBox.BorderSizePixel = 0
-AD_HeightBox.Position = UDim2.new(0.5, 0, 0, 422)
-AD_HeightBox.Size = UDim2.new(0.5, -10, 0, 22)
+AD_HeightBox.Position = UDim2.new(0.5, 0, 0, 376)
+AD_HeightBox.Size = UDim2.new(0.5, -8, 0, 18)
 AD_HeightBox.Font = Enum.Font.GothamBold
 AD_HeightBox.Text = tostring(flyHeight)
 AD_HeightBox.TextColor3 = Color3.fromRGB(180, 255, 255)
-AD_HeightBox.TextSize = 10
+AD_HeightBox.TextSize = 9
 Instance.new("UICorner", AD_HeightBox).CornerRadius = UDim.new(0, 4)
 
 local AD_SpeedLbl = Instance.new("TextLabel", ContainerMaxgen)
 AD_SpeedLbl.BackgroundTransparency = 1
-AD_SpeedLbl.Position = UDim2.new(0, 0, 0, 448)
-AD_SpeedLbl.Size = UDim2.new(0.5, -5, 0, 16)
+AD_SpeedLbl.Position = UDim2.new(0, 0, 0, 400)
+AD_SpeedLbl.Size = UDim2.new(0.5, -4, 0, 14)
 AD_SpeedLbl.Font = Enum.Font.GothamBold
 AD_SpeedLbl.Text = "🚀 Speed:"
-AD_SpeedLbl.TextColor3 = Color3.fromRGB(255, 200, 100)
-AD_SpeedLbl.TextSize = 9
+AD_SpeedLbl.TextColor3 = Color3.fromRGB(255, 220, 100)
+AD_SpeedLbl.TextSize = 8
 AD_SpeedLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local AD_SpeedBox = Instance.new("TextBox", ContainerMaxgen)
-AD_SpeedBox.BackgroundColor3 = Color3.fromRGB(60, 50, 30)
+AD_SpeedBox.BackgroundColor3 = Color3.fromRGB(55, 45, 25)
 AD_SpeedBox.BorderSizePixel = 0
-AD_SpeedBox.Position = UDim2.new(0.5, 0, 0, 446)
-AD_SpeedBox.Size = UDim2.new(0.5, -10, 0, 22)
+AD_SpeedBox.Position = UDim2.new(0.5, 0, 0, 398)
+AD_SpeedBox.Size = UDim2.new(0.5, -8, 0, 18)
 AD_SpeedBox.Font = Enum.Font.GothamBold
 AD_SpeedBox.Text = tostring(flySpeed)
-AD_SpeedBox.TextColor3 = Color3.fromRGB(255, 200, 100)
-AD_SpeedBox.TextSize = 10
+AD_SpeedBox.TextColor3 = Color3.fromRGB(255, 220, 100)
+AD_SpeedBox.TextSize = 9
 Instance.new("UICorner", AD_SpeedBox).CornerRadius = UDim.new(0, 4)
 
 AD_HeightBox.FocusLost:Connect(function()
@@ -1777,137 +1658,125 @@ AD_SpeedBox.FocusLost:Connect(function()
 end)
 
 local AD_DynamicBtn = Instance.new("TextButton", ContainerMaxgen)
-AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 80)
-AD_DynamicBtn.Position = UDim2.new(0, 0, 0, 476)
-AD_DynamicBtn.Size = UDim2.new(0.5, -5, 0, 22)
+AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 70, 70)
+AD_DynamicBtn.Position = UDim2.new(0, 0, 0, 422)
+AD_DynamicBtn.Size = UDim2.new(0.5, -4, 0, 20)
 AD_DynamicBtn.Font = Enum.Font.GothamBold
 AD_DynamicBtn.Text = "⚡ Dynamic: ON"
 AD_DynamicBtn.TextColor3 = Color3.fromRGB(180, 255, 255)
-AD_DynamicBtn.TextSize = 9
+AD_DynamicBtn.TextSize = 8
 AD_DynamicBtn.BorderSizePixel = 0
-Instance.new("UICorner", AD_DynamicBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", AD_DynamicBtn).CornerRadius = UDim.new(0, 4)
 
 local AD_NoClipBtn = Instance.new("TextButton", ContainerMaxgen)
-AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 100)
-AD_NoClipBtn.Position = UDim2.new(0.5, 5, 0, 476)
-AD_NoClipBtn.Size = UDim2.new(0.5, -15, 0, 22)
+AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 80)
+AD_NoClipBtn.Position = UDim2.new(0.5, 4, 0, 422)
+AD_NoClipBtn.Size = UDim2.new(0.5, -12, 0, 20)
 AD_NoClipBtn.Font = Enum.Font.GothamBold
 AD_NoClipBtn.Text = "🚫 No-Clip: ON"
 AD_NoClipBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
-AD_NoClipBtn.TextSize = 9
+AD_NoClipBtn.TextSize = 8
 AD_NoClipBtn.BorderSizePixel = 0
-Instance.new("UICorner", AD_NoClipBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", AD_NoClipBtn).CornerRadius = UDim.new(0, 4)
 
 local AD_NoFlyBtn = Instance.new("TextButton", ContainerMaxgen)
-AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 60)
-AD_NoFlyBtn.Position = UDim2.new(0, 0, 0, 502)
-AD_NoFlyBtn.Size = UDim2.new(1, -10, 0, 22)
+AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 110, 60)
+AD_NoFlyBtn.Position = UDim2.new(0, 0, 0, 446)
+AD_NoFlyBtn.Size = UDim2.new(1, -8, 0, 20)
 AD_NoFlyBtn.Font = Enum.Font.GothamBold
 AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): ON"
 AD_NoFlyBtn.TextColor3 = Color3.fromRGB(220, 255, 200)
-AD_NoFlyBtn.TextSize = 9
+AD_NoFlyBtn.TextSize = 8
 AD_NoFlyBtn.BorderSizePixel = 0
-Instance.new("UICorner", AD_NoFlyBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", AD_NoFlyBtn).CornerRadius = UDim.new(0, 4)
 
 AD_NoFlyBtn.MouseButton1Click:Connect(function()
     noFlyMode = not noFlyMode
     if noFlyMode then
         AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): ON"
-        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 60)
+        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 110, 60)
         AD_NoFlyBtn.TextColor3 = Color3.fromRGB(220, 255, 200)
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "Auto-Drive Mode",
-                Text = "🛞 Ground Mode (No-Fly)",
-                Duration = 3
-            })
-        end)
+        sendNotif("INFO", "🛞 Ground Mode (No-Fly)", 3, "DRIVE_MODE", 2)
     else
         AD_NoFlyBtn.Text = "🛞 No-Fly (Ground): OFF"
-        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 80)
+        AD_NoFlyBtn.BackgroundColor3 = Color3.fromRGB(40, 55, 75)
         AD_NoFlyBtn.TextColor3 = Color3.fromRGB(180, 220, 255)
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "Auto-Drive Mode",
-                Text = "✈️ Fly Mode",
-                Duration = 3
-            })
-        end)
+        sendNotif("INFO", "✈️ Fly Mode", 3, "DRIVE_MODE", 2)
     end
 end)
 
 local AD_StatsLabel = Instance.new("TextLabel", ContainerMaxgen)
-AD_StatsLabel.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
-AD_StatsLabel.Position = UDim2.new(0, 0, 0, 532)
-AD_StatsLabel.Size = UDim2.new(1, -10, 0, 22)
+AD_StatsLabel.BackgroundColor3 = Color3.fromRGB(20, 18, 5)
+AD_StatsLabel.Position = UDim2.new(0, 0, 0, 472)
+AD_StatsLabel.Size = UDim2.new(1, -8, 0, 20)
 AD_StatsLabel.Font = Enum.Font.GothamBold
 AD_StatsLabel.Text = "📊 Job: 0  |  ⏱️ 00:00:00"
-AD_StatsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-AD_StatsLabel.TextSize = 9
+AD_StatsLabel.TextColor3 = Color3.fromRGB(220, 200, 140)
+AD_StatsLabel.TextSize = 8
 Instance.new("UICorner", AD_StatsLabel).CornerRadius = UDim.new(0, 5)
 
 local beamColorEnabled = true
-local beamColorValue = Color3.fromRGB(0, 255, 100)
+local beamColorValue = Color3.fromRGB(255, 200, 0)
 local beamRainbow = false
 
 local BeamTitle = Instance.new("TextLabel", ContainerMaxgen)
-BeamTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
-BeamTitle.Position = UDim2.new(0, 0, 0, 560)
-BeamTitle.Size = UDim2.new(1, -10, 0, 24)
+BeamTitle.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
+BeamTitle.Position = UDim2.new(0, 0, 0, 498)
+BeamTitle.Size = UDim2.new(1, -8, 0, 22)
 BeamTitle.Font = Enum.Font.GothamBold
 BeamTitle.Text = "🎨 BEAM COLOR"
-BeamTitle.TextColor3 = Color3.fromRGB(200, 150, 255)
-BeamTitle.TextSize = 11
-Instance.new("UICorner", BeamTitle).CornerRadius = UDim.new(0, 6)
+BeamTitle.TextColor3 = Color3.fromRGB(255, 220, 100)
+BeamTitle.TextSize = 10
+Instance.new("UICorner", BeamTitle).CornerRadius = UDim.new(0, 5)
 
 local BeamColorBtn = Instance.new("TextButton", ContainerMaxgen)
-BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-BeamColorBtn.Position = UDim2.new(0, 0, 0, 588)
-BeamColorBtn.Size = UDim2.new(0.5, -5, 0, 26)
+BeamColorBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 20)
+BeamColorBtn.Position = UDim2.new(0, 0, 0, 524)
+BeamColorBtn.Size = UDim2.new(0.5, -4, 0, 22)
 BeamColorBtn.Font = Enum.Font.GothamBold
 BeamColorBtn.Text = "🎨 Custom: ON"
-BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
-BeamColorBtn.TextSize = 9
+BeamColorBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
+BeamColorBtn.TextSize = 8
 BeamColorBtn.BorderSizePixel = 0
-Instance.new("UICorner", BeamColorBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", BeamColorBtn).CornerRadius = UDim.new(0, 4)
 
 local BeamRainbowBtn = Instance.new("TextButton", ContainerMaxgen)
 BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
-BeamRainbowBtn.Position = UDim2.new(0.5, 5, 0, 588)
-BeamRainbowBtn.Size = UDim2.new(0.5, -15, 0, 26)
+BeamRainbowBtn.Position = UDim2.new(0.5, 4, 0, 524)
+BeamRainbowBtn.Size = UDim2.new(0.5, -12, 0, 22)
 BeamRainbowBtn.Font = Enum.Font.GothamBold
 BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
 BeamRainbowBtn.TextColor3 = Color3.fromRGB(220, 180, 220)
-BeamRainbowBtn.TextSize = 9
+BeamRainbowBtn.TextSize = 8
 BeamRainbowBtn.BorderSizePixel = 0
-Instance.new("UICorner", BeamRainbowBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", BeamRainbowBtn).CornerRadius = UDim.new(0, 4)
 
 local presetColors = {
+    {name = "🟡 Kuning", color = Color3.fromRGB(255, 200, 0)},
+    {name = "🟠 Orange", color = Color3.fromRGB(255, 130, 0)},
+    {name = "🔴 Merah", color = Color3.fromRGB(255, 50, 50)},
     {name = "🟢 Hijau", color = Color3.fromRGB(0, 255, 100)},
     {name = "🔵 Biru", color = Color3.fromRGB(0, 200, 255)},
     {name = "🟣 Ungu", color = Color3.fromRGB(200, 0, 255)},
-    {name = "🟡 Kuning", color = Color3.fromRGB(255, 200, 0)},
-    {name = "🟠 Orange", color = Color3.fromRGB(255, 100, 0)},
-    {name = "🔴 Merah", color = Color3.fromRGB(255, 50, 50)},
     {name = "⚪ Putih", color = Color3.fromRGB(255, 255, 255)},
 }
 
 local colorButtons = {}
-local rowY = 618
+local rowY = 552
 
 for i, preset in ipairs(presetColors) do
     local col = (i - 1) % 3
     local row = math.floor((i - 1) / 3)
     local btn = Instance.new("TextButton", ContainerMaxgen)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 25, 35)
-    btn.Position = UDim2.new(col / 3, col * 2, 0, rowY + row * 28)
-    btn.Size = UDim2.new(1/3 - 4/3, -2, 0, 24)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 25, 10)
+    btn.Position = UDim2.new(col / 3, col * 2, 0, rowY + row * 24)
+    btn.Size = UDim2.new(1/3 - 4/3, -2, 0, 20)
     btn.Font = Enum.Font.GothamBold
     btn.Text = preset.name
-    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-    btn.TextSize = 9
+    btn.TextColor3 = Color3.fromRGB(220, 200, 140)
+    btn.TextSize = 8
     btn.BorderSizePixel = 0
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
     table.insert(colorButtons, btn)
     
     btn.MouseButton1Click:Connect(function()
@@ -1918,45 +1787,39 @@ for i, preset in ipairs(presetColors) do
         BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
         BeamRainbowBtn.TextColor3 = Color3.fromRGB(220, 180, 220)
         BeamColorBtn.Text = "🎨 Custom: ON"
-        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 20)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
         
         for _, b in ipairs(colorButtons) do
-            b.BackgroundColor3 = Color3.fromRGB(35, 25, 35)
+            b.BackgroundColor3 = Color3.fromRGB(30, 25, 10)
         end
         btn.BackgroundColor3 = preset.color
         btn.TextColor3 = (preset.color.R + preset.color.G + preset.color.B > 1.5) and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
         
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "Beam Color",
-                Text = "Warna: " .. preset.name,
-                Duration = 2
-            })
-        end)
+        sendNotif("INFO", "Warna: " .. preset.name, 2, "BEAM_COLOR", 1)
     end)
 end
 
 local customHexLbl = Instance.new("TextLabel", ContainerMaxgen)
 customHexLbl.BackgroundTransparency = 1
-customHexLbl.Position = UDim2.new(0, 0, 0, rowY + 3 * 28 + 4)
-customHexLbl.Size = UDim2.new(0.5, -5, 0, 22)
+customHexLbl.Position = UDim2.new(0, 0, 0, rowY + 3 * 24 + 4)
+customHexLbl.Size = UDim2.new(0.5, -4, 0, 18)
 customHexLbl.Font = Enum.Font.Gotham
 customHexLbl.Text = "🎨 Hex (#RRGGBB):"
-customHexLbl.TextColor3 = Color3.fromRGB(180, 180, 220)
-customHexLbl.TextSize = 9
+customHexLbl.TextColor3 = Color3.fromRGB(200, 180, 120)
+customHexLbl.TextSize = 8
 customHexLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local customHexBox = Instance.new("TextBox", ContainerMaxgen)
-customHexBox.BackgroundColor3 = Color3.fromRGB(40, 30, 50)
+customHexBox.BackgroundColor3 = Color3.fromRGB(35, 28, 8)
 customHexBox.BorderSizePixel = 0
-customHexBox.Position = UDim2.new(0.5, 0, 0, rowY + 3 * 28 + 4)
-customHexBox.Size = UDim2.new(0.5, -10, 0, 22)
+customHexBox.Position = UDim2.new(0.5, 0, 0, rowY + 3 * 24 + 4)
+customHexBox.Size = UDim2.new(0.5, -8, 0, 18)
 customHexBox.Font = Enum.Font.GothamBold
-customHexBox.Text = "00FF64"
-customHexBox.TextColor3 = Color3.fromRGB(255, 200, 255)
-customHexBox.TextSize = 9
-customHexBox.PlaceholderText = "00FF64"
+customHexBox.Text = "FFC800"
+customHexBox.TextColor3 = Color3.fromRGB(255, 220, 120)
+customHexBox.TextSize = 8
+customHexBox.PlaceholderText = "FFC800"
 Instance.new("UICorner", customHexBox).CornerRadius = UDim.new(0, 4)
 
 customHexBox.FocusLost:Connect(function()
@@ -1972,19 +1835,13 @@ customHexBox.FocusLost:Connect(function()
         beamRainbow = false
         beamColorEnabled = true
         BeamColorBtn.Text = "🎨 Custom: ON"
-        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 20)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
         BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
         BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "Beam Color",
-                Text = "Custom hex: #" .. hex,
-                Duration = 2
-            })
-        end)
+        sendNotif("INFO", "Custom hex: #" .. hex, 2, "BEAM_COLOR", 1)
     else
-        customHexBox.Text = "00FF64"
+        customHexBox.Text = "FFC800"
     end
 end)
 
@@ -1992,8 +1849,8 @@ BeamColorBtn.MouseButton1Click:Connect(function()
     beamColorEnabled = not beamColorEnabled
     if beamColorEnabled then
         BeamColorBtn.Text = "🎨 Custom: ON"
-        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 20)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
     else
         BeamColorBtn.Text = "🎨 Custom: OFF"
         BeamColorBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
@@ -2009,8 +1866,8 @@ BeamRainbowBtn.MouseButton1Click:Connect(function()
         BeamRainbowBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
         beamColorEnabled = true
         BeamColorBtn.Text = "🎨 Custom: ON"
-        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
-        BeamColorBtn.TextColor3 = Color3.fromRGB(180, 255, 180)
+        BeamColorBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 20)
+        BeamColorBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
     else
         BeamRainbowBtn.Text = "🌈 Rainbow: OFF"
         BeamRainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
@@ -2032,12 +1889,12 @@ task.spawn(function()
                 end
                 
                 for _, obj in ipairs(Workspace:GetDescendants()) do
-                    if obj:IsA("Beam") then
+                    if obj:IsA("Beam") and obj.Attachment0 and obj.Attachment1 then
                         obj.Color = ColorSequence.new(color)
                     end
                 end
                 for _, obj in ipairs(LocalPlayer.PlayerGui:GetDescendants()) do
-                    if obj:IsA("Beam") then
+                    if obj:IsA("Beam") and obj.Attachment0 and obj.Attachment1 then
                         obj.Color = ColorSequence.new(color)
                     end
                 end
@@ -2046,18 +1903,18 @@ task.spawn(function()
     end
 end)
 
-ContainerMaxgen.CanvasSize = UDim2.new(0, 0, 0, rowY + 3 * 28 + 40)
+ContainerMaxgen.CanvasSize = UDim2.new(0, 0, 0, rowY + 3 * 24 + 40)
 
 AD_SitBtn.MouseButton1Click:Connect(function()
     local ok = sitInVehicle()
     if ok then
         AD_StatusLabel.Text = "✅ Duduk sukses!"
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-        AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(180, 255, 100)
     else
         AD_StatusLabel.Text = "⚠️ Gagal duduk"
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 220, 100)
     end
 end)
 
@@ -2065,7 +1922,7 @@ AD_DynamicBtn.MouseButton1Click:Connect(function()
     dynamicSpeed = not dynamicSpeed
     if dynamicSpeed then
         AD_DynamicBtn.Text = "⚡ Dynamic: ON"
-        AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 80)
+        AD_DynamicBtn.BackgroundColor3 = Color3.fromRGB(40, 70, 70)
         AD_DynamicBtn.TextColor3 = Color3.fromRGB(180, 255, 255)
     else
         AD_DynamicBtn.Text = "⚡ Dynamic: OFF"
@@ -2078,7 +1935,7 @@ AD_NoClipBtn.MouseButton1Click:Connect(function()
     noClipEnabled = not noClipEnabled
     if noClipEnabled then
         AD_NoClipBtn.Text = "🚫 No-Clip: ON"
-        AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 100)
+        AD_NoClipBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 80)
         AD_NoClipBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
     else
         AD_NoClipBtn.Text = "🚫 No-Clip: OFF"
@@ -2089,11 +1946,14 @@ end)
 
 AD_StartBtn.MouseButton1Click:Connect(function()
     if not autoDriveActive then
+        if autoDeliveryActive then
+            autoDeliveryActive = false
+            toggleButton.Text = "🟢 START DELIVERY (TP)"
+            toggleButton.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
+        end
+        
         _loopGeneration = _loopGeneration + 1
         task.wait(0.3)
-        
-        local hasActiveState = (adTargetPos ~= nil) or (adFinishPos ~= nil) 
-            or (currentTargetPosition ~= nil) or (jobState ~= "NONE")
         
         autoDriveActive = true
         _restarting = false
@@ -2113,15 +1973,14 @@ AD_StartBtn.MouseButton1Click:Connect(function()
             task.wait(0.5)
         end
         
-        if hasActiveState then
+        if adTargetPos or adFinishPos or jobState ~= "NONE" then
             AD_StatusLabel.Text = "♻️ Resume job..."
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-            warn("[DV] Resume state:", jobState)
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(255, 220, 100)
         else
             AD_StatusLabel.Text = "🟢 Auto-Loop started!"
-            AD_StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-            AD_LED.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+            AD_StatusLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
+            AD_LED.BackgroundColor3 = Color3.fromRGB(180, 255, 100)
         end
         
         task.spawn(autoRunJob)
@@ -2132,8 +1991,8 @@ AD_StartBtn.MouseButton1Click:Connect(function()
         AD_StartBtn.Text = "🟢 AUTO START"
         AD_StartBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
         AD_StatusLabel.Text = "⏸️ Paused (state preserved)"
-        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+        AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+        AD_LED.BackgroundColor3 = Color3.fromRGB(255, 220, 100)
         AD_PhaseLabel.Text = "🎯 Phase: —"
         
         pcall(function()
@@ -2158,15 +2017,15 @@ task.spawn(function()
         end
         
         if adTargetPos then
-            AD_TargetLabel.Text = string.format("📍 Target: %.1f, %.1f, %.1f", adTargetPos.X, adTargetPos.Y, adTargetPos.Z)
-            AD_TargetLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AD_TargetLabel.Text = string.format("📍 Target: %.0f, %.0f, %.0f", adTargetPos.X, adTargetPos.Y, adTargetPos.Z)
+            AD_TargetLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         else
             AD_TargetLabel.Text = "📍 Target: —"
             AD_TargetLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
         end
         if adFinishPos then
-            AD_FinishLabel.Text = string.format("🏁 Finish: %.1f, %.1f, %.1f", adFinishPos.X, adFinishPos.Y, adFinishPos.Z)
-            AD_FinishLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AD_FinishLabel.Text = string.format("🏁 Finish: %.0f, %.0f, %.0f", adFinishPos.X, adFinishPos.Y, adFinishPos.Z)
+            AD_FinishLabel.TextColor3 = Color3.fromRGB(180, 255, 100)
         else
             AD_FinishLabel.Text = "🏁 Finish: —"
             AD_FinishLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -2177,26 +2036,29 @@ end)
 toggleButton.MouseButton1Click:Connect(function()
     autoDeliveryActive = not autoDeliveryActive
     if autoDeliveryActive then
+        if autoDriveActive then
+            autoDriveActive = false
+            AD_StartBtn.Text = "🟢 AUTO START"
+            AD_StartBtn.BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+        end
         toggleButton.Text = "🔴 STOP DELIVERY"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(80, 40, 120)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(100, 60, 20)
         if statusText then 
             statusText.Text = "🔥 Triggering Job (TP)..." 
-            statusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+            statusText.TextColor3 = Color3.fromRGB(180, 255, 100)
         end
         touchStartJob()
         updateLockSeatVisual()
     else
         toggleButton.Text = "🟢 START DELIVERY (TP)"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
         if statusText then 
             statusText.Text = "⏸️ Delivery Paused" 
-            statusText.TextColor3 = Color3.fromRGB(180, 160, 210)
+            statusText.TextColor3 = Color3.fromRGB(200, 180, 100)
         end
         if LockSeatEnabled then
             setLockSeat(false)
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {Title = "Lock Seat", Text = "🔓 Auto-OFF", Duration = 3})
-            end)
+            sendNotif("INFO", "🔓 Auto-OFF", 3, "LOCK_SEAT", 3)
         end
         if _anchoredVehicle then pcall(function() unlockVehicle(_anchoredVehicle) end) end
         updateLockSeatVisual()
@@ -2338,7 +2200,7 @@ pcall(function()
 end)
 if statusText then
     statusText.Text = "✅ Reward selesai, ulang..."
-    statusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+    statusText.TextColor3 = Color3.fromRGB(180, 255, 100)
 end
     end)
 end
@@ -2449,7 +2311,7 @@ local function hookGameRemotes()
                     _G_CurrentStage = "Stage2"
                     if ProgressDisplay then 
                         ProgressDisplay.Text = "Status: Tempat Taruh 2" 
-                        ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120) 
+                        ProgressDisplay.TextColor3 = Color3.fromRGB(255, 220, 100) 
                     end
                 elseif actionType == "Progress1" then
                     _G_CurrentProgressCount = value or 0
@@ -2457,13 +2319,13 @@ local function hookGameRemotes()
                         _G_CurrentStage = "Stage2"
                         if ProgressDisplay then 
                             ProgressDisplay.Text = "Progres 1 Selesai -> Taruh 2" 
-                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120) 
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 220, 100) 
                         end
                     else
                         _G_CurrentStage = "Progress1"
                         if ProgressDisplay then 
                             ProgressDisplay.Text = "Progres 1: " .. _G_CurrentProgressCount .. " / 5" 
-                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 160, 160) 
+                            ProgressDisplay.TextColor3 = Color3.fromRGB(255, 220, 100) 
                         end
                     end
                 end
@@ -2474,91 +2336,95 @@ end
 hookGameRemotes()
 
 local ToggleBrewokBtn = Instance.new("TextButton", ContainerBrewok)
-ToggleBrewokBtn.Size = UDim2.new(1, -12, 0, 32)
-ToggleBrewokBtn.Position = UDim2.new(0, 0, 0, 8)
-ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+ToggleBrewokBtn.Size = UDim2.new(1, -10, 0, 28)
+ToggleBrewokBtn.Position = UDim2.new(0, 0, 0, 6)
+ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(150, 110, 20)
 ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: OFF"
 ToggleBrewokBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBrewokBtn.Font = Enum.Font.GothamBold
-ToggleBrewokBtn.TextSize = 11
+ToggleBrewokBtn.TextSize = 10
 ToggleBrewokBtn.BorderSizePixel = 0
-Instance.new("UICorner", ToggleBrewokBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", ToggleBrewokBtn).CornerRadius = UDim.new(0, 5)
 
 ToggleBrewokBtn.MouseButton1Click:Connect(function()
     _G_AutoFarmBrewok = not _G_AutoFarmBrewok
     if _G_AutoFarmBrewok then
         ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: ON"
-        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+        ToggleBrewokBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         if _G_AutoFlyEnabled then toggleFly(true) end
     else
         ToggleBrewokBtn.Text = "🍺 AUTO FARM BREWOK: OFF"
-        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+        ToggleBrewokBtn.BackgroundColor3 = Color3.fromRGB(150, 110, 20)
+        ToggleBrewokBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         toggleFly(false)
     end
 end)
 
 local FlyModeBtn = Instance.new("TextButton", ContainerBrewok)
-FlyModeBtn.Size = UDim2.new(1, -12, 0, 28)
-FlyModeBtn.Position = UDim2.new(0, 0, 0, 46)
-FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+FlyModeBtn.Size = UDim2.new(1, -10, 0, 24)
+FlyModeBtn.Position = UDim2.new(0, 0, 0, 40)
+FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 15)
 FlyModeBtn.Text = "Mode: FLY (Mati)"
-FlyModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyModeBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
 FlyModeBtn.Font = Enum.Font.GothamBold
-FlyModeBtn.TextSize = 10
+FlyModeBtn.TextSize = 9
 FlyModeBtn.BorderSizePixel = 0
-Instance.new("UICorner", FlyModeBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", FlyModeBtn).CornerRadius = UDim.new(0, 5)
 
 FlyModeBtn.MouseButton1Click:Connect(function()
     _G_AutoFlyEnabled = not _G_AutoFlyEnabled
     if _G_AutoFlyEnabled then
         FlyModeBtn.Text = "Mode: FLY (Aktif)"
-        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+        FlyModeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         if _G_AutoFarmBrewok then toggleFly(true) end
     else
         FlyModeBtn.Text = "Mode: FLY (Mati)"
-        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+        FlyModeBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 15)
+        FlyModeBtn.TextColor3 = Color3.fromRGB(255, 220, 120)
         toggleFly(false)
     end
 end)
 
 local BodyStateBtn = Instance.new("TextButton", ContainerBrewok)
-BodyStateBtn.Size = UDim2.new(1, -12, 0, 28)
-BodyStateBtn.Position = UDim2.new(0, 0, 0, 80)
-BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+BodyStateBtn.Size = UDim2.new(1, -10, 0, 24)
+BodyStateBtn.Position = UDim2.new(0, 0, 0, 70)
+BodyStateBtn.BackgroundColor3 = Color3.fromRGB(90, 70, 20)
 BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
-BodyStateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BodyStateBtn.TextColor3 = Color3.fromRGB(255, 240, 180)
 BodyStateBtn.Font = Enum.Font.GothamBold
-BodyStateBtn.TextSize = 10
+BodyStateBtn.TextSize = 9
 BodyStateBtn.BorderSizePixel = 0
-Instance.new("UICorner", BodyStateBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", BodyStateBtn).CornerRadius = UDim.new(0, 5)
 
 BodyStateBtn.MouseButton1Click:Connect(function()
     if _G_BodyState == "Terlentang" then
         _G_BodyState = "Berdiri"
         BodyStateBtn.Text = "Posisi: Berdiri (Normal)"
-        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(110, 85, 25)
     elseif _G_BodyState == "Berdiri" then
         _G_BodyState = "KepalaBawah"
         BodyStateBtn.Text = "Posisi: Kepala di Bawah"
-        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(130, 100, 30)
     else
         _G_BodyState = "Terlentang"
         BodyStateBtn.Text = "Posisi: Terlentang (Rebahan)"
-        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(100, 25, 25)
+        BodyStateBtn.BackgroundColor3 = Color3.fromRGB(90, 70, 20)
     end
 end)
 
 local DelayBox = Instance.new("TextBox", ContainerBrewok)
-DelayBox.Size = UDim2.new(0.48, -4, 0, 28)
-DelayBox.Position = UDim2.new(0, 0, 0, 114)
-DelayBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
-DelayBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+DelayBox.Size = UDim2.new(0.48, -4, 0, 24)
+DelayBox.Position = UDim2.new(0, 0, 0, 100)
+DelayBox.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
+DelayBox.TextColor3 = Color3.fromRGB(255, 200, 100)
 DelayBox.PlaceholderText = "Delay TP"
 DelayBox.Text = tostring(_G_ActionDelay)
 DelayBox.Font = Enum.Font.GothamBold
-DelayBox.TextSize = 10
+DelayBox.TextSize = 9
 DelayBox.BorderSizePixel = 0
-Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 5)
 
 DelayBox.FocusLost:Connect(function()
     local val = tonumber(DelayBox.Text)
@@ -2566,16 +2432,16 @@ DelayBox.FocusLost:Connect(function()
 end)
 
 local BurstBox = Instance.new("TextBox", ContainerBrewok)
-BurstBox.Size = UDim2.new(0.48, -4, 0, 28)
-BurstBox.Position = UDim2.new(0.52, 0, 0, 114)
-BurstBox.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
-BurstBox.TextColor3 = Color3.fromRGB(255, 100, 100)
+BurstBox.Size = UDim2.new(0.48, -4, 0, 24)
+BurstBox.Position = UDim2.new(0.52, 0, 0, 100)
+BurstBox.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
+BurstBox.TextColor3 = Color3.fromRGB(255, 200, 100)
 BurstBox.PlaceholderText = "Burst Count"
 BurstBox.Text = tostring(_G_BurstCount)
 BurstBox.Font = Enum.Font.GothamBold
-BurstBox.TextSize = 10
+BurstBox.TextSize = 9
 BurstBox.BorderSizePixel = 0
-Instance.new("UICorner", BurstBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", BurstBox).CornerRadius = UDim.new(0, 5)
 
 BurstBox.FocusLost:Connect(function()
     local val = tonumber(BurstBox.Text)
@@ -2583,26 +2449,26 @@ BurstBox.FocusLost:Connect(function()
 end)
 
 ProgressDisplay = Instance.new("TextLabel", ContainerBrewok)
-ProgressDisplay.Size = UDim2.new(1, -12, 0, 26)
-ProgressDisplay.Position = UDim2.new(0, 0, 0, 148)
-ProgressDisplay.BackgroundColor3 = Color3.fromRGB(28, 15, 15)
+ProgressDisplay.Size = UDim2.new(1, -10, 0, 22)
+ProgressDisplay.Position = UDim2.new(0, 0, 0, 130)
+ProgressDisplay.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
 ProgressDisplay.BorderSizePixel = 0
 ProgressDisplay.Text = "Progres: Menunggu Sinyal..."
-ProgressDisplay.TextColor3 = Color3.fromRGB(255, 120, 120)
+ProgressDisplay.TextColor3 = Color3.fromRGB(255, 200, 100)
 ProgressDisplay.Font = Enum.Font.GothamBold
-ProgressDisplay.TextSize = 10
-Instance.new("UICorner", ProgressDisplay).CornerRadius = UDim.new(0, 6)
+ProgressDisplay.TextSize = 9
+Instance.new("UICorner", ProgressDisplay).CornerRadius = UDim.new(0, 5)
 
 local ManualTpBrewokBtn = Instance.new("TextButton", ContainerBrewok)
-ManualTpBrewokBtn.Size = UDim2.new(1, -12, 0, 30)
-ManualTpBrewokBtn.Position = UDim2.new(0, 0, 0, 180)
-ManualTpBrewokBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+ManualTpBrewokBtn.Size = UDim2.new(1, -10, 0, 26)
+ManualTpBrewokBtn.Position = UDim2.new(0, 0, 0, 158)
+ManualTpBrewokBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
 ManualTpBrewokBtn.Text = "📍 TP Manual ke Brewog"
-ManualTpBrewokBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ManualTpBrewokBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 ManualTpBrewokBtn.Font = Enum.Font.GothamBold
-ManualTpBrewokBtn.TextSize = 11
+ManualTpBrewokBtn.TextSize = 10
 ManualTpBrewokBtn.BorderSizePixel = 0
-Instance.new("UICorner", ManualTpBrewokBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", ManualTpBrewokBtn).CornerRadius = UDim.new(0, 5)
 
 ManualTpBrewokBtn.MouseButton1Click:Connect(function()
     pcall(function()
@@ -2615,25 +2481,25 @@ ManualTpBrewokBtn.MouseButton1Click:Connect(function()
 end)
 
 local AddonsTitle = Instance.new("TextLabel", ContainerAddons)
-AddonsTitle.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
+AddonsTitle.BackgroundColor3 = Color3.fromRGB(30, 25, 5)
 AddonsTitle.Position = UDim2.new(0, 0, 0, 4)
-AddonsTitle.Size = UDim2.new(1, -10, 0, 24)
+AddonsTitle.Size = UDim2.new(1, -8, 0, 22)
 AddonsTitle.Font = Enum.Font.GothamBold
 AddonsTitle.Text = "📥 PILIH SCRIPT:"
-AddonsTitle.TextColor3 = Color3.fromRGB(255, 200, 100)
-AddonsTitle.TextSize = 11
-Instance.new("UICorner", AddonsTitle).CornerRadius = UDim.new(0, 6)
+AddonsTitle.TextColor3 = Color3.fromRGB(255, 220, 100)
+AddonsTitle.TextSize = 10
+Instance.new("UICorner", AddonsTitle).CornerRadius = UDim.new(0, 5)
 
 local LoadBankBtn = Instance.new("TextButton", ContainerAddons)
-LoadBankBtn.Size = UDim2.new(1, -10, 0, 34)
-LoadBankBtn.Position = UDim2.new(0, 0, 0, 34)
-LoadBankBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadBankBtn.Size = UDim2.new(1, -8, 0, 30)
+LoadBankBtn.Position = UDim2.new(0, 0, 0, 30)
+LoadBankBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
 LoadBankBtn.Text = "🏦 LOAD BANK SCRIPT"
-LoadBankBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBankBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 LoadBankBtn.Font = Enum.Font.GothamBold
-LoadBankBtn.TextSize = 11
+LoadBankBtn.TextSize = 10
 LoadBankBtn.BorderSizePixel = 0
-Instance.new("UICorner", LoadBankBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", LoadBankBtn).CornerRadius = UDim.new(0, 5)
 
 LoadBankBtn.MouseButton1Click:Connect(function()
     pcall(function()
@@ -2642,15 +2508,15 @@ LoadBankBtn.MouseButton1Click:Connect(function()
 end)
 
 local LoadBypassBtn = Instance.new("TextButton", ContainerAddons)
-LoadBypassBtn.Size = UDim2.new(1, -10, 0, 34)
-LoadBypassBtn.Position = UDim2.new(0, 0, 0, 74)
-LoadBypassBtn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadBypassBtn.Size = UDim2.new(1, -8, 0, 30)
+LoadBypassBtn.Position = UDim2.new(0, 0, 0, 66)
+LoadBypassBtn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
 LoadBypassBtn.Text = "🛡️ LOAD BYPASS SCRIPT"
-LoadBypassBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBypassBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 LoadBypassBtn.Font = Enum.Font.GothamBold
-LoadBypassBtn.TextSize = 11
+LoadBypassBtn.TextSize = 10
 LoadBypassBtn.BorderSizePixel = 0
-Instance.new("UICorner", LoadBypassBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", LoadBypassBtn).CornerRadius = UDim.new(0, 5)
 
 LoadBypassBtn.MouseButton1Click:Connect(function()
     pcall(function()
@@ -2659,15 +2525,15 @@ LoadBypassBtn.MouseButton1Click:Connect(function()
 end)
 
 local LoadH42Btn = Instance.new("TextButton", ContainerAddons)
-LoadH42Btn.Size = UDim2.new(1, -10, 0, 34)
-LoadH42Btn.Position = UDim2.new(0, 0, 0, 114)
-LoadH42Btn.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
+LoadH42Btn.Size = UDim2.new(1, -8, 0, 30)
+LoadH42Btn.Position = UDim2.new(0, 0, 0, 102)
+LoadH42Btn.BackgroundColor3 = Color3.fromRGB(180, 140, 0)
 LoadH42Btn.Text = "🍺 LOAD H42 BREWOK"
-LoadH42Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadH42Btn.TextColor3 = Color3.fromRGB(0, 0, 0)
 LoadH42Btn.Font = Enum.Font.GothamBold
-LoadH42Btn.TextSize = 11
+LoadH42Btn.TextSize = 10
 LoadH42Btn.BorderSizePixel = 0
-Instance.new("UICorner", LoadH42Btn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", LoadH42Btn).CornerRadius = UDim.new(0, 5)
 
 LoadH42Btn.MouseButton1Click:Connect(function()
     pcall(function()
@@ -2676,20 +2542,20 @@ LoadH42Btn.MouseButton1Click:Connect(function()
 end)
 
 local DevCard = Instance.new("Frame", ContainerAddons)
-DevCard.Size = UDim2.new(1, -10, 0, 140)
-DevCard.Position = UDim2.new(0, 0, 0, 170)
-DevCard.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+DevCard.Size = UDim2.new(1, -8, 0, 110)
+DevCard.Position = UDim2.new(0, 0, 0, 150)
+DevCard.BackgroundColor3 = Color3.fromRGB(20, 18, 5)
 DevCard.BorderSizePixel = 0
-Instance.new("UICorner", DevCard).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", DevCard).CornerRadius = UDim.new(0, 8)
 
 local DevAvatar = Instance.new("ImageLabel", DevCard)
-DevAvatar.Size = UDim2.new(0, 80, 0, 80)
-DevAvatar.Position = UDim2.new(0.5, -40, 0, 12)
+DevAvatar.Size = UDim2.new(0, 60, 0, 60)
+DevAvatar.Position = UDim2.new(0.5, -30, 0, 10)
 DevAvatar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 DevAvatar.BorderSizePixel = 0
 DevAvatar.Image = "rbxassetid://0"
 Instance.new("UICorner", DevAvatar).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", DevAvatar).Color = Color3.fromRGB(255, 50, 50)
+Instance.new("UIStroke", DevAvatar).Color = Color3.fromRGB(255, 200, 0)
 
 pcall(function()
     local devUserId = 0
@@ -2703,63 +2569,63 @@ end)
 
 local DevLabel = Instance.new("TextLabel", DevCard)
 DevLabel.BackgroundTransparency = 1
-DevLabel.Size = UDim2.new(1, 0, 0, 20)
-DevLabel.Position = UDim2.new(0, 0, 0, 96)
+DevLabel.Size = UDim2.new(1, 0, 0, 16)
+DevLabel.Position = UDim2.new(0, 0, 0, 74)
 DevLabel.Font = Enum.Font.GothamBold
 DevLabel.Text = "GZ"
-DevLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-DevLabel.TextSize = 16
+DevLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+DevLabel.TextSize = 13
 
 local DevSubLabel = Instance.new("TextLabel", DevCard)
 DevSubLabel.BackgroundTransparency = 1
-DevSubLabel.Size = UDim2.new(1, 0, 0, 16)
-DevSubLabel.Position = UDim2.new(0, 0, 0, 116)
+DevSubLabel.Size = UDim2.new(1, 0, 0, 14)
+DevSubLabel.Position = UDim2.new(0, 0, 0, 90)
 DevSubLabel.Font = Enum.Font.Gotham
 DevSubLabel.Text = "Developer & Owner"
-DevSubLabel.TextColor3 = Color3.fromRGB(180, 150, 150)
-DevSubLabel.TextSize = 10
+DevSubLabel.TextColor3 = Color3.fromRGB(180, 150, 80)
+DevSubLabel.TextSize = 9
 
 local LToggle = Instance.new("TextButton", ContainerLight)
-LToggle.Size = UDim2.new(1, -12, 0, 34)
-LToggle.Position = UDim2.new(0, 0, 0, 8)
-LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+LToggle.Size = UDim2.new(1, -10, 0, 28)
+LToggle.Position = UDim2.new(0, 0, 0, 6)
+LToggle.BackgroundColor3 = Color3.fromRGB(150, 110, 20)
 LToggle.Text = "⚡ Status Lighting: OFF"
-LToggle.TextColor3 = Color3.new(1,1,1)
+LToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 LToggle.Font = Enum.Font.GothamBold
-LToggle.TextSize = 11
-Instance.new("UICorner", LToggle).CornerRadius = UDim.new(0, 6)
+LToggle.TextSize = 10
+Instance.new("UICorner", LToggle).CornerRadius = UDim.new(0, 5)
 
 local ClockBox = Instance.new("TextBox", ContainerLight)
-ClockBox.Size = UDim2.new(1, -12, 0, 30)
-ClockBox.Position = UDim2.new(0, 0, 0, 48)
-ClockBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+ClockBox.Size = UDim2.new(1, -10, 0, 26)
+ClockBox.Position = UDim2.new(0, 0, 0, 40)
+ClockBox.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
 ClockBox.PlaceholderText = "ClockTime (Cth: 14)"
 ClockBox.Text = "14"
-ClockBox.TextColor3 = Color3.new(1,1,1)
+ClockBox.TextColor3 = Color3.fromRGB(255, 220, 120)
 ClockBox.Font = Enum.Font.GothamBold
-ClockBox.TextSize = 11
-Instance.new("UICorner", ClockBox).CornerRadius = UDim.new(0, 6)
+ClockBox.TextSize = 10
+Instance.new("UICorner", ClockBox).CornerRadius = UDim.new(0, 5)
 
 local BrightBox = Instance.new("TextBox", ContainerLight)
-BrightBox.Size = UDim2.new(1, -12, 0, 30)
-BrightBox.Position = UDim2.new(0, 0, 0, 84)
-BrightBox.BackgroundColor3 = Color3.fromRGB(30, 12, 15)
+BrightBox.Size = UDim2.new(1, -10, 0, 26)
+BrightBox.Position = UDim2.new(0, 0, 0, 72)
+BrightBox.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
 BrightBox.PlaceholderText = "Brightness (Cth: 3)"
 BrightBox.Text = "3"
-BrightBox.TextColor3 = Color3.new(1,1,1)
+BrightBox.TextColor3 = Color3.fromRGB(255, 220, 120)
 BrightBox.Font = Enum.Font.GothamBold
-BrightBox.TextSize = 11
-Instance.new("UICorner", BrightBox).CornerRadius = UDim.new(0, 6)
+BrightBox.TextSize = 10
+Instance.new("UICorner", BrightBox).CornerRadius = UDim.new(0, 5)
 
 local SBtn = Instance.new("TextButton", ContainerLight)
-SBtn.Size = UDim2.new(1, -12, 0, 32)
-SBtn.Position = UDim2.new(0, 0, 0, 120)
-SBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 20)
+SBtn.Size = UDim2.new(1, -10, 0, 28)
+SBtn.Position = UDim2.new(0, 0, 0, 104)
+SBtn.BackgroundColor3 = Color3.fromRGB(40, 32, 8)
 SBtn.Text = "🌑 Global Shadows: OFF"
-SBtn.TextColor3 = Color3.fromRGB(220, 150, 150)
+SBtn.TextColor3 = Color3.fromRGB(220, 190, 100)
 SBtn.Font = Enum.Font.GothamBold
-SBtn.TextSize = 11
-Instance.new("UICorner", SBtn).CornerRadius = UDim.new(0, 6)
+SBtn.TextSize = 10
+Instance.new("UICorner", SBtn).CornerRadius = UDim.new(0, 5)
 
 local shadowOff = true
 
@@ -2774,12 +2640,14 @@ end
 LToggle.MouseButton1Click:Connect(function()
     lightOn = not lightOn
     if lightOn then
-        LToggle.BackgroundColor3 = Color3.fromRGB(40, 160, 60)
+        LToggle.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
         LToggle.Text = "⚡ Status Lighting: ON"
+        LToggle.TextColor3 = Color3.fromRGB(0, 0, 0)
         updateLight()
     else
-        LToggle.BackgroundColor3 = Color3.fromRGB(140, 20, 30)
+        LToggle.BackgroundColor3 = Color3.fromRGB(150, 110, 20)
         LToggle.Text = "⚡ Status Lighting: OFF"
+        LToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
         Lighting.GlobalShadows = true
         Lighting.Brightness = 1
         Lighting.ClockTime = 14
@@ -2797,100 +2665,100 @@ BrightBox:GetPropertyChangedSignal("Text"):Connect(updateLight)
 
 local function createInfoCard(parent, title, yPos, height)
     local card = Instance.new("Frame", parent)
-    card.Size = UDim2.new(1, -8, 0, height)
+    card.Size = UDim2.new(1, -6, 0, height)
     card.Position = UDim2.new(0, 0, 0, yPos)
-    card.BackgroundColor3 = Color3.fromRGB(24, 16, 16)
+    card.BackgroundColor3 = Color3.fromRGB(20, 18, 5)
     card.BorderSizePixel = 0
-    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
     local titleLbl = Instance.new("TextLabel", card)
-    titleLbl.Size = UDim2.new(1, -12, 0, 20)
-    titleLbl.Position = UDim2.new(0, 8, 0, 4)
+    titleLbl.Size = UDim2.new(1, -10, 0, 18)
+    titleLbl.Position = UDim2.new(0, 6, 0, 4)
     titleLbl.BackgroundTransparency = 1
     titleLbl.Font = Enum.Font.GothamBold
     titleLbl.Text = title
-    titleLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
-    titleLbl.TextSize = 11
+    titleLbl.TextColor3 = Color3.fromRGB(255, 200, 100)
+    titleLbl.TextSize = 10
     titleLbl.TextXAlignment = Enum.TextXAlignment.Left
     return card
 end
 
-local profileCard = createInfoCard(ContainerInfo, "👤  PROFILE", 4, 78)
+local profileCard = createInfoCard(ContainerInfo, "👤  PROFILE", 4, 68)
 local AvatarBox = Instance.new("ImageLabel", profileCard)
-AvatarBox.Size = UDim2.new(0, 48, 0, 48)
-AvatarBox.Position = UDim2.new(0, 8, 0, 24)
+AvatarBox.Size = UDim2.new(0, 42, 0, 42)
+AvatarBox.Position = UDim2.new(0, 6, 0, 22)
 AvatarBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 AvatarBox.BorderSizePixel = 0
 AvatarBox.Image = "rbxassetid://0"
-Instance.new("UICorner", AvatarBox).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", AvatarBox).CornerRadius = UDim.new(0, 6)
 pcall(function()
     AvatarBox.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 end)
 
 local profileName = Instance.new("TextLabel", profileCard)
-profileName.Size = UDim2.new(1, -70, 0, 18)
-profileName.Position = UDim2.new(0, 64, 0, 24)
+profileName.Size = UDim2.new(1, -60, 0, 16)
+profileName.Position = UDim2.new(0, 54, 0, 22)
 profileName.BackgroundTransparency = 1
 profileName.Font = Enum.Font.GothamBold
 profileName.Text = LocalPlayer.DisplayName
-profileName.TextColor3 = Color3.fromRGB(255, 255, 255)
-profileName.TextSize = 13
+profileName.TextColor3 = Color3.fromRGB(255, 240, 180)
+profileName.TextSize = 11
 profileName.TextXAlignment = Enum.TextXAlignment.Left
 profileName.TextTruncate = Enum.TextTruncate.AtEnd
 
 local profileUser = Instance.new("TextLabel", profileCard)
-profileUser.Size = UDim2.new(1, -70, 0, 16)
-profileUser.Position = UDim2.new(0, 64, 0, 42)
+profileUser.Size = UDim2.new(1, -60, 0, 14)
+profileUser.Position = UDim2.new(0, 54, 0, 38)
 profileUser.BackgroundTransparency = 1
 profileUser.Font = Enum.Font.Gotham
 profileUser.Text = "@" .. LocalPlayer.Name
-profileUser.TextColor3 = Color3.fromRGB(180, 160, 180)
-profileUser.TextSize = 11
+profileUser.TextColor3 = Color3.fromRGB(180, 160, 100)
+profileUser.TextSize = 9
 profileUser.TextXAlignment = Enum.TextXAlignment.Left
 
 local profileExtra = Instance.new("TextLabel", profileCard)
-profileExtra.Size = UDim2.new(1, -70, 0, 16)
-profileExtra.Position = UDim2.new(0, 64, 0, 58)
+profileExtra.Size = UDim2.new(1, -60, 0, 14)
+profileExtra.Position = UDim2.new(0, 54, 0, 52)
 profileExtra.BackgroundTransparency = 1
 profileExtra.Font = Enum.Font.Gotham
 profileExtra.Text = "ID: " .. LocalPlayer.UserId .. "  |  Age: " .. LocalPlayer.AccountAge .. "D"
-profileExtra.TextColor3 = Color3.fromRGB(160, 140, 160)
-profileExtra.TextSize = 10
+profileExtra.TextColor3 = Color3.fromRGB(160, 140, 100)
+profileExtra.TextSize = 8
 profileExtra.TextXAlignment = Enum.TextXAlignment.Left
 
-local execCard = createInfoCard(ContainerInfo, "⚙️  EXECUTOR", 88, 52)
+local execCard = createInfoCard(ContainerInfo, "⚙️  EXECUTOR", 78, 44)
 local execLabel = Instance.new("TextLabel", execCard)
-execLabel.Size = UDim2.new(1, -16, 1, -24)
-execLabel.Position = UDim2.new(0, 8, 0, 22)
+execLabel.Size = UDim2.new(1, -12, 1, -22)
+execLabel.Position = UDim2.new(0, 6, 0, 20)
 execLabel.BackgroundTransparency = 1
 execLabel.Font = Enum.Font.Gotham
 execLabel.Text = "Loading..."
-execLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
-execLabel.TextSize = 11
+execLabel.TextColor3 = Color3.fromRGB(220, 200, 140)
+execLabel.TextSize = 9
 execLabel.TextXAlignment = Enum.TextXAlignment.Left
 execLabel.TextYAlignment = Enum.TextYAlignment.Top
 
-local gameCard = createInfoCard(ContainerInfo, "🗺️  GAME", 146, 68)
+local gameCard = createInfoCard(ContainerInfo, "🗺️  GAME", 128, 58)
 local gameLabel = Instance.new("TextLabel", gameCard)
-gameLabel.Size = UDim2.new(1, -16, 1, -24)
-gameLabel.Position = UDim2.new(0, 8, 0, 22)
+gameLabel.Size = UDim2.new(1, -12, 1, -22)
+gameLabel.Position = UDim2.new(0, 6, 0, 20)
 gameLabel.BackgroundTransparency = 1
 gameLabel.Font = Enum.Font.Gotham
 gameLabel.Text = "Loading..."
-gameLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
-gameLabel.TextSize = 11
+gameLabel.TextColor3 = Color3.fromRGB(220, 200, 140)
+gameLabel.TextSize = 9
 gameLabel.TextXAlignment = Enum.TextXAlignment.Left
 gameLabel.TextYAlignment = Enum.TextYAlignment.Top
 gameLabel.TextWrapped = true
 
-local perfCard = createInfoCard(ContainerInfo, "📊  SESSION & SYSTEM", 220, 78)
+local perfCard = createInfoCard(ContainerInfo, "📊  SESSION & SYSTEM", 192, 68)
 local perfLabel = Instance.new("TextLabel", perfCard)
-perfLabel.Size = UDim2.new(1, -16, 1, -24)
-perfLabel.Position = UDim2.new(0, 8, 0, 22)
+perfLabel.Size = UDim2.new(1, -12, 1, -22)
+perfLabel.Position = UDim2.new(0, 6, 0, 20)
 perfLabel.BackgroundTransparency = 1
 perfLabel.Font = Enum.Font.Gotham
 perfLabel.Text = "Loading..."
-perfLabel.TextColor3 = Color3.fromRGB(220, 200, 220)
-perfLabel.TextSize = 11
+perfLabel.TextColor3 = Color3.fromRGB(220, 200, 140)
+perfLabel.TextSize = 9
 perfLabel.TextXAlignment = Enum.TextXAlignment.Left
 perfLabel.TextYAlignment = Enum.TextYAlignment.Top
 
@@ -2940,31 +2808,22 @@ task.spawn(function()
     end
 end)
 
-local notificationCounts = {}
-local notificationDurations = {
-    ["JOB_STARTED"] = 3,
-    ["JOB_ARRIVED_TARGET"] = 6,
-    ["JOB_RETURNING"] = 4,
-    ["JOB_FINISHED"] = 6,
-    ["JOB_ENDED"] = 6,
-    ["JOB_TIMEOUT"] = 6,
-    ["JOB_CANCELLED_SUSPICIOUS"] = 6,
-    ["JOB_MUST_BE_IN_VEHICLE"] = 3,
-    ["JOB_SERVER_BUSY"] = 4,
-    ["JOB_NO_TARGET"] = 4,
-    ["JOB_SPAWN_FAIL"] = 4,
-    ["JOB_ALREADY_ACTIVE"] = 3,
-    ["JOB_NO_CHARACTER"] = 4,
-    ["DEFAULT"] = 3
-}
-
 if deliveryRemote then
     deliveryRemote.OnClientEvent:Connect(function(param1, param2)
         if typeof(param1) == "string" then
             if param1 == "JOB_STARTED" then
                 currentJobId = param2
                 jobState = "DELIVERING"
+                adTargetPos = nil
+                adFinishPos = nil
+                currentTargetPosition = nil
+                lastVectorHash = nil
+                for k, _ in pairs(notificationCounts) do
+                    notificationCounts[k] = 0
+                end
             elseif param1 == "JOB_ARRIVED_TARGET" then
+                jobState = "WAITING"
+            elseif param1 == "JOB_ARRIVED_WAYPOINT" then
                 jobState = "WAITING"
             elseif param1 == "JOB_RETURNING" then
                 jobState = "RETURNING"
@@ -2974,6 +2833,7 @@ if deliveryRemote then
                 adTargetPos = nil
                 adFinishPos = nil
                 currentJobId = nil
+                lastVectorHash = nil
                 if autoDeliveryActive then
                     task.spawn(function()
                         task.wait(2)
@@ -2988,6 +2848,7 @@ if deliveryRemote then
                 adTargetPos = nil
                 adFinishPos = nil
                 currentJobId = nil
+                lastVectorHash = nil
                 if AD_StatusLabel then
                     AD_StatusLabel.Text = "⚠️ Suspicious! Cooldown 5s"
                     AD_StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -3031,42 +2892,37 @@ if deliveryRemote then
             notificationCounts[param1] = notificationCounts[param1] or 0
             if notificationCounts[param1] < 2 then
                 notificationCounts[param1] = notificationCounts[param1] + 1
-                pcall(function()
-                    local textMsg = "Status Job: " .. param1
-                    if param1 == "JOB_MUST_BE_IN_VEHICLE" then textMsg = "Harus berada di dalam kendaraan!"
-                    elseif param1 == "JOB_CANCELLED_SUSPICIOUS" then textMsg = "⚠️ Terdeteksi Suspicious!"
-                    elseif param1 == "JOB_FINISHED" then textMsg = "🎉 Job Selesai!"
-                    elseif param1 == "JOB_ALREADY_ACTIVE" then textMsg = "Job sudah aktif!"
-                    elseif param1 == "JOB_SERVER_BUSY" then textMsg = "Server sibuk!"
-                    elseif param1 == "JOB_NO_TARGET" then textMsg = "Ga ada target!"
-                    end
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "DV Delivery System",
-                        Text = textMsg,
-                        Duration = notificationDurations[param1] or 3
-                    })
-                end)
+                local textMsg = "Status Job: " .. param1
+                if param1 == "JOB_MUST_BE_IN_VEHICLE" then textMsg = "Harus berada di dalam kendaraan!"
+                elseif param1 == "JOB_CANCELLED_SUSPICIOUS" then textMsg = "⚠️ Terdeteksi Suspicious!"
+                elseif param1 == "JOB_FINISHED" then textMsg = "🎉 Job Selesai!"
+                elseif param1 == "JOB_ALREADY_ACTIVE" then textMsg = "Job sudah aktif!"
+                elseif param1 == "JOB_SERVER_BUSY" then textMsg = "Server sibuk!"
+                elseif param1 == "JOB_NO_TARGET" then textMsg = "Ga ada target!"
+                end
+                sendNotif("INFO", textMsg, notificationDurations[param1] or 3, param1, 3)
             end
         elseif typeof(param1) == "Vector3" then
-    if param2 == nil or param2 == currentJobId then
-        currentTargetPosition = param1
-        if jobState == "RETURNING" then
-            if not adFinishPos then
-                adFinishPos = param1
-                warn("[DV] Finish pos LOCKED:", adFinishPos)
+            if param2 == nil or param2 == currentJobId then
+                local hash = string.format("V:%.1f:%.1f:%.1f", param1.X, param1.Y, param1.Z)
+                if hash == lastVectorHash then return end
+                lastVectorHash = hash
+                
+                if jobState == "RETURNING" then
+                    adFinishPos = param1
+                    currentTargetPosition = param1
+                else
+                    adTargetPos = param1
+                    currentTargetPosition = param1
+                end
             end
-        else
-            if not adTargetPos then
-                adTargetPos = param1
-            end
-        end
-    end
         elseif param1 == nil then
             jobState = "NONE"
             currentTargetPosition = nil
             adTargetPos = nil
             adFinishPos = nil
             currentJobId = nil
+            lastVectorHash = nil
         end
     end)
 end
@@ -3163,6 +3019,7 @@ LocalPlayer.CharacterRemoving:Connect(function()
     currentTargetPosition = nil
     adTargetPos = nil
     adFinishPos = nil
+    lastVectorHash = nil
     jobState = "NONE"
     _lastProgressTick = tick()
 end)
